@@ -142,17 +142,78 @@ function escXml(s) {
       sel.appendChild(o);
     }
   }
-  function fillSelectWithCustom(sel, items) {
+  function fillSelectWithCustom(sel, items, key) {
     fillSelect(sel, items);
+    if (key) {
+      var saved = loadSavedOpt(key);
+      for (var i = 0; i < saved.length; i++) {
+        var o = document.createElement('option');
+        o.textContent = saved[i]; sel.appendChild(o);
+      }
+    }
     var oo = document.createElement('option');
     oo.value = '__custom__'; oo.textContent = t('other_free_text'); sel.appendChild(oo);
   }
-  fillSelectWithCustom(authorSel, DATA.authors);
 
-  fillSelectWithCustom(cameraSel, DATA.cameras.map(function(c) { return c.model; }));
-  fillSelectWithCustom(labSel, DATA.labs);
-  fillSelectWithCustom(scanSel, DATA.scanners);
-  fillSelectWithCustom(ppSel, DATA.pushpulls);
+  function loadSavedOpt(key) {
+    try {
+      var data = JSON.parse(localStorage.getItem('filmtag-custom-opts') || '{}');
+      return data[key] || [];
+    } catch(_) { return []; }
+  }
+  function loadSavedLensesForCamera(cameraModel) {
+    try {
+      var data = JSON.parse(localStorage.getItem('filmtag-custom-opts') || '{}');
+      if (data.lensByCamera && data.lensByCamera[cameraModel]) return data.lensByCamera[cameraModel];
+      return data.lensName || [];
+    } catch(_) { return []; }
+  }
+  function currentCameraModel() {
+    if (cameraSel.value === '__custom__') return $('camera-model-custom').value.trim();
+    if (cameraSel.selectedIndex < CAMERAS.length) return CAMERAS[cameraSel.selectedIndex].model;
+    return cameraSel.value;
+  }
+
+  function saveCustomOpts() {
+    var data = {};
+    try { data = JSON.parse(localStorage.getItem('filmtag-custom-opts') || '{}'); } catch(_) {}
+    var fields = [
+      {sel: authorSel, inp: $('author-custom-input'), key: 'author'},
+      {sel: cameraSel, inp: $('camera-model-custom'), key: 'cameraModel'},
+      {sel: lensSel, inp: $('lens-name-custom'), key: 'lensName'},
+      {sel: filmSel, inp: $('film-name-custom'), key: 'filmName'},
+      {sel: labSel, inp: $('lab-custom-input'), key: 'lab'},
+      {sel: scanSel, inp: $('scanner-custom-input'), key: 'scanner'},
+      {sel: ppSel, inp: $('pushpull-custom-input'), key: 'pushPull'}
+    ];
+    for (var i = 0; i < fields.length; i++) {
+      if (fields[i].sel.value === '__custom__' && fields[i].inp.value.trim()) {
+        var v = fields[i].inp.value.trim();
+        if (!data[fields[i].key]) data[fields[i].key] = [];
+        if (fields[i].key === 'lensName') {
+          var cameraModel = currentCameraModel();
+          if (!cameraModel) continue;
+          if (!data.lensByCamera) data.lensByCamera = {};
+          if (!data.lensByCamera[cameraModel]) data.lensByCamera[cameraModel] = [];
+          data.lensByCamera[cameraModel] = data.lensByCamera[cameraModel].filter(function(x) { return x.name !== v; });
+          data.lensByCamera[cameraModel].unshift({ name: v, focal: $('lens-focal').value.trim(), aperture: $('lens-aperture').value.trim() });
+          data.lensByCamera[cameraModel] = data.lensByCamera[cameraModel].slice(0, 5);
+        } else {
+          if (!data[fields[i].key]) data[fields[i].key] = [];
+          data[fields[i].key] = data[fields[i].key].filter(function(x) { return x !== v; });
+          data[fields[i].key].unshift(v);
+          data[fields[i].key] = data[fields[i].key].slice(0, 5);
+        }
+      }
+    }
+    localStorage.setItem('filmtag-custom-opts', JSON.stringify(data));
+  }
+  fillSelectWithCustom(authorSel, DATA.authors, 'author');
+
+  fillSelectWithCustom(cameraSel, DATA.cameras.map(function(c) { return c.model; }), 'cameraModel');
+  fillSelectWithCustom(labSel, DATA.labs, 'lab');
+  fillSelectWithCustom(scanSel, DATA.scanners, 'scanner');
+  fillSelectWithCustom(ppSel, DATA.pushpulls, 'pushPull');
   fillSelect($('process-select'), DATA.processes);
 
   (function() {
@@ -162,6 +223,11 @@ function escXml(s) {
       o.textContent = DATA.films[i].name;
       o.setAttribute('data-iso', DATA.films[i].iso);
       filmSel.appendChild(o);
+    }
+    var savedFilms = loadSavedOpt('filmName');
+    for (var si = 0; si < savedFilms.length; si++) {
+      var o2 = document.createElement('option');
+      o2.textContent = savedFilms[si]; filmSel.appendChild(o2);
     }
     var oo = document.createElement('option');
     oo.value = '__custom__'; oo.textContent = t('other_free_text'); filmSel.appendChild(oo);
@@ -196,12 +262,42 @@ function escXml(s) {
     CAMERAS[idx].lenses.forEach(function(l, i) {
       var o = document.createElement('option'); o.value = i; o.textContent = l.name; lensSel.appendChild(o);
     });
+    var savedLenses = loadSavedLensesForCamera(CAMERAS[idx].model);
+    for (var si = 0; si < savedLenses.length; si++) {
+      var o2 = document.createElement('option');
+      if (typeof savedLenses[si] === 'object') {
+        o2.textContent = savedLenses[si].name;
+        if (savedLenses[si].focal) o2.setAttribute('data-focal', savedLenses[si].focal);
+        if (savedLenses[si].aperture) o2.setAttribute('data-aperture', savedLenses[si].aperture);
+      } else {
+        o2.textContent = savedLenses[si];
+      }
+      lensSel.appendChild(o2);
+    }
     var oo = document.createElement('option');
     oo.value = '__custom__'; oo.textContent = t('other_free_text'); lensSel.appendChild(oo);
   }
   function updateLensUI() {
     if (cameraSel.value === '__custom__') {
-      lensDrop.style.display = 'none'; lensCust.classList.add('show');
+      lensDrop.style.display = 'none'; lensCust.classList.add('show'); lensSel.value = '__custom__';
+    } else if (cameraSel.selectedIndex >= CAMERAS.length) {
+      lensDrop.style.display = 'block';
+      lensSel.innerHTML = '';
+      var savedLenses = loadSavedLensesForCamera(cameraSel.value);
+      for (var si = 0; si < savedLenses.length; si++) {
+        var o = document.createElement('option');
+        if (typeof savedLenses[si] === 'object') {
+          o.textContent = savedLenses[si].name;
+          if (savedLenses[si].focal) o.setAttribute('data-focal', savedLenses[si].focal);
+          if (savedLenses[si].aperture) o.setAttribute('data-aperture', savedLenses[si].aperture);
+        } else {
+          o.textContent = savedLenses[si];
+        }
+        lensSel.appendChild(o);
+      }
+      var oo = document.createElement('option');
+      oo.value = '__custom__'; oo.textContent = t('other_free_text'); lensSel.appendChild(oo);
+      lensCust.classList.remove('show');
     } else {
       lensDrop.style.display = 'block'; populateLenses(cameraSel.selectedIndex);
       lensCust.classList.toggle('show', lensSel.value === '__custom__');
@@ -539,12 +635,19 @@ function escXml(s) {
   function selText(sel) { return sel.options[sel.selectedIndex].text; }
   function getVal(sel, inp) { return sel.value === '__custom__' ? inp.value.trim() : selText(sel); }
   function camInfo() {
-    if (cameraSel.value === '__custom__') return { make: $('camera-make-custom').value.trim() || t('unknown'), model: $('camera-model-custom').value.trim() || t('unknown'), shutter: null };
+    if (cameraSel.value === '__custom__' || cameraSel.selectedIndex >= CAMERAS.length) {
+      var model = cameraSel.value === '__custom__' ? ($('camera-model-custom').value.trim() || t('unknown')) : cameraSel.value;
+      return { make: $('camera-make-custom').value.trim() || t('unknown'), model: model, shutter: null };
+    }
     var c = CAMERAS[cameraSel.selectedIndex]; return { make: c.make, model: c.model, shutter: c.shutter };
   }
   function lensInfo() {
     if (cameraSel.value === '__custom__' || lensSel.value === '__custom__')
       return { name: $('lens-name-custom').value.trim(), focal: $('lens-focal').value.trim(), aperture: $('lens-aperture').value.trim() };
+    if (cameraSel.selectedIndex >= CAMERAS.length || lensSel.selectedIndex >= CAMERAS[cameraSel.selectedIndex].lenses.length) {
+      var o = lensSel.options[lensSel.selectedIndex];
+      return { name: selText(lensSel), focal: o.getAttribute('data-focal') || '', aperture: o.getAttribute('data-aperture') || '' };
+    }
     var l = CAMERAS[cameraSel.selectedIndex].lenses[lensSel.selectedIndex];
     return { name: l.name, focal: l.focal, aperture: l.aperture };
   }
@@ -667,6 +770,7 @@ function escXml(s) {
           progBar.style.width = '100%'; progText.textContent = t('done_processed', {n: total});
           showStatus(t('processed_success', {n: total}), 'success');
           reviewBtn.disabled = false;
+          saveCustomOpts();
           setTimeout(function() { progressSec.style.display = 'none'; progBar.style.width = '0%'; }, 3000);
         });
         return;
@@ -782,6 +886,7 @@ function escXml(s) {
         progText.textContent = t('done_processed', {n: total});
         progressSec.style.display = 'none';
         reviewBtn.disabled = false;
+        saveCustomOpts();
         showGallery(processedFiles, p, zip);
         return;
       }

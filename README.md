@@ -63,6 +63,13 @@ The final result 👇
 
 ## What's New
 
+**2026-06-11** — Camera-Lens association & persistence
+- 📸 Custom lenses are now saved per camera — each camera only shows its own saved lenses
+- 💾 Focal length & max aperture are saved alongside the lens name for custom entries
+- 🐛 Fixed: custom lens not saving to localStorage when camera is set to custom
+- 🐛 Fixed: selecting a saved custom camera no longer crashes the app
+- 🐛 Fixed: saved custom cameras now show their associated lens options instead of an empty dropdown
+
 **2026-06-11** — GPS + i18n update
 - 🌐 English & Traditional Chinese (Hong Kong) with floating language toggle
 - 🗺️ GPS location via Leaflet + OpenStreetMap map — search or drop a pin, coordinates written to EXIF
