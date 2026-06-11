@@ -1395,22 +1395,7 @@ function escXml(s) {
     var newBtn = $('gallery-new-btn');
     if (newBtn) newBtn.onclick = function() {
       gallery.classList.add('fade-out');
-      setTimeout(function() {
-        gallery.classList.remove('show', 'fade-out');
-        galleryGrid.innerHTML = '';
-        summaryPanel.classList.remove('show');
-        summaryBody.innerHTML = '';
-        uploadedFiles = [];
-        gpsData = {}; selectedSet = {}; thumbnailCache = {}; geocodeCache = {}; fileDates = {};
-        currentPage = 1; summaryPage = 1;
-        if (mapMarker) { map.removeLayer(mapMarker); mapMarker = null; }
-        mapInitialized = false;
-        progressSec.classList.remove('show'); progBar.style.width = '0%';
-        statusMsg.className = 'status-msg'; statusMsg.style.display = 'none';
-        reviewBtn.disabled = true;
-        renderFileList();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }, 300);
+      setTimeout(function() { history.scrollRestoration = 'manual'; location.reload(); }, 300);
     };
   }
 
