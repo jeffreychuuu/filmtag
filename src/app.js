@@ -744,6 +744,7 @@ function escXml(s) {
             var exifBytes = piexif.dump(exifObj);
             var newStr = piexif.insert(exifBytes, jpegStr);
             p.dateTime = dt;
+            p.publicDesc = $('public-checkbox').checked;
             newStr = injectXmp(newStr, p, p.lab, p.process, p.scanner);
             bytes = new Uint8Array(newStr.length);
             for (var b2 = 0; b2 < newStr.length; b2++) bytes[b2] = newStr.charCodeAt(b2) & 0xFF;
@@ -908,7 +909,7 @@ function escXml(s) {
         saveBtn2.className = 'g-save-btn'; saveBtn2.textContent = t('save');
         saveBtn2.addEventListener('click', function() {
           var file = new File([f.blob], f.name, { type: 'image/jpeg' });
-          if (navigator.share) {
+          if (/iPhone|iPad|Android/.test(navigator.userAgent) && navigator.share) {
             navigator.share({ files: [file] }).catch(function(){});
           } else {
             var a = document.createElement('a');
