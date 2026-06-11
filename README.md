@@ -70,6 +70,14 @@ The final result 👇
 - 🖼️ File thumbnails with click-to-full-image preview
 - 🔄 Multi-select files to batch-assign GPS location
 
+**2026-06-11** — File Setup + Date/Time + Review overhaul
+- 📅 Date & Time merged into File Setup section — select files, change date/time applies instantly
+- 🗓️ Date auto-extracted from uploaded EXIF files; fallback to today 12:00
+- 📍 GPS auto-extracted from uploaded EXIF with reverse geocode for address
+- 🧹 Clear Date / Clear Selected GPS buttons for selected files
+- 📋 Review summary now shows 40×40 thumbnails + Location + Date columns
+- 🏷️ "Add FilmTag credit to photo description" checkbox replaces old signature options
+
 ## Tech
 
 - **piexifjs** — browser-side EXIF read/write

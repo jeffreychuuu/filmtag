@@ -64,7 +64,7 @@ function injectXmp(jpegStr, params, lab, process, scanner) {
     '<photoshop:Credit>' + escXml('Processed by ' + lab + ' (' + process + ') | Scanned via ' + scanner) + '</photoshop:Credit>' +
     '<xmp:DateCreated>' + escXml(params.dateTime) + '</xmp:DateCreated>' +
     '<dc:creator>' + escXml(params.author) + '</dc:creator>' +
-    (params.publicDesc ? '<dc:description>' + escXml('FilmTag by Jeffrey Chu — Photo by ' + params.author + ' | Camera: ' + params.camera.model + ' (' + params.lens.name + ') | Film: ' + params.film.name + ' (ISO ' + params.film.iso + ')' + (params.camera.shutter ? ' | Shutter: ' + params.camera.shutter : '') + ' | Lab: ' + lab + ' | Process: ' + process + ' (' + params.pushpull + ') | Scanner: ' + scanner) + '</dc:description>' : '<dc:description>' + escXml('Photo by ' + params.author + ' | Camera: ' + params.camera.model + ' (' + params.lens.name + ') | Film: ' + params.film.name + ' (ISO ' + params.film.iso + ')' + (params.camera.shutter ? ' | Shutter: ' + params.camera.shutter : '') + ' | Lab: ' + lab + ' | Process: ' + process + ' (' + params.pushpull + ') | Scanner: ' + scanner) + '</dc:description>') +
+    (params.publicDesc ? '<dc:description>' + escXml('FilmTag by Jeffrey Chu | Photo by ' + params.author + ' | Camera: ' + params.camera.model + ' (' + params.lens.name + ') | Film: ' + params.film.name + ' (ISO ' + params.film.iso + ')' + (params.camera.shutter ? ' | Shutter: ' + params.camera.shutter : '') + ' | Lab: ' + lab + ' | Process: ' + process + ' (' + params.pushpull + ') | Scanner: ' + scanner) + '</dc:description>' : '<dc:description>' + escXml('Photo by ' + params.author + ' | Camera: ' + params.camera.model + ' (' + params.lens.name + ') | Film: ' + params.film.name + ' (ISO ' + params.film.iso + ')' + (params.camera.shutter ? ' | Shutter: ' + params.camera.shutter : '') + ' | Lab: ' + lab + ' | Process: ' + process + ' (' + params.pushpull + ') | Scanner: ' + scanner) + '</dc:description>') +
     '</rdf:Description>' +
     '</rdf:RDF>' +
     '</x:xmpmeta>' +
@@ -132,9 +132,6 @@ function escXml(s) {
   var gpsData = {}, selectedSet = {}, map = null, mapMarker = null, mapInitialized = false;
   var isIPhone = /iPhone|iPad/.test(navigator.userAgent);
 
-  function branding() {
-    return $('branding-checkbox').checked ? 'FilmTag by Jeffrey Chu' : '';
-  }
   var summaryPanel = $('summary-panel'), summaryBody = $('summary-body');
   var progressSec = $('progress-section'), progBar = $('progress-bar'), progText = $('progress-text');
   var statusMsg = $('status-msg');
@@ -229,7 +226,8 @@ function escXml(s) {
     var fd = dv.replace(/-/g, ''), ed = dv.replace(/-/g, ':');
     var p = tv.split(':'), h = parseInt(p[0], 10) || 0, m = parseInt(p[1], 10) || 0;
     for (var k = 0; k < keys.length; k++) {
-      fileDates[keys[k]] = { fileDate: fd, exifDate: ed, hr: h, min: m + k };
+      var mins = m + k;
+      fileDates[keys[k]] = { fileDate: fd, exifDate: ed, hr: (h + Math.floor(mins / 60)) % 24, min: mins % 60 };
       delete clearedDates[keys[k]];
     }
     renderFileList();
@@ -310,6 +308,7 @@ function escXml(s) {
                 var lng = dmsToDecimal(gps[piexif.GPSIFD.GPSLongitude], gps[piexif.GPSIFD.GPSLongitudeRef]);
                 if (lat !== null && lng !== null) {
                   gpsData[idx] = { lat: lat, lng: lng, addr: '' };
+                  reverseGeocode(lat, lng, [idx]);
                 }
               }
             }
@@ -350,7 +349,7 @@ function escXml(s) {
     for (var i = 0; i < uploadedFiles.length; i++) {
       var f = uploadedFiles[i];
       var sel = selectedSet[i] ? ' selected' : '';
-      var hasGps = gpsModeSelect.value === 'on' && gpsData[i];
+      var hasGps = gpsData[i];
       var addrTxt = hasGps && gpsData[i].addr ? ' <span class="gps-addr">' + esc(gpsData[i].addr) + '</span>' : '';
       var dot = hasGps ? '📍' + addrTxt : '<img src="no_gps.png" class="no-gps-icon">';
       var dateInfo = computeDateForFile(i + 1);
@@ -472,7 +471,7 @@ function escXml(s) {
     if (fd) return fd;
     var now = new Date();
     var d = now.getFullYear().toString() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
-    return { fileDate: d, exifDate: d.slice(0,4) + ':' + d.slice(4,6) + ':' + d.slice(6,8), hr: 12, min: i };
+    return { fileDate: d, exifDate: d.slice(0,4) + ':' + d.slice(4,6) + ':' + d.slice(6,8), hr: (12 + Math.floor(i / 60)) % 24, min: i % 60 };
   }
 
   function newFilmPrefix(film) {
@@ -591,8 +590,7 @@ function escXml(s) {
             exifObj['0th'][piexif.ImageIFD.Make] = p.camera.make;
             exifObj['0th'][piexif.ImageIFD.Model] = p.camera.model;
             exifObj['0th'][piexif.ImageIFD.Artist] = p.author;
-            var brand = branding();
-            exifObj['0th'][piexif.ImageIFD.Software] = brand ? p.scanner + ' (FilmTag by Jeffrey Chu)' : p.scanner;
+            exifObj['0th'][piexif.ImageIFD.Software] = p.scanner + ' (FilmTag by Jeffrey Chu)';
             exifObj['Exif'][0x828D] = p.process + ' (' + p.pushpull + ')';
 
             var dateTimeStr = fd.exifDate + ' ' + String(fd.hr).padStart(2,'0') + ':' + String(fd.min).padStart(2,'0') + ':00+08:00';
@@ -626,12 +624,12 @@ function escXml(s) {
               (p.camera.shutter ? ' | Shutter: ' + p.camera.shutter : '') + ' | Scanner: ' + p.scanner);
 
                         exifObj['0th'][piexif.ImageIFD.ImageDescription] =
-              (brand ? 'FilmTag by Jeffrey Chu — ' : '') +
+              ($('public-checkbox').checked ? 'FilmTag by Jeffrey Chu | ' : '') +
               'Photo by ' + p.author + ' | Camera: ' + p.camera.model + ' (' + p.lens.name + ') | Film: ' + p.film.name +
               ' (ISO ' + p.film.iso + ')' + (p.camera.shutter ? ' | Shutter: ' + p.camera.shutter : '') +
               ' | Lab: ' + p.lab + ' | Process: ' + p.process + ' (' + p.pushpull + ') | Scanner: ' + p.scanner;
             exifObj['0th'][piexif.ImageIFD.Copyright] =
-              (brand ? 'FilmTag by Jeffrey Chu | ' : '') +
+              'FilmTag by Jeffrey Chu | ' +
               'Processed by ' + p.lab + ' (' + p.process + ') | Scanned via ' + p.scanner;
 
             var gps = gpsModeSelect.value === 'on' ? gpsData[i] : null;
@@ -704,8 +702,7 @@ function escXml(s) {
             exifObj['0th'][piexif.ImageIFD.Make] = p.camera.make;
             exifObj['0th'][piexif.ImageIFD.Model] = p.camera.model;
             exifObj['0th'][piexif.ImageIFD.Artist] = p.author;
-            var brand = branding();
-            exifObj['0th'][piexif.ImageIFD.Software] = brand ? p.scanner + ' (FilmTag by Jeffrey Chu)' : p.scanner;
+            exifObj['0th'][piexif.ImageIFD.Software] = p.scanner + ' (FilmTag by Jeffrey Chu)';
             var dt = fd.exifDate + ' ' + String(fd.hr).padStart(2,'0') + ':' + String(fd.min).padStart(2,'0') + ':00+08:00';
             exifObj['0th'][piexif.ImageIFD.DateTime] = dt;
             exifObj['Exif'][piexif.ExifIFD.DateTimeOriginal] = dt;
@@ -733,9 +730,9 @@ function escXml(s) {
               'UNICODE\x00' + toUcs2Binary('Film Stock: ' + p.film.name + ' | Process: ' + p.process + ' | Exposure: ' + p.pushpull + (p.camera.shutter ? ' | Shutter: ' + p.camera.shutter : '') + ' | Scanner: ' + p.scanner);
             exifObj['Exif'][0x828D] = p.process + ' (' + p.pushpull + ')';
             exifObj['0th'][piexif.ImageIFD.ImageDescription] =
-              (brand ? 'FilmTag by Jeffrey Chu — ' : '') +
+              ($('public-checkbox').checked ? 'FilmTag by Jeffrey Chu | ' : '') +
               'Photo by ' + p.author + ' | Camera: ' + p.camera.model + ' (' + p.lens.name + ') | Film: ' + p.film.name + ' (ISO ' + p.film.iso + ')' + (p.camera.shutter ? ' | Shutter: ' + p.camera.shutter : '') + ' | Lab: ' + p.lab + ' | Process: ' + p.process + ' (' + p.pushpull + ') | Scanner: ' + p.scanner;
-            exifObj['0th'][piexif.ImageIFD.Copyright] = (brand ? 'FilmTag by Jeffrey Chu | ' : '') + 'Processed by ' + p.lab + ' (' + p.process + ') | Scanned via ' + p.scanner;
+            exifObj['0th'][piexif.ImageIFD.Copyright] = 'FilmTag by Jeffrey Chu | ' + 'Processed by ' + p.lab + ' (' + p.process + ') | Scanned via ' + p.scanner;
             var gps2 = gpsModeSelect.value === 'on' ? gpsData[i] : null;
             if (gps2) {
               exifObj['GPS'] = exifObj['GPS'] || {};
@@ -767,7 +764,7 @@ function escXml(s) {
     for (var j = 0; j < items.length; j++) {
       var i = parseInt(items[j].getAttribute('data-idx'), 10);
       var dot = items[j].querySelector('.file-gps-dot');
-      var hasDotGps = gpsModeSelect.value === 'on' && gpsData[i];
+      var hasDotGps = gpsData[i];
       if (dot) dot.innerHTML = hasDotGps ? '📍' + (gpsData[i].addr ? ' <span class="gps-addr">' + esc(gpsData[i].addr) + '</span>' : '') : '<img src="no_gps.png" class="no-gps-icon">';
     }
   }

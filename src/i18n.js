@@ -75,8 +75,7 @@ tpl.en = {
   "start_time": "Start Time (24h, first photo)",
   "add_segment": "+ Add Date Segment",
   "signature": "\u{1F60E} Signature",
-  "signature_label": "Add \"FilmTag by Jeffrey Chu\" to EXIF metadata",
-  "public_label": "Make it public (include \"FilmTag by Jeffrey Chu\" in description)",
+  "public_label": "Add FilmTag credit to photo description",
 
   // Actions / Status
   "review_summary": "Review Summary",
@@ -174,8 +173,7 @@ tpl.zh = {
   "start_time": "開始時間 (24小時, 第一張相)",
   "add_segment": "+ 新增日期分段",
   "signature": "😎 簽名",
-  "signature_label": "於 EXIF 中加入「FilmTag by Jeffrey Chu」",
-  "public_label": "公開顯示（在描述中包含「FilmTag by Jeffrey Chu」）",
+  "public_label": "在相片描述中加入 FilmTag 署名",
 
   // Actions / Status
   "review_summary": "檢視摘要",
