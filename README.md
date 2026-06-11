@@ -63,6 +63,11 @@ The final result 👇
 
 ## What's New
 
+**2026-06-12** — Parallel processing & geocode throttle
+- ⚡ Zip/Save now processes 4 files concurrently instead of 1 — 36 files processed ~3× faster
+- 🗺️ Reverse geocode throttled to 1 req/s with response caching — same coordinates reuse cached address instantly
+- 🖼️ Summary thumbnails now concurrency-limited, same as file list
+
 **2026-06-12** — Pagination & thumbnail caching
 - 📄 File list pagination — default 5 per page, user can choose 5/10/25/50/All; prev/next controls
 - 📋 Review Summary pagination — same pagination for the file table section

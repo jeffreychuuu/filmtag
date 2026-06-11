@@ -127,7 +127,7 @@ function escXml(s) {
   var imgOverlay = $('img-overlay'), imgOverlayImg = $('img-overlay-img'), imgOverlayClose = $('img-overlay-close');
   var selectToolbar = $('select-toolbar'), selectAllBtn = $('select-all-btn');
   var rangeRowsEl = $('range-rows'), addRangeBtn = $('add-range-btn');
-  var gpsData = {}, selectedSet = {}, thumbnailCache = {}, map = null, mapMarker = null, mapInitialized = false;
+  var gpsData = {}, selectedSet = {}, thumbnailCache = {}, geocodeCache = {}, geocodeQueue = [], geocodeBusy = false, map = null, mapMarker = null, mapInitialized = false;
   var isIPhone = /iPhone|iPad/.test(navigator.userAgent);
 
   var currentPage = 1, pageSize = 5;
@@ -589,7 +589,7 @@ function escXml(s) {
 
   function clearAll() {
     uploadedFiles = [];
-    gpsData = {}; selectedSet = {}; thumbnailCache = {}; fileDates = {}; clearedDates = {};
+    gpsData = {}; selectedSet = {}; thumbnailCache = {}; geocodeCache = {}; fileDates = {}; clearedDates = {};
     currentPage = 1;
     if (mapMarker) { map.removeLayer(mapMarker); mapMarker = null; }
     refreshSegments();
@@ -813,6 +813,13 @@ function escXml(s) {
     var tp = getSummaryTotalPages();
     summaryPage = Math.max(1, Math.min(summaryPage, tp));
     summaryBody.innerHTML = buildSummaryHtml(p);
+    generateSummaryThumbnails();
+    $('confirm-zip-btn').addEventListener('click', startZipProcess);
+    $('confirm-save-btn').addEventListener('click', startSaveProcess);
+  }
+
+  function generateSummaryThumbnails() {
+    var queue = [], concurrency = 6;
     var canvases = document.querySelectorAll('canvas.summary-thumb');
     for (var ti = 0; ti < canvases.length; ti++) {
       (function(canvas) {
@@ -823,18 +830,7 @@ function escXml(s) {
           img.onload = function() { canvas.getContext('2d').drawImage(img, 0, 0, 40, 40); };
           img.src = thumbnailCache[idx];
         } else {
-          var img = new Image();
-          img.onload = function() {
-            var s = Math.min(40 / img.width, 40 / img.height);
-            var ctx = canvas.getContext('2d');
-            ctx.drawImage(img, (40 - img.width * s) / 2, (40 - img.height * s) / 2, img.width * s, img.height * s);
-            var tmp = document.createElement('canvas');
-            tmp.width = 40; tmp.height = 40;
-            tmp.getContext('2d').drawImage(img, (40 - img.width * s) / 2, (40 - img.height * s) / 2, img.width * s, img.height * s);
-            thumbnailCache[idx] = tmp.toDataURL();
-            URL.revokeObjectURL(img.src);
-          };
-          img.src = URL.createObjectURL(file);
+          queue.push({ canvas: canvas, idx: idx, file: file });
         }
         canvas.addEventListener('click', function(e) {
           e.stopPropagation();
@@ -845,8 +841,26 @@ function escXml(s) {
         });
       })(canvases[ti]);
     }
-    $('confirm-zip-btn').addEventListener('click', startZipProcess);
-    $('confirm-save-btn').addEventListener('click', startSaveProcess);
+    var next = 0;
+    function processNext() {
+      if (next >= queue.length) return;
+      var item = queue[next++];
+      var img = new Image();
+      img.onload = function() {
+        if (!item.canvas.parentNode) return;
+        var s = Math.min(40 / img.width, 40 / img.height);
+        var ctx = item.canvas.getContext('2d');
+        ctx.drawImage(img, (40 - img.width * s) / 2, (40 - img.height * s) / 2, img.width * s, img.height * s);
+        var tmp = document.createElement('canvas');
+        tmp.width = 40; tmp.height = 40;
+        tmp.getContext('2d').drawImage(img, (40 - img.width * s) / 2, (40 - img.height * s) / 2, img.width * s, img.height * s);
+        thumbnailCache[item.idx] = tmp.toDataURL();
+        URL.revokeObjectURL(img.src);
+        processNext();
+      };
+      img.src = URL.createObjectURL(item.file);
+    }
+    for (var i = 0; i < Math.min(concurrency, queue.length); i++) processNext();
   }
 
   reviewBtn.addEventListener('click', function() {
@@ -870,9 +884,15 @@ function escXml(s) {
     statusMsg.className = 'status-msg'; statusMsg.style.display = 'none';
 
     var total = uploadedFiles.length, zip = new JSZip();
+    var completed = 0, nextIdx = 0, active = 0, CONCURRENCY = 4;
 
-    function doOne(i) {
-      if (i >= total) {
+    function startNext() {
+      while (active < CONCURRENCY && nextIdx < total) {
+        var idx = nextIdx++;
+        active++;
+        processFile(idx);
+      }
+      if (active === 0 && completed === total) {
         progText.textContent = t('creating_zip');
         zip.generateAsync({ type: 'blob' }).then(function(blob) {
           var url = URL.createObjectURL(blob), a = document.createElement('a');
@@ -884,14 +904,13 @@ function escXml(s) {
           saveCustomOpts();
           setTimeout(function() { progressSec.style.display = 'none'; progBar.style.width = '0%'; }, 3000);
         });
-        return;
       }
-      var entry = uploadedFiles[i], ext = entry.file.name.split('.').pop().toLowerCase();
-      var fd = getFileDate(i);
-      var nn = newFName(p.film.name, ext, i);
+    }
 
-      progBar.style.width = Math.round(((i + 1) / total) * 100) + '%';
-      progText.textContent = t('processing_of', {i: i + 1, n: total});
+    function processFile(idx) {
+      var entry = uploadedFiles[idx], ext = entry.file.name.split('.').pop().toLowerCase();
+      var fd = getFileDate(idx);
+      var nn = newFName(p.film.name, ext, idx);
 
       var reader = new FileReader();
       reader.onload = function(e) {
@@ -954,7 +973,7 @@ function escXml(s) {
               'FilmTag by Jeffrey Chu | ' +
               'Processed by ' + p.lab + ' (' + p.process + ') | Scanned via ' + p.scanner;
 
-            var gps = gpsData[i];
+            var gps = gpsData[idx];
             if (gps) {
               exifObj['GPS'] = exifObj['GPS'] || {};
               exifObj['GPS'][piexif.GPSIFD.GPSLatitude] = toDms(gps.lat);
@@ -974,11 +993,16 @@ function escXml(s) {
         }
 
         zip.file(nn, bytes, { binary: true });
-        doOne(i + 1);
+        completed++;
+        active--;
+        progBar.style.width = Math.round((completed / total) * 100) + '%';
+        progText.textContent = t('processing_of', {i: completed, n: total});
+        startNext();
       };
       reader.readAsArrayBuffer(entry.file);
     }
-    doOne(0);
+
+    startNext();
   }
 
   var processedFiles = [];
@@ -993,22 +1017,27 @@ function escXml(s) {
     processedFiles = [];
 
     var total = uploadedFiles.length, zip = new JSZip();
+    var completed = 0, nextIdx = 0, active = 0, CONCURRENCY = 4;
 
-    function doOne(i) {
-      if (i >= total) {
+    function startNext() {
+      while (active < CONCURRENCY && nextIdx < total) {
+        var idx = nextIdx++;
+        active++;
+        processFile(idx);
+      }
+      if (active === 0 && completed === total) {
         progText.textContent = t('done_processed', {n: total});
         progressSec.style.display = 'none';
         reviewBtn.disabled = false;
         saveCustomOpts();
         showGallery(processedFiles, p, zip);
-        return;
       }
-      var entry = uploadedFiles[i], ext = entry.file.name.split('.').pop().toLowerCase();
-      var fd = getFileDate(i);
-      var nn = newFName(p.film.name, ext, i);
+    }
 
-      progBar.style.width = Math.round(((i + 1) / total) * 100) + '%';
-      progText.textContent = t('processing_of', {i: i + 1, n: total});
+    function processFile(idx) {
+      var entry = uploadedFiles[idx], ext = entry.file.name.split('.').pop().toLowerCase();
+      var fd = getFileDate(idx);
+      var nn = newFName(p.film.name, ext, idx);
 
       var reader = new FileReader();
       reader.onload = function(e) {
@@ -1058,7 +1087,7 @@ function escXml(s) {
               ($('public-checkbox').checked ? 'FilmTag by Jeffrey Chu | ' : '') +
               'Photo by ' + p.author + ' | Camera: ' + p.camera.model + ' (' + p.lens.name + ') | Film: ' + p.film.name + ' (ISO ' + p.film.iso + ')' + (p.camera.shutter ? ' | Shutter: ' + p.camera.shutter : '') + ' | Lab: ' + p.lab + ' | Process: ' + p.process + ' (' + p.pushpull + ') | Scanner: ' + p.scanner;
             exifObj['0th'][piexif.ImageIFD.Copyright] = 'FilmTag by Jeffrey Chu | ' + 'Processed by ' + p.lab + ' (' + p.process + ') | Scanned via ' + p.scanner;
-            var gps2 = gpsData[i];
+            var gps2 = gpsData[idx];
             if (gps2) {
               exifObj['GPS'] = exifObj['GPS'] || {};
               exifObj['GPS'][piexif.GPSIFD.GPSLatitude] = toDms(gps2.lat);
@@ -1078,11 +1107,16 @@ function escXml(s) {
 
         zip.file(nn, bytes, { binary: true });
         processedFiles.push({ name: nn, blob: new Blob([bytes], { type: entry.file.type || 'image/jpeg' }) });
-        doOne(i + 1);
+        completed++;
+        active--;
+        progBar.style.width = Math.round((completed / total) * 100) + '%';
+        progText.textContent = t('processing_of', {i: completed, n: total});
+        startNext();
       };
       reader.readAsArrayBuffer(entry.file);
     }
-    doOne(0);
+
+    startNext();
   }
 
   function updateGpsDots() {
@@ -1107,7 +1141,34 @@ function escXml(s) {
   }
 
   function reverseGeocode(lat, lng, indices) {
-    fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng)
+    var key = lat.toFixed(5) + ',' + lng.toFixed(5);
+    if (geocodeCache[key]) {
+      var addr = geocodeCache[key];
+      for (var k = 0; k < indices.length; k++) {
+        if (gpsData[indices[k]]) gpsData[indices[k]].addr = addr;
+      }
+      updateGpsDots();
+      return;
+    }
+    for (var q = 0; q < geocodeQueue.length; q++) {
+      if (geocodeQueue[q].key === key) {
+        for (var k2 = 0; k2 < indices.length; k2++) {
+          if (geocodeQueue[q].indices.indexOf(indices[k2]) === -1) {
+            geocodeQueue[q].indices.push(indices[k2]);
+          }
+        }
+        return;
+      }
+    }
+    geocodeQueue.push({ key: key, lat: lat, lng: lng, indices: indices.slice() });
+    processGeocodeQueue();
+  }
+
+  function processGeocodeQueue() {
+    if (geocodeBusy || !geocodeQueue.length) return;
+    geocodeBusy = true;
+    var item = geocodeQueue.shift();
+    fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + item.lat + '&lon=' + item.lng)
       .then(function(r) { return r.json(); })
       .then(function(data) {
         var addr = '';
@@ -1119,12 +1180,18 @@ function escXml(s) {
           if (!p.length) addr = data.name || data.display_name || '';
           else addr = p.join(', ');
         }
-        for (var k = 0; k < indices.length; k++) {
-          if (gpsData[indices[k]]) gpsData[indices[k]].addr = addr;
+        geocodeCache[item.key] = addr;
+        for (var k = 0; k < item.indices.length; k++) {
+          if (gpsData[item.indices[k]]) gpsData[item.indices[k]].addr = addr;
         }
         updateGpsDots();
+        geocodeBusy = false;
+        setTimeout(processGeocodeQueue, 1000);
       })
-      .catch(function() {});
+      .catch(function() {
+        geocodeBusy = false;
+        setTimeout(processGeocodeQueue, 1000);
+      });
   }
 
   function initMap() {

@@ -63,6 +63,11 @@
 
 ## 新功能
 
+**2026-06-12** — 並行處理 & 地理編碼節流
+- ⚡ Zip/Save 而家 4 張相同時處理，36 張加快約 3 倍
+- 🗺️ Reverse geocode 限制 1 req/s + 快取重複座標，唔會再因為 rate limit 而 lost address
+- 🖼️ Summary 縮圖同樣加入 concurrency limit
+
 **2026-06-12** — 分頁顯示 & 縮圖快取
 - 📄 檔案列表分頁 — default 每頁 5 張，可選 5/10/25/50/全部；上下頁切換
 - 📋 Review Summary 分頁 — 檔案表格同樣支援分頁
