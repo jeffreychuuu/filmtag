@@ -218,14 +218,48 @@
       .egg-images { flex-direction: column; }
       .egg-images img { max-width: 90%; max-height: 45vh; }
     }
+    .section-collapse-header {
+      display: flex; align-items: center; gap: 0.5rem;
+      cursor: pointer; user-select: none;
+      font-size: 0.9rem; font-weight: 500; color: #fff;
+    }
+    .section-collapse-header:hover { color: var(--accent); }
+    .collapse-icon { margin-left: auto; transition: transform 0.2s; font-size: 0.75rem; }
+    .collapse-icon.open { transform: rotate(180deg); }
+    .section-body { overflow: hidden; transition: max-height 0.3s ease; }
+    .section-body.collapsed { max-height: 0; }
+    .section-body:not(.collapsed) { max-height: 20rem; margin-top: 0.75rem; }
+    .section-body p { color: #aaa; font-size: 0.85rem; line-height: 1.6; margin: 0; }
+    .social-links {
+      display: flex; justify-content: center; gap: 2rem;
+      padding: 0.5rem 0 1rem; font-size: 0.85rem;
+    }
+    .social-links a { color: #888; text-decoration: none; transition: color 0.2s; }
+    .social-links a:hover { color: var(--accent); }
   </style>
 </head>
 <body>
 <div class="container">
   <header>
+<div class="social-links">
+  <a href="https://github.com/jeffreychuuu/filmtag/tree/main" target="_blank" rel="noopener">🐙 GitHub</a>
+  <a href="https://www.instagram.com/jeffreychuphotography/" target="_blank" rel="noopener">📷 Instagram</a>
+  <a href="https://www.threads.com/@jeffreychuphotography" target="_blank" rel="noopener">🧵 Threads</a>
+</div>
     <h1>FilmTag</h1>
     <p>Every frame tells a story.<br>FilmTag makes sure none of them are forgotten.</p>
   </header>
+
+  <div class="section origin-section">
+    <div class="section-collapse-header" data-target="origin-body">
+      <span class="section-number">✦</span>
+      Origin
+      <span class="collapse-icon">▾</span>
+    </div>
+    <div class="section-body collapsed" id="origin-body">
+      <p>FilmTag started as a CLI tool for myself and a few friends — I'm a film photography beginner who happens to write code for a living, and I just wanted an easy way to tag my scans with proper metadata. Before a trip, I worried that a lab might send scans back while I was away, so I turned it into a web app I could use from anywhere.</p>
+    </div>
+  </div>
 
   <div class="section">
     <div class="section-header"><span class="section-number">1</span> Upload Photos</div>
@@ -362,6 +396,17 @@
     </div>
   </div>
 
+  <div class="section disclaimer-section">
+    <div class="section-collapse-header" data-target="disclaimer-body">
+      <span class="section-number">⚠</span>
+      Disclaimer
+      <span class="collapse-icon">▾</span>
+    </div>
+    <div class="section-body collapsed" id="disclaimer-body">
+      <p>This tool is shared freely with the film photography community. Commercial use or profiteering is strictly prohibited. Unauthorised commercial use will be subject to legal action.</p>
+    </div>
+  </div>
+
   <div class="status-msg" id="status-msg"></div>
 
   <div class="actions">
@@ -399,7 +444,7 @@
 <div class="egg-overlay" id="egg-overlay">
   <button class="egg-close" id="egg-close">✕</button>
   <div class="egg-images">
-    <img src="toro2.jpg" alt="">
+    <img src="toro.jpg" alt="">
     <img src="mallow.jpg" alt="">
   </div>
 </div>

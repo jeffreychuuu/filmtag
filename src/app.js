@@ -692,6 +692,15 @@ function escXml(s) {
 
   updateLensUI();
 
+  document.querySelectorAll('.section-collapse-header').forEach(function(header) {
+    header.addEventListener('click', function() {
+      var target = document.getElementById(header.dataset.target);
+      var icon = header.querySelector('.collapse-icon');
+      target.classList.toggle('collapsed');
+      icon.classList.toggle('open');
+    });
+  });
+
   $('easter-egg-btn').addEventListener('click', function() {
     $('egg-overlay').classList.add('show');
   });
