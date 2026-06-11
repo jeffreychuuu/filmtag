@@ -524,10 +524,11 @@ function escXml(s) {
       });
     }
     bindFileItemClicks();
-    gpsSection.style.display = 'block';
     initMap();
     renderRanges();
     selectAllBtn.textContent = Object.keys(selectedSet).length === uploadedFiles.length ? t('unselect_all') : t('select_all');
+    dateSection.style.display = hasS ? 'block' : 'none';
+    gpsSection.style.display = hasS ? 'block' : 'none';
   }
 
   function generateThumbnails(onDone) {
