@@ -63,6 +63,33 @@
 
 ## 新功能
 
+**2026-06-12** — 背景預載 & 順序載入
+- ⚡ Thumbnail prefetch — page 1 thumbnail 完成後，背景 decode 之後嘅頁面（concurrency=2），切頁即時顯示
+- ⚡ 順序啟動 — EXIF 提取先 run，完成後先開始 thumbnail generation，唔會爭 I/O
+- 🐛 修正：上傳後 Review Summary 按鈕冇正常啟用
+
+**2026-06-12** — 並行處理 & 地理編碼節流
+- ⚡ Zip/Save 而家 4 張相同時處理，36 張加快約 3 倍
+- 🗺️ Reverse geocode 限制 1 req/s + 快取重複座標，唔會再因為 rate limit 而 lost address
+- 🖼️ Summary 縮圖同樣加入 concurrency limit
+
+**2026-06-12** — 分頁顯示 & 縮圖快取
+- 📄 檔案列表分頁 — default 每頁 5 張，可選 5/10/25/50/全部；上下頁切換
+- 📋 Review Summary 分頁 — 檔案表格同樣支援分頁
+- ⚡ 縮圖快取 — thumbnail 首次 render 後 cache 做 data URL；切頁後即時顯示唔使重新 decode
+- 🗺️ 「清除已選 GPS 位置」按鈕搬去搜尋列獨立一行，UX 更清晰
+
+**2026-06-12** — 大量上傳效能翻新
+- ⚡ 批次 `renderFileList()` — 而家等所有 EXIF 讀完先 render 一次，唔會每張相都 rebuild 成個 list
+- ⚡ 快取 byte-to-string 轉換 — 每張相喺 EXIF 提取時只轉一次，zip/save 時重用，唔使 loop 幾千萬次
+- 🖼️ 縮圖生成加 concurrency limit — 最多同時 decode 6 張，唔會因為太多相而 freeze 瀏覽器
+- 💨 Blob URL 記憶體管理 — 所有 `createObjectURL` 用完即 revoke，杜絕 memory leak
+
+**2026-06-12** — Google AdSense 整合
+- 📢 加入 AdSense script 同 meta tag 以便放送廣告
+- 📄 網站根目錄放置 `ads.txt` 供廣告網絡驗證
+- 🔧 Build script 更新，自動複製 `ads.txt` 到 dist/
+
 **2026-06-11** — 相機-鏡頭關聯同儲存修正
 - 📸 自訂鏡頭而家按相機儲存——每部相機只會顯示屬於佢嘅鏡頭
 - 💾 焦距同最大光圈會同鏡頭名稱一齊儲存

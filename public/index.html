@@ -306,6 +306,17 @@
       background: none; border: none; color: #fff; font-size: 1.5rem;
       cursor: pointer; z-index: 1002;
     }
+    .pagination {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0.5rem; padding: 0.75rem 0 0; font-size: 0.8rem;
+    }
+    .pagination .page-info { color: var(--text-secondary); }
+    .pagination select {
+      width: auto; font-size: 0.75rem;
+      padding: 0.3rem 1.5rem 0.3rem 0.5rem;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text);
+    }
   </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8584571560750534" crossorigin="anonymous"></script>
 </head>
@@ -372,10 +383,12 @@
           <input type="text" id="map-search-input" data-i18n-placeholder="search_location" placeholder="Search location..." class="map-search-inp">
           <button class="btn btn-sm btn-secondary" id="map-search-btn" data-i18n="search">Search</button>
         </div>
+        <div class="map-search-row">
+          <button class="btn btn-sm btn-danger" id="clear-location-btn" data-i18n="clear_selected">Clear Selected GPS</button>
+        </div>
         <div id="map" style="height:280px; border-radius:6px;"></div>
         <div class="map-bottom">
           <p class="map-info" id="map-info" data-i18n="map_hint">Select file(s) above, then click the map or search to set location</p>
-          <button class="btn btn-sm btn-danger" id="clear-location-btn" data-i18n="clear_selected">Clear Selected GPS</button>
         </div>
       </div>
     </div>

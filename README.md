@@ -63,6 +63,33 @@ The final result 👇
 
 ## What's New
 
+**2026-06-12** — Background prefetch & sequenced loading
+- ⚡ Thumbnail prefetch — after page 1 thumbnails load, pages 2+ are decoded in background (concurrency=2) so navigation is instant
+- ⚡ Sequenced startup — EXIF extraction now runs before thumbnail generation, no I/O contention
+- 🐛 Fixed: Review Summary button staying disabled after upload
+
+**2026-06-12** — Parallel processing & geocode throttle
+- ⚡ Zip/Save now processes 4 files concurrently instead of 1 — 36 files processed ~3× faster
+- 🗺️ Reverse geocode throttled to 1 req/s with response caching — same coordinates reuse cached address instantly
+- 🖼️ Summary thumbnails now concurrency-limited, same as file list
+
+**2026-06-12** — Pagination & thumbnail caching
+- 📄 File list pagination — default 5 per page, user can choose 5/10/25/50/All; prev/next controls
+- 📋 Review Summary pagination — same pagination for the file table section
+- ⚡ Thumbnail cache — thumbnails are cached as data URLs after first render; switching pages reuses cached results instantly instead of re-decoding original images
+- 🗺️ Moved "Clear Selected GPS" to its own row next to the search bar for better UX
+
+**2026-06-12** — Performance overhaul for large uploads
+- ⚡ Batch `renderFileList()` — file list now renders once after all EXIF extraction completes, instead of N times for N files
+- ⚡ Cached byte-to-string conversion — binary-to-string is done once per file during EXIF extraction and reused by ZIP/save processing
+- 🖼️ Thumbnail generation concurrency limit — max 6 simultaneous image decodes, prevents browser from locking up with many files
+- 💨 Blob URL memory management — all `createObjectURL` calls now properly revoked after use, eliminating memory leaks
+
+**2026-06-12** — Google AdSense integration
+- 📢 Added AdSense script & meta tag for ad serving
+- 📄 `ads.txt` placed at site root for ad network verification
+- 🔧 Build script updated to copy `ads.txt` to dist/
+
 **2026-06-11** — Camera-Lens association & persistence
 - 📸 Custom lenses are now saved per camera — each camera only shows its own saved lenses
 - 💾 Focal length & max aperture are saved alongside the lens name for custom entries
