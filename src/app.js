@@ -531,6 +531,11 @@ function escXml(s) {
           ctx.drawImage(img, (40 - img.width * s) / 2, (40 - img.height * s) / 2, img.width * s, img.height * s);
         };
         img.src = URL.createObjectURL(file);
+        canvas.addEventListener('click', function(e) {
+          e.stopPropagation();
+          imgOverlayImg.src = URL.createObjectURL(file);
+          imgOverlay.classList.add('show');
+        });
       })(summaryCanvases[ti], uploadedFiles[ti].file);
     }
 
