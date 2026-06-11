@@ -32,7 +32,7 @@ function applyTranslations() {
     ph[j].placeholder = t(ph[j].getAttribute('data-i18n-placeholder'));
   }
   var tb = document.getElementById('lang-float-btn');
-  if (tb) tb.textContent = lang === 'en' ? '中文' : 'EN';
+  if (tb) tb.textContent = lang === 'en' ? '🇭🇰' : '🇺🇸';
 }
 
 window.toggleLang = toggleLang;
