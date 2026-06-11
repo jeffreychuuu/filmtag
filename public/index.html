@@ -236,6 +236,16 @@
     }
     .social-links a { color: #888; text-decoration: none; transition: color 0.2s; }
     .social-links a:hover { color: var(--accent); }
+
+    .lang-float-btn {
+      position: fixed; bottom: 68px; right: 16px;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--surface2); border: 1px solid var(--border);
+      font-size: 0.55rem; font-weight: 600; cursor: pointer; z-index: 999;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0.4; transition: opacity 0.2s; color: #888;
+    }
+    .lang-float-btn:hover { opacity: 1; color: var(--accent); border-color: var(--accent); }
   </style>
 </head>
 <body>
@@ -253,94 +263,94 @@
   <div class="section origin-section">
     <div class="section-collapse-header" data-target="origin-body">
       <span class="section-number">✦</span>
-      Origin
+      <span data-i18n="origin">Origin</span>
       <span class="collapse-icon">▾</span>
     </div>
     <div class="section-body collapsed" id="origin-body">
-      <p>FilmTag started as a CLI tool for myself and a few friends — I'm a film photography beginner who happens to write code for a living, and I just wanted an easy way to tag my scans with proper metadata. Before a trip, I worried that a lab might send scans back while I was away, so I turned it into a web app I could use from anywhere.</p>
+      <p data-i18n="origin_text">FilmTag started as a CLI tool for myself and a few friends — I'm a film photography beginner who happens to write code for a living, and I just wanted an easy way to tag my scans with proper metadata. Before a trip, I worried that a lab might send scans back while I was away, so I turned it into a web app I could use from anywhere.</p>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-header"><span class="section-number">1</span> Upload Photos</div>
+    <div class="section-header"><span class="section-number">1</span> <span data-i18n="upload_photos">Upload Photos</span></div>
     <div class="upload-wrap" id="upload-wrap">
       <input type="file" id="file-input" multiple accept="image/jpeg,image/png,image/tiff,image/dng,.dng">
       <div class="upload-zone">
         <div class="upload-icon">📁</div>
-        <p>Click to select files, or drag & drop here</p>
-        <p class="supported">JPEG, TIFF, DNG, PNG (JPEG recommended — EXIF writes to JPEG only)</p>
+        <p data-i18n="upload_hint">Click to select files, or drag & drop here</p>
+        <p class="supported" data-i18n="upload_formats">JPEG, TIFF, DNG, PNG (JPEG recommended — EXIF writes to JPEG only)</p>
       </div>
     </div>
     <div class="file-list" id="file-list"></div>
   </div>
 
   <div class="section">
-    <div class="section-header"><span class="section-number">2</span> Author</div>
+    <div class="section-header"><span class="section-number">2</span> <span data-i18n="author">Author</span></div>
     <div class="form-row">
       <select id="author-select"></select>
       <div class="custom-input" id="author-custom">
-        <input type="text" id="author-custom-input" placeholder="Enter custom author name">
+        <input type="text" id="author-custom-input" data-i18n-placeholder="author_placeholder" placeholder="Enter custom author name">
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-header"><span class="section-number">3</span> Camera & Lens</div>
+    <div class="section-header"><span class="section-number">3</span> <span data-i18n="camera_lens">Camera & Lens</span></div>
     <div class="form-row">
-      <div><label>Camera</label>
+      <div><label data-i18n="camera">Camera</label>
         <select id="camera-select"></select>
       </div>
       <div class="custom-input" id="camera-custom">
         <div class="field-group">
-          <div><label>Make</label><input type="text" id="camera-make-custom" placeholder="e.g. Fujifilm"></div>
-          <div><label>Model</label><input type="text" id="camera-model-custom" placeholder="e.g. GA645"></div>
+          <div><label data-i18n="make">Make</label><input type="text" id="camera-make-custom" placeholder="e.g. Fujifilm"></div>
+          <div><label data-i18n="model">Model</label><input type="text" id="camera-model-custom" placeholder="e.g. GA645"></div>
         </div>
       </div>
       <div id="lens-dropdown-group">
-        <label>Lens</label><select id="lens-select"></select>
+        <label data-i18n="lens">Lens</label><select id="lens-select"></select>
       </div>
       <div class="custom-input" id="lens-custom">
-        <div class="field-group"><div><label>Lens Name</label><input type="text" id="lens-name-custom" placeholder="e.g. Summicron-M 50mm f/2"></div></div>
+        <div class="field-group"><div><label data-i18n="lens_name">Lens Name</label><input type="text" id="lens-name-custom" placeholder="e.g. Summicron-M 50mm f/2"></div></div>
         <div class="field-group" style="margin-top:0.5rem;">
-          <div><label>Focal Length (mm)</label><input type="text" id="lens-focal" placeholder="e.g. 50"></div>
-          <div><label>Max Aperture</label><input type="text" id="lens-aperture" placeholder="e.g. 2.0"></div>
+          <div><label data-i18n="focal_length">Focal Length (mm)</label><input type="text" id="lens-focal" placeholder="e.g. 50"></div>
+          <div><label data-i18n="max_aperture">Max Aperture</label><input type="text" id="lens-aperture" placeholder="e.g. 2.0"></div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-header"><span class="section-number">4</span> Film Stock & ISO</div>
+    <div class="section-header"><span class="section-number">4</span> <span data-i18n="film_stock">Film Stock & ISO</span></div>
     <div class="form-row">
       <select id="film-select"></select>
       <div class="custom-input" id="film-custom">
         <div class="field-group">
-          <div><label>Film Stock Name</label><input type="text" id="film-name-custom" placeholder="e.g. Tri-X 400"></div>
-          <div><label>ISO</label><input type="number" id="film-iso-custom" placeholder="e.g. 400"></div>
+          <div><label data-i18n="film_name">Film Stock Name</label><input type="text" id="film-name-custom" placeholder="e.g. Tri-X 400"></div>
+          <div><label data-i18n="iso">ISO</label><input type="number" id="film-iso-custom" placeholder="e.g. 400"></div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-header"><span class="section-number">5</span> Lab</div>
+    <div class="section-header"><span class="section-number">5</span> <span data-i18n="lab">Lab</span></div>
     <div class="form-row">
       <select id="lab-select"></select>
       <div class="custom-input" id="lab-custom">
-        <input type="text" id="lab-custom-input" placeholder="Enter custom lab name">
+        <input type="text" id="lab-custom-input" data-i18n-placeholder="lab_placeholder" placeholder="Enter custom lab name">
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-header"><span class="section-number">6</span> Developing Process</div>
+    <div class="section-header"><span class="section-number">6</span> <span data-i18n="process">Developing Process</span></div>
     <div class="form-row">
       <select id="process-select"></select>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-header"><span class="section-number">7</span> Push / Pull</div>
+    <div class="section-header"><span class="section-number">7</span> <span data-i18n="push_pull">Push / Pull</span></div>
     <div class="form-row">
       <select id="pushpull-select"></select>
       <div class="custom-input" id="pushpull-custom">
@@ -350,48 +360,48 @@
   </div>
 
   <div class="section">
-    <div class="section-header"><span class="section-number">8</span> Scanner</div>
+    <div class="section-header"><span class="section-number">8</span> <span data-i18n="scanner">Scanner</span></div>
     <div class="form-row">
       <select id="scanner-select"></select>
       <div class="custom-input" id="scanner-custom">
-        <input type="text" id="scanner-custom-input" placeholder="Enter custom scanner name">
+        <input type="text" id="scanner-custom-input" data-i18n-placeholder="scanner_placeholder" placeholder="Enter custom scanner name">
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-header"><span class="section-number">9</span> Date & Time</div>
+    <div class="section-header"><span class="section-number">9</span> <span data-i18n="date_time">Date & Time</span></div>
     <div class="form-row">
-      <div><label>Are all photos from the same date?</label>
+      <div><label data-i18n="date_question">Are all photos from the same date?</label>
         <select id="same-date-select">
-          <option value="yes">Yes — all same date</option>
-          <option value="no">No — multiple date segments</option>
+          <option value="yes" data-i18n="date_yes">Yes — all same date</option>
+          <option value="no" data-i18n="date_no">No — multiple date segments</option>
         </select>
       </div>
       <div id="single-date-group">
         <div class="field-group">
-          <div><label>Shoot Date</label><input type="date" id="single-date-input"></div>
-          <div><label>Start Time (24h)</label><input type="time" id="single-time-input" value="12:00"></div>
+          <div><label data-i18n="shoot_date">Shoot Date</label><input type="date" id="single-date-input"></div>
+          <div><label data-i18n="start_time">Start Time (24h)</label><input type="time" id="single-time-input" value="12:00"></div>
         </div>
       </div>
       <div id="multi-date-group" style="display:none;">
         <p class="hint" id="seg-file-count"></p>
         <div class="date-segments" id="seg-container"></div>
-        <button class="btn btn-secondary btn-sm" type="button" id="add-seg-btn" style="margin-top:0.5rem;">+ Add Date Segment</button>
+        <button class="btn btn-secondary btn-sm" type="button" id="add-seg-btn" style="margin-top:0.5rem;" data-i18n="add_segment">+ Add Date Segment</button>
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-header"><span class="section-number">10</span> 😎 Signature</div>
+    <div class="section-header"><span class="section-number">10</span> <span data-i18n="signature">😎 Signature</span></div>
     <div class="form-row">
       <label style="font-size:0.85rem;color:var(--text);display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
         <input type="checkbox" id="branding-checkbox" checked style="width:auto;accent-color:var(--accent);">
-        Add "FilmTag by Jeffrey Chu" to EXIF metadata
+        <span data-i18n="signature_label">Add "FilmTag by Jeffrey Chu" to EXIF metadata</span>
       </label>
       <label style="font-size:0.85rem;color:var(--text);display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
         <input type="checkbox" id="public-checkbox" checked style="width:auto;accent-color:var(--accent);">
-        Make it public (include "FilmTag by Jeffrey Chu" in description)
+        <span data-i18n="public_label">Make it public (include "FilmTag by Jeffrey Chu" in description)</span>
       </label>
     </div>
   </div>
@@ -399,25 +409,25 @@
   <div class="section disclaimer-section">
     <div class="section-collapse-header" data-target="disclaimer-body">
       <span class="section-number">⚠</span>
-      Disclaimer
+      <span data-i18n="disclaimer">Disclaimer</span>
       <span class="collapse-icon">▾</span>
     </div>
     <div class="section-body collapsed" id="disclaimer-body">
-      <p>This tool is shared freely with the film photography community. Commercial use or profiteering is strictly prohibited. Unauthorised commercial use will be subject to legal action.</p>
+      <p data-i18n="disclaimer_text">This tool is shared freely with the film photography community. Commercial use or profiteering is strictly prohibited. Unauthorised commercial use will be subject to legal action.</p>
     </div>
   </div>
 
   <div class="status-msg" id="status-msg"></div>
 
   <div class="actions">
-    <button class="btn btn-primary" id="review-btn" disabled>Review Summary</button>
-    <button class="btn btn-secondary" id="reset-btn">Reset All</button>
+    <button class="btn btn-primary" id="review-btn" disabled data-i18n="review_summary">Review Summary</button>
+    <button class="btn btn-secondary" id="reset-btn" data-i18n="reset_all">Reset All</button>
   </div>
 
   <div class="summary-panel" id="summary-panel">
     <div class="summary-header">
-      <span>Review Summary</span>
-      <button class="btn btn-sm btn-secondary" id="summary-close-btn">Close</button>
+      <span data-i18n="review_summary">Review Summary</span>
+      <button class="btn btn-sm btn-secondary" id="summary-close-btn" data-i18n="close">Close</button>
     </div>
     <div class="summary-body" id="summary-body"></div>
   </div>
@@ -431,13 +441,15 @@
   <div class="gallery" id="gallery">
     <div class="gallery-header">
       <span id="gallery-title"></span>
-      <button class="btn btn-sm btn-secondary" id="gallery-zip-btn">Download All as ZIP</button>
+      <button class="btn btn-sm btn-secondary" id="gallery-zip-btn" data-i18n="download_all_zip">Download All as ZIP</button>
     </div>
     <div class="gallery-grid" id="gallery-grid"></div>
   </div>
 </div>
 
 <footer>Made by Jeffrey Chu (99% Agentic AI, 1% 🐈 Supervision &amp; 🥃)</footer>
+
+<div class="lang-float-btn" id="lang-float-btn">中文</div>
 
 <div class="easter-egg-btn" id="easter-egg-btn">🐈</div>
 

@@ -1,6 +1,7 @@
 import piexif from 'piexifjs';
 import JSZip from 'jszip';
 import DATA from '../data.json';
+import { t, setLang, toggleLang, applyTranslations, lang } from './i18n.js';
 
 // Register custom EXIF tags used by exiftool -Instructions
 piexif.TAGS.Exif[0x828D] = { name: 'Instructions', type: 'Ascii' };
@@ -135,7 +136,7 @@ function escXml(s) {
   function fillSelectWithCustom(sel, items) {
     fillSelect(sel, items);
     var oo = document.createElement('option');
-    oo.value = '__custom__'; oo.textContent = 'Other (free text)'; sel.appendChild(oo);
+    oo.value = '__custom__'; oo.textContent = t('other_free_text'); sel.appendChild(oo);
   }
   fillSelectWithCustom(authorSel, DATA.authors);
 
@@ -227,14 +228,14 @@ function escXml(s) {
     var card = document.createElement('div');
     card.className = 'segment-card';
     card.innerHTML =
-      '<div class="seg-label">Files <span class="s1">' + start + '</span> – <span class="s2">' + defEnd + '</span></div>' +
-      '<div style="margin-bottom:0.5rem;"><label>End file index</label>' +
+      '<div class="seg-label">' + t('files_range', {s: start, e: defEnd}) + '</div>' +
+      '<div style="margin-bottom:0.5rem;"><label>' + t('end_file_index') + '</label>' +
       '<input type="number" class="seg-end" min="' + start + '" max="' + total + '" value="' + defEnd + '"></div>' +
       '<div class="field-group">' +
-      '<div><label>Shoot Date</label><input type="date" class="seg-date"></div>' +
-      '<div><label>Start Time (24h)</label><input type="time" class="seg-time" value="12:00"></div>' +
+      '<div><label>' + t('shoot_date') + '</label><input type="date" class="seg-date"></div>' +
+      '<div><label>' + t('start_time') + '</label><input type="time" class="seg-time" value="12:00"></div>' +
       '</div>' +
-      '<button class="btn btn-danger" style="margin-top:0.5rem;" type="button">Remove</button>';
+      '<button class="btn btn-danger" style="margin-top:0.5rem;" type="button">' + t('remove') + '</button>';
     card.querySelector('.seg-end').addEventListener('change', refreshSegments);
     card.querySelector('button').addEventListener('click', function() { card.remove(); refreshSegments(); });
     return card;
@@ -252,10 +253,10 @@ function escXml(s) {
       se.value = ev; se.min = st; se.max = total;
       cards[i].querySelector('.s1').textContent = st;
       cards[i].querySelector('.s2').textContent = ev;
-      cards[i].querySelector('.seg-label').textContent = 'Files ' + st + ' – ' + ev;
+      cards[i].querySelector('.seg-label').textContent = t('files_range', {s: st, e: ev});
       cum = ev;
     }
-    segCount.textContent = uploadedFiles.length > 0 ? 'Total: ' + uploadedFiles.length + ' file(s) uploaded' : '';
+    segCount.textContent = uploadedFiles.length > 0 ? t('total_uploaded', {n: uploadedFiles.length}) : '';
     renderFileList();
     reviewBtn.disabled = uploadedFiles.length === 0;
   }
@@ -287,9 +288,9 @@ function escXml(s) {
 
   function renderFileList() {
     if (uploadedFiles.length === 0) { fileListEl.innerHTML = ''; reviewBtn.disabled = true; segCount.textContent = ''; return; }
-    segCount.textContent = 'Total: ' + uploadedFiles.length + ' file(s) uploaded';
-    var h = '<div class="file-list-header"><span>' + uploadedFiles.length + ' file(s)</span>' +
-      '<button class="btn btn-sm btn-danger" onclick="clearAll()">Clear All</button></div>';
+    segCount.textContent = t('total_uploaded', {n: uploadedFiles.length});
+    var h = '<div class="file-list-header"><span>' + t('file_count', {n: uploadedFiles.length}) + '</span>' +
+      '<button class="btn btn-sm btn-danger" onclick="clearAll()">' + t('clear_all') + '</button></div>';
     for (var i = 0; i < uploadedFiles.length; i++) {
       var f = uploadedFiles[i];
       h += '<div class="file-item">' +
@@ -309,7 +310,7 @@ function escXml(s) {
   function selText(sel) { return sel.options[sel.selectedIndex].text; }
   function getVal(sel, inp) { return sel.value === '__custom__' ? inp.value.trim() : selText(sel); }
   function camInfo() {
-    if (cameraSel.value === '__custom__') return { make: $('camera-make-custom').value.trim() || 'Unknown', model: $('camera-model-custom').value.trim() || 'Unknown', shutter: null };
+    if (cameraSel.value === '__custom__') return { make: $('camera-make-custom').value.trim() || t('unknown'), model: $('camera-model-custom').value.trim() || t('unknown'), shutter: null };
     var c = CAMERAS[cameraSel.selectedIndex]; return { make: c.make, model: c.model, shutter: c.shutter };
   }
   function lensInfo() {
@@ -331,9 +332,9 @@ function escXml(s) {
     };
   }
   function validate(p) {
-    if (!p.author) return 'Author is required'; if (!p.lens.name) return 'Lens name is required';
-    if (!p.film.name) return 'Film stock is required'; if (!p.lab) return 'Lab is required';
-    if (!p.scanner) return 'Scanner is required'; return null;
+    if (!p.author) return t('author_required'); if (!p.lens.name) return t('lens_required');
+    if (!p.film.name) return t('film_required'); if (!p.lab) return t('lab_required');
+    if (!p.scanner) return t('scanner_required'); return null;
   }
   function getSegments(total) {
     if (sameDateSel.value === 'yes') {
@@ -375,22 +376,22 @@ function escXml(s) {
     var p = collect();
     var err = validate(p); if (err) { showStatus(err, 'error'); return; }
     var sgs = getSegments(uploadedFiles.length);
-    if (!sgs) { showStatus('Date is required', 'error'); return; }
+    if (!sgs) { showStatus(t('date_required'), 'error'); return; }
 
     var html = '';
-    html += '<div class="summary-section"><h3>Settings</h3>';
+    html += '<div class="summary-section"><h3>' + t('settings') + '</h3>';
     var rows = [
-      ['Author', p.author], ['Camera', p.camera.make + ' ' + p.camera.model],
-      ['Lens', p.lens.name + (p.lens.focal ? ' (' + p.lens.focal + 'mm)' : '') + (p.lens.aperture ? ' F/' + p.lens.aperture : '')],
-      ['Film', p.film.name + ' (ISO ' + p.film.iso + ')'], ['Lab', p.lab],
-      ['Process', p.process + ' (' + p.pushpull + ')'], ['Scanner', p.scanner]
+      [t('author'), p.author], [t('camera'), p.camera.make + ' ' + p.camera.model],
+      [t('lens'), p.lens.name + (p.lens.focal ? ' (' + p.lens.focal + 'mm)' : '') + (p.lens.aperture ? ' F/' + p.lens.aperture : '')],
+      [t('film_stock'), p.film.name + ' (ISO ' + p.film.iso + ')'], [t('lab'), p.lab],
+      [t('process'), p.process + ' (' + p.pushpull + ')'], [t('scanner'), p.scanner]
     ];
-    if (p.camera.shutter) rows.push(['Shutter', p.camera.shutter]);
+    if (p.camera.shutter) rows.push([t('shutter'), p.camera.shutter]);
     for (var i = 0; i < rows.length; i++) html += '<div class="summary-row"><span class="k">' + rows[i][0] + '</span><span class="v">' + esc(rows[i][1]) + '</span></div>';
     html += '</div>';
 
-    html += '<div class="summary-section"><h3>Files (' + uploadedFiles.length + ')</h3>';
-    html += '<table class="rename-table"><tr><th>#</th><th>Original</th><th>New Name</th></tr>';
+    html += '<div class="summary-section"><h3>' + t('files_header', {n: uploadedFiles.length}) + '</h3>';
+    html += '<table class="rename-table"><tr><th>' + t('col_index') + '</th><th>' + t('col_original') + '</th><th>' + t('col_new_name') + '</th></tr>';
     for (var j = 0; j < uploadedFiles.length; j++) {
       var idx = j + 1, seg2 = segForIdx(sgs, idx), ts = calcTS(seg2, idx);
       var ext = uploadedFiles[j].file.name.split('.').pop().toLowerCase();
@@ -399,8 +400,8 @@ function escXml(s) {
     }
     html += '</table></div>';
     html += '<div class="actions" style="margin-top:1rem;">' +
-      '<button class="btn btn-primary" id="confirm-save-btn">Save to Album</button>' +
-      '<button class="btn btn-primary" id="confirm-zip-btn">Download ZIP</button></div>';
+      '<button class="btn btn-primary" id="confirm-save-btn">' + t('save_to_album') + '</button>' +
+      '<button class="btn btn-primary" id="confirm-zip-btn">' + t('download_zip') + '</button></div>';
 
     summaryBody.innerHTML = html;
     summaryPanel.classList.add('show');
@@ -414,7 +415,7 @@ function escXml(s) {
   function startZipProcess() {
     summaryPanel.classList.remove('show');
     var p = collect(), sgs = getSegments(uploadedFiles.length);
-    if (!sgs) return showStatus('Date error', 'error');
+    if (!sgs) return showStatus(t('date_error'), 'error');
 
     reviewBtn.disabled = true;
     progressSec.style.display = 'block';
@@ -424,13 +425,13 @@ function escXml(s) {
 
     function doOne(i) {
       if (i >= total) {
-        progText.textContent = 'Creating ZIP...';
+        progText.textContent = t('creating_zip');
         zip.generateAsync({ type: 'blob' }).then(function(blob) {
           var url = URL.createObjectURL(blob), a = document.createElement('a');
           a.href = url;
           a.download = 'filmtag_' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '.zip';          document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-          progBar.style.width = '100%'; progText.textContent = 'Done! ' + total + ' file(s) processed.';
-          showStatus(total + ' file(s) processed successfully', 'success');
+          progBar.style.width = '100%'; progText.textContent = t('done_processed', {n: total});
+          showStatus(t('processed_success', {n: total}), 'success');
           reviewBtn.disabled = false;
           setTimeout(function() { progressSec.style.display = 'none'; progBar.style.width = '0%'; }, 3000);
         });
@@ -441,7 +442,7 @@ function escXml(s) {
       var nn = newFName(p.film.name, seg, idx, ts.hr, ts.min, ext);
 
       progBar.style.width = Math.round(((i + 1) / total) * 100) + '%';
-      progText.textContent = 'Processing ' + (i + 1) + ' of ' + total;
+      progText.textContent = t('processing_of', {i: i + 1, n: total});
 
       var reader = new FileReader();
       reader.onload = function(e) {
@@ -527,7 +528,7 @@ function escXml(s) {
   function startSaveProcess() {
     summaryPanel.classList.remove('show');
     var p = collect(), sgs = getSegments(uploadedFiles.length);
-    if (!sgs) return showStatus('Date error', 'error');
+    if (!sgs) return showStatus(t('date_error'), 'error');
 
     reviewBtn.disabled = true;
     progressSec.style.display = 'block';
@@ -538,7 +539,7 @@ function escXml(s) {
 
     function doOne(i) {
       if (i >= total) {
-        progText.textContent = 'Done! ' + total + ' file(s) processed.';
+        progText.textContent = t('done_processed', {n: total});
         progressSec.style.display = 'none';
         reviewBtn.disabled = false;
         showGallery(processedFiles, p, zip);
@@ -549,7 +550,7 @@ function escXml(s) {
       var nn = newFName(p.film.name, seg, idx, ts.hr, ts.min, ext);
 
       progBar.style.width = Math.round(((i + 1) / total) * 100) + '%';
-      progText.textContent = 'Processing ' + (i + 1) + ' of ' + total;
+      progText.textContent = t('processing_of', {i: i + 1, n: total});
 
       var reader = new FileReader();
       reader.onload = function(e) {
@@ -617,7 +618,7 @@ function escXml(s) {
   }
 
   function showGallery(files, params, zip) {
-    galleryTitle.textContent = files.length + ' file(s) ready';
+    galleryTitle.textContent = t('files_ready', {n: files.length});
     galleryGrid.innerHTML = '';
     for (var i = 0; i < files.length; i++) {
       (function(f) {
@@ -641,7 +642,7 @@ function escXml(s) {
         item.appendChild(nameEl);
 
         var saveBtn2 = document.createElement('button');
-        saveBtn2.className = 'g-save-btn'; saveBtn2.textContent = 'Save';
+        saveBtn2.className = 'g-save-btn'; saveBtn2.textContent = t('save');
         saveBtn2.addEventListener('click', function() {
           var file = new File([f.blob], f.name, { type: 'image/jpeg' });
           if (navigator.share) {
@@ -699,6 +700,18 @@ function escXml(s) {
       target.classList.toggle('collapsed');
       icon.classList.toggle('open');
     });
+  });
+
+  applyTranslations();
+
+  $('lang-float-btn').addEventListener('click', function() {
+    toggleLang();
+    summaryPanel.classList.remove('show');
+    summaryBody.innerHTML = '';
+    gallery.classList.remove('show');
+    galleryGrid.innerHTML = '';
+    refreshSegments();
+    renderFileList();
   });
 
   $('easter-egg-btn').addEventListener('click', function() {
