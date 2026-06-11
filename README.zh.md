@@ -32,6 +32,8 @@
 | 🎞️ 底片 & ISO | 內建 23 款常見菲林（Kodak、Fujifilm、CineStill、Ilford 等），揀菲林會自動帶入 ISO |
 | 🧪 沖掃紀錄 | 內建香港主流沖掃工作室：DOT-WELL、Megatoni、TrueFace Pro Lab 金鈿、Photo Garden 金藝、HK Camera、Showa、Colorluxe 彩圖麗——仲支援記錄 Push/Pull 同掃描器型號 |
 | 🕐 時間排序（最正嗰個功能） | 每張相片自動遞增 1 分鐘，時區強制寫入 +08:00。一卷菲林跨唔同日子拍？可以分段設定日期同起始時間，Google Photos 就會完美排好順序 |
+| 🌐 多語言 | 英文 & 繁體中文，透過浮動按鈕一鍵切換。所有介面文字均已翻譯 |
+| 🗺️ GPS 拍攝位置 | 內建 Leaflet + OpenStreetMap 地圖。選擇檔案後搜尋地址或點擊地圖落針，GPS 坐標寫入 EXIF。逆向地理編碼顯示街道名稱喺每張檔旁邊 |
 
 成品效果 👇
 
@@ -54,6 +56,19 @@
 - 寫入 XMP：Label、Creator、Credit、DateCreated、dc:description
 - 批次下載為 ZIP，檔名標準化（`FilmName_YYYYMMDDHHMM_XX.jpg`）
 - iOS：透過分享選單儲存至相簿
+- 檔案縮圖預覽，點擊可放大睇原圖
+- 多選檔案後點擊地圖批次設定 GPS 位置
+- OpenStreetMap Nominatim 地名搜尋功能
+- 可摺疊嘅起源與聲明區塊
+
+## 新功能
+
+**2026-06-11** — GPS + 多語言更新
+- 🌐 英文 & 繁體中文（香港），浮動按鈕一鍵切換，所有介面已翻譯
+- 🗺️ GPS 拍攝位置 — Leaflet + OpenStreetMap 地圖，搜尋地址或點擊落針，坐標寫入 EXIF
+- 📍 逆向地理編碼 — 設定位置後顯示街道名稱於每張檔旁邊
+- 🖼️ 檔案縮圖預覽，點擊放大睇原圖
+- 🔄 多選檔案批次設定 GPS 位置
 
 ## 技術
 
@@ -61,6 +76,8 @@
 - **JSZip** — 用戶端 ZIP 打包
 - **esbuild** — 打包工具
 - **Vercel** — 部署
+- **Leaflet.js** — 互動地圖
+- **OpenStreetMap + Nominatim** — 地圖圖磚、地理編碼／逆向地理編碼
 
 ## 本地開發
 

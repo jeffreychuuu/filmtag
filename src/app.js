@@ -3,6 +3,14 @@ import JSZip from 'jszip';
 import DATA from '../data.json';
 import { t, setLang, toggleLang, applyTranslations, lang } from './i18n.js';
 
+function toDms(coord) {
+  var abs = Math.abs(coord);
+  var d = Math.floor(abs);
+  var m = Math.floor((abs - d) * 60);
+  var s = Math.round(((abs - d) * 60 - m) * 60 * 100);
+  return [[d, 1], [m, 1], [s, 100]];
+}
+
 // Register custom EXIF tags used by exiftool -Instructions
 piexif.TAGS.Exif[0x828D] = { name: 'Instructions', type: 'Ascii' };
 
@@ -116,6 +124,12 @@ function escXml(s) {
   var fileListEl = $('file-list'), reviewBtn = $('review-btn');
   var gallery = $('gallery'), galleryGrid = $('gallery-grid'), galleryTitle = $('gallery-title');
   var galleryZipBtn = $('gallery-zip-btn');
+  var gpsSection = $('gps-section'), mapEl = $('map'), mapInfoEl = $('map-info'), clearLocBtn = $('clear-location-btn');
+  var gpsModeSelect = $('gps-mode-select'), selectAllBtn = $('select-all-btn');
+  var gpsControls = $('gps-controls');
+  var mapSearchInput = $('map-search-input'), mapSearchBtn = $('map-search-btn');
+  var imgOverlay = $('img-overlay'), imgOverlayImg = $('img-overlay-img'), imgOverlayClose = $('img-overlay-close');
+  var gpsData = {}, selectedSet = {}, map = null, mapMarker = null, mapInitialized = false;
   var isIPhone = /iPhone|iPad/.test(navigator.userAgent);
 
   function branding() {
@@ -278,24 +292,104 @@ function escXml(s) {
   }
 
   function renderFileList() {
-    if (uploadedFiles.length === 0) { fileListEl.innerHTML = ''; reviewBtn.disabled = true; segCount.textContent = ''; return; }
+    if (uploadedFiles.length === 0) {
+      fileListEl.innerHTML = ''; reviewBtn.disabled = true;
+      segCount.textContent = '';
+    gpsSection.style.display = 'none';
+    gpsControls.style.display = 'none';
+    gpsModeSelect.value = 'off';
+
+      return;
+    }
     segCount.textContent = t('total_uploaded', {n: uploadedFiles.length});
     var h = '<div class="file-list-header"><span>' + t('file_count', {n: uploadedFiles.length}) + '</span>' +
       '<button class="btn btn-sm btn-danger" onclick="clearAll()">' + t('clear_all') + '</button></div>';
     for (var i = 0; i < uploadedFiles.length; i++) {
       var f = uploadedFiles[i];
-      h += '<div class="file-item">' +
+      var sel = selectedSet[i] ? ' selected' : '';
+      var hasGps = gpsModeSelect.value === 'on' && gpsData[i];
+      var addrTxt = hasGps && gpsData[i].addr ? ' <span class="gps-addr">' + esc(gpsData[i].addr) + '</span>' : '';
+      var dot = hasGps ? '📍' + addrTxt : '<img src="no_gps.png" class="no-gps-icon">';
+      h += '<div class="file-item' + sel + '" data-idx="' + i + '">' +
+        '<canvas class="file-thumb" data-idx="' + i + '" width="40" height="40"></canvas>' +
         '<div class="fidx">#' + String(i + 1).padStart(2, '0') + '</div>' +
         '<div class="fname">' + esc(f.file.name) + '</div>' +
         '<div class="fsize">' + fmtSize(f.file.size) + '</div>' +
+        '<span class="file-gps-dot">' + dot + '</span>' +
         '<button class="remove-btn" onclick="removeOne(' + i + ')">✕</button>' +
         '</div>';
     }
     fileListEl.innerHTML = h;
+    generateThumbnails();
+    bindFileItemClicks();
+    gpsSection.style.display = 'block';
+    initMap();
   }
 
-  function clearAll() { uploadedFiles = []; refreshSegments(); }
-  function removeOne(i) { uploadedFiles.splice(i, 1); refreshSegments(); }
+  function generateThumbnails() {
+    for (var i = 0; i < uploadedFiles.length; i++) {
+      var c = document.querySelector('canvas.file-thumb[data-idx="' + i + '"]');
+      if (!c) continue;
+      (function(canvas, file) {
+        var img = new Image();
+        img.onload = function() {
+          var s = Math.min(40 / img.width, 40 / img.height);
+          var w = img.width * s, h = img.height * s;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, (40 - w) / 2, (40 - h) / 2, w, h);
+        };
+        img.src = URL.createObjectURL(file);
+        canvas.removeEventListener('click', thumbnailClick);
+        canvas.addEventListener('click', thumbnailClick);
+        canvas._thumbFile = file;
+      })(c, uploadedFiles[i].file);
+    }
+  }
+
+  function thumbnailClick(e) {
+    e.stopPropagation();
+    imgOverlayImg.src = URL.createObjectURL(e.target._thumbFile);
+    imgOverlay.classList.add('show');
+  }
+
+  function bindFileItemClicks() {
+    var items = document.querySelectorAll('.file-item');
+    for (var k = 0; k < items.length; k++) {
+      items[k].removeEventListener('click', fileItemClick);
+      items[k].addEventListener('click', fileItemClick);
+    }
+  }
+
+  function fileItemClick(e) {
+    if (e.target.closest('.remove-btn')) return;
+    var item = e.currentTarget;
+    var i = parseInt(item.getAttribute('data-idx'), 10);
+    if (selectedSet[i]) {
+      delete selectedSet[i]; item.classList.remove('selected');
+    } else {
+      selectedSet[i] = true; item.classList.add('selected');
+    }
+    var keys = Object.keys(selectedSet);
+    selectAllBtn.textContent = keys.length === uploadedFiles.length ? t('select_all') + ' (All)' : t('select_all');
+  }
+
+  function clearAll() {
+    uploadedFiles = [];
+    gpsData = {}; selectedSet = {};
+    if (mapMarker) { map.removeLayer(mapMarker); mapMarker = null; }
+    refreshSegments();
+  }
+  function removeOne(i) {
+    uploadedFiles.splice(i, 1);
+    var newGps = {}, newSel = {};
+    for (var j = 0; j < uploadedFiles.length; j++) {
+      var oldIdx = j < i ? j : j + 1;
+      if (gpsData[oldIdx]) newGps[j] = gpsData[oldIdx];
+      if (selectedSet[oldIdx]) newSel[j] = true;
+    }
+    gpsData = newGps; selectedSet = newSel;
+    refreshSegments();
+  }
   window.clearAll = clearAll; window.removeOne = removeOne;
 
   function selText(sel) { return sel.options[sel.selectedIndex].text; }
@@ -495,6 +589,14 @@ function escXml(s) {
               (brand ? 'FilmTag by Jeffrey Chu | ' : '') +
               'Processed by ' + p.lab + ' (' + p.process + ') | Scanned via ' + p.scanner;
 
+            var gps = gpsModeSelect.value === 'on' ? gpsData[i] : null;
+            if (gps) {
+              exifObj['GPS'] = exifObj['GPS'] || {};
+              exifObj['GPS'][piexif.GPSIFD.GPSLatitude] = toDms(gps.lat);
+              exifObj['GPS'][piexif.GPSIFD.GPSLatitudeRef] = gps.lat >= 0 ? 'N' : 'S';
+              exifObj['GPS'][piexif.GPSIFD.GPSLongitude] = toDms(gps.lng);
+              exifObj['GPS'][piexif.GPSIFD.GPSLongitudeRef] = gps.lng >= 0 ? 'E' : 'W';
+            }
 
             var exifBytes = piexif.dump(exifObj);
             var newStr = piexif.insert(exifBytes, jpegStr);
@@ -590,6 +692,14 @@ function escXml(s) {
               (brand ? 'FilmTag by Jeffrey Chu — ' : '') +
               'Photo by ' + p.author + ' | Camera: ' + p.camera.model + ' (' + p.lens.name + ') | Film: ' + p.film.name + ' (ISO ' + p.film.iso + ')' + (p.camera.shutter ? ' | Shutter: ' + p.camera.shutter : '') + ' | Lab: ' + p.lab + ' | Process: ' + p.process + ' (' + p.pushpull + ') | Scanner: ' + p.scanner;
             exifObj['0th'][piexif.ImageIFD.Copyright] = (brand ? 'FilmTag by Jeffrey Chu | ' : '') + 'Processed by ' + p.lab + ' (' + p.process + ') | Scanned via ' + p.scanner;
+            var gps2 = gpsModeSelect.value === 'on' ? gpsData[i] : null;
+            if (gps2) {
+              exifObj['GPS'] = exifObj['GPS'] || {};
+              exifObj['GPS'][piexif.GPSIFD.GPSLatitude] = toDms(gps2.lat);
+              exifObj['GPS'][piexif.GPSIFD.GPSLatitudeRef] = gps2.lat >= 0 ? 'N' : 'S';
+              exifObj['GPS'][piexif.GPSIFD.GPSLongitude] = toDms(gps2.lng);
+              exifObj['GPS'][piexif.GPSIFD.GPSLongitudeRef] = gps2.lng >= 0 ? 'E' : 'W';
+            }
             var exifBytes = piexif.dump(exifObj);
             var newStr = piexif.insert(exifBytes, jpegStr);
             p.dateTime = dt;
@@ -607,6 +717,135 @@ function escXml(s) {
     }
     doOne(0);
   }
+
+  function updateGpsDots() {
+    var items = document.querySelectorAll('.file-item');
+    for (var j = 0; j < items.length; j++) {
+      var i = parseInt(items[j].getAttribute('data-idx'), 10);
+      var dot = items[j].querySelector('.file-gps-dot');
+      var hasDotGps = gpsModeSelect.value === 'on' && gpsData[i];
+      if (dot) dot.innerHTML = hasDotGps ? '📍' + (gpsData[i].addr ? ' <span class="gps-addr">' + esc(gpsData[i].addr) + '</span>' : '') : '<img src="no_gps.png" class="no-gps-icon">';
+    }
+  }
+
+  function setGpsForSelected(lat, lng) {
+    var keys = Object.keys(selectedSet);
+    if (!keys.length) return;
+    for (var k = 0; k < keys.length; k++) {
+      gpsData[keys[k]] = { lat: lat, lng: lng, addr: '' };
+    }
+    updateGpsDots();
+    reverseGeocode(lat, lng, keys);
+    mapInfoEl.textContent = keys.length + ' file(s) location set';
+    var items = document.querySelectorAll('.file-item');
+    for (var j = 0; j < items.length; j++) items[j].classList.remove('selected');
+    selectedSet = {};
+
+    selectAllBtn.textContent = t('select_all');
+  }
+
+  function reverseGeocode(lat, lng, indices) {
+    fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var addr = '';
+        if (data.address) {
+          var p = [];
+          if (data.address.road) p.push(data.address.road);
+          if (data.address.suburb) p.push(data.address.suburb);
+          else if (data.address.city || data.address.town) p.push(data.address.city || data.address.town);
+          if (!p.length) addr = data.name || data.display_name || '';
+          else addr = p.join(', ');
+        }
+        for (var k = 0; k < indices.length; k++) {
+          if (gpsData[indices[k]]) gpsData[indices[k]].addr = addr;
+        }
+        updateGpsDots();
+      })
+      .catch(function() {});
+  }
+
+  function initMap() {
+    if (!gpsSection || gpsSection.style.display === 'none' || gpsControls.style.display === 'none') return;
+    if (mapInitialized) { map.invalidateSize(); return; }
+    mapInitialized = true;
+    var defPos = [22.3193, 114.1694];
+    map = L.map('map').setView(defPos, 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(pos) {
+        map.setView([pos.coords.latitude, pos.coords.longitude], 13);
+      }, function() {});
+    }
+    map.on('click', function(e) {
+      var lat = e.latlng.lat, lng = e.latlng.lng;
+      if (mapMarker) mapMarker.setLatLng([lat, lng]);
+      else mapMarker = L.marker([lat, lng]).addTo(map);
+      setGpsForSelected(lat, lng);
+    });
+  }
+
+  gpsModeSelect.addEventListener('change', function() {
+    if (this.value === 'on') {
+      gpsControls.style.display = 'block';
+      selectAllBtn.style.display = '';
+      updateGpsDots();
+      initMap();
+    } else {
+      gpsControls.style.display = 'none';
+      selectAllBtn.style.display = 'none';
+      updateGpsDots();
+    }
+  });
+
+  imgOverlayClose.addEventListener('click', function() { imgOverlay.classList.remove('show'); });
+  imgOverlay.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
+
+  clearLocBtn.addEventListener('click', function() {
+    var keys = Object.keys(selectedSet);
+    for (var k = 0; k < keys.length; k++) delete gpsData[keys[k]];
+    if (mapMarker) { map.removeLayer(mapMarker); mapMarker = null; }
+    updateGpsDots();
+    applyTranslations();
+  });
+
+  selectAllBtn.addEventListener('click', function() {
+    var count = Object.keys(selectedSet).length;
+    if (count === uploadedFiles.length) {
+      selectedSet = {};
+    } else {
+      for (var i = 0; i < uploadedFiles.length; i++) selectedSet[i] = true;
+    }
+    var items = document.querySelectorAll('.file-item');
+    for (var j = 0; j < items.length; j++) {
+      var idx = parseInt(items[j].getAttribute('data-idx'), 10);
+      if (selectedSet[idx]) items[j].classList.add('selected');
+      else items[j].classList.remove('selected');
+    }
+    selectAllBtn.textContent = Object.keys(selectedSet).length === uploadedFiles.length ? t('select_all') + ' (All)' : t('select_all');
+
+  });
+
+  mapSearchBtn.addEventListener('click', function() {
+    var q = mapSearchInput.value.trim();
+    if (!q || !map) return;
+    fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(q))
+      .then(function(r) { return r.json(); })
+      .then(function(results) {
+        if (!results.length) return;
+        var lat = parseFloat(results[0].lat), lng = parseFloat(results[0].lon);
+        map.setView([lat, lng], 15);
+        if (mapMarker) mapMarker.setLatLng([lat, lng]);
+        else mapMarker = L.marker([lat, lng]).addTo(map);
+        setGpsForSelected(lat, lng);
+      })
+      .catch(function() {});
+  });
+  mapSearchInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') mapSearchBtn.click();
+  });
 
   function showGallery(files, params, zip) {
     galleryTitle.textContent = t('files_ready', {n: files.length});
@@ -657,7 +896,7 @@ function escXml(s) {
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');
         a.href = url;
-        a.download = 'film_exif_' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '.zip';
+        a.download = 'filmtag_' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '.zip';
         document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
       });
     };
@@ -677,6 +916,13 @@ function escXml(s) {
     segContainer.innerHTML = ''; uploadedFiles = [];
     summaryPanel.classList.remove('show'); summaryBody.innerHTML = '';
     gallery.classList.remove('show'); galleryGrid.innerHTML = '';
+    gpsSection.style.display = 'none';
+    gpsControls.style.display = 'none';
+    gpsModeSelect.value = 'off';
+    selectAllBtn.style.display = 'none';
+    gpsData = {}; selectedSet = {};
+    if (mapMarker) { map.removeLayer(mapMarker); mapMarker = null; }
+    mapInitialized = false;
     progressSec.style.display = 'none'; progBar.style.width = '0%';
     statusMsg.className = 'status-msg'; statusMsg.style.display = 'none';
     updateLensUI(); refreshSegments();
@@ -704,6 +950,10 @@ function escXml(s) {
     summaryBody.innerHTML = '';
     gallery.classList.remove('show');
     galleryGrid.innerHTML = '';
+    gpsSection.style.display = 'none';
+    gpsControls.style.display = 'none';
+    gpsModeSelect.value = 'off';
+    selectAllBtn.style.display = 'none';
     refreshSegments();
     renderFileList();
   });

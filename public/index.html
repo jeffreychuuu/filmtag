@@ -6,6 +6,8 @@
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
   <title>FilmTag</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root {
       --bg: #0d0d0d; --surface: #1a1a1a; --surface2: #242424; --border: #333;
@@ -246,6 +248,43 @@
       opacity: 0.4; transition: opacity 0.2s; color: #888;
     }
     .lang-float-btn:hover { opacity: 1; color: var(--accent); border-color: var(--accent); }
+
+    .file-item {
+      display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0;
+      border-bottom: 1px solid #1a1a1a; font-size: 0.78rem; cursor: pointer;
+    }
+    .file-item:hover { background: #151515; }
+    .file-item.selected { outline: 1px solid var(--accent); border-radius: 4px; background: #1a1a10; }
+    .file-thumb { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; flex-shrink: 0; background: #111; }
+    .gps-section { margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border); }
+    .gps-toolbar {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;
+    }
+    .gps-mode-row { display: flex; align-items: center; gap: 0.5rem; }
+    .gps-mode-label { font-size: 0.8rem; color: var(--text-secondary); }
+    .map-search-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .map-search-inp { flex: 1; }
+    .map-bottom {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 0.5rem; flex-wrap: wrap; gap: 0.5rem;
+    }
+    .map-info { font-size: 0.72rem; color: var(--text-secondary); }
+    .file-gps-dot { font-size: 0.65rem; flex-shrink: 0; }
+    .gps-addr { font-size: 0.6rem; color: var(--text-secondary); margin-left: 3px; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle; }
+
+    .file-thumb { cursor: pointer; }
+    .no-gps-icon { width: 14px; height: 14px; opacity: 0.3; vertical-align: middle; }
+    .img-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+      z-index: 1001; align-items: center; justify-content: center;
+    }
+    .img-overlay.show { display: flex; }
+    .img-overlay-close {
+      position: absolute; top: 16px; right: 16px;
+      background: none; border: none; color: #fff; font-size: 1.5rem;
+      cursor: pointer; z-index: 1002;
+    }
   </style>
 </head>
 <body>
@@ -282,6 +321,29 @@
       </div>
     </div>
     <div class="file-list" id="file-list"></div>
+    <div class="gps-section" id="gps-section" style="display:none;">
+      <div class="gps-toolbar">
+        <div class="gps-mode-row">
+          <label class="gps-mode-label">GPS Location:</label>
+          <select id="gps-mode-select" style="width:auto; font-size:0.8rem;">
+            <option value="off" data-i18n="gps_off">Don't add GPS location</option>
+            <option value="on" data-i18n="gps_on">Add GPS location to EXIF</option>
+          </select>
+        </div>
+        <button class="btn btn-sm btn-secondary" id="select-all-btn" data-i18n="select_all" style="display:none;">Select All</button>
+      </div>
+      <div class="gps-controls" id="gps-controls" style="display:none;">
+        <div class="map-search-row">
+          <input type="text" id="map-search-input" data-i18n-placeholder="search_location" placeholder="Search location..." class="map-search-inp">
+          <button class="btn btn-sm btn-secondary" id="map-search-btn" data-i18n="search">Search</button>
+        </div>
+        <div id="map" style="height:280px; border-radius:6px;"></div>
+        <div class="map-bottom">
+          <p class="map-info" id="map-info" data-i18n="map_hint">Select file(s) above, then click the map or search to set location</p>
+          <button class="btn btn-sm btn-danger" id="clear-location-btn" data-i18n="clear_selected">Clear Selected</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="section">
@@ -459,6 +521,11 @@
     <img src="toro.jpg" alt="">
     <img src="mallow.jpg" alt="">
   </div>
+</div>
+
+<div class="img-overlay" id="img-overlay">
+  <button class="img-overlay-close" id="img-overlay-close">✕</button>
+  <img id="img-overlay-img" style="max-width:90vw; max-height:85vh; object-fit:contain; border-radius:4px;">
 </div>
 
 <script src="bundle.js"></script>

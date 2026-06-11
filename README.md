@@ -32,6 +32,8 @@ FilmTag batch-writes EXIF metadata to your scanned photos. Everything happens in
 | Film Stock & ISO | 23 built-in film stocks (Kodak, Fujifilm, CineStill, Ilford, etc.) — selecting a film auto-fills ISO |
 | Lab Records | Hong Kong lab presets: DOT-WELL, Megatoni, TrueFace Pro Lab, Photo Garden, HK Camera, Showa, Colorluxe — with Push/Pull and scanner model tracking |
 | Time Sequencing (the best part) | Auto-increments +1 minute per photo, timezone forced to +08:00. Shot a roll across multiple days? Set up date segments with individual start times — Google Photos will order them perfectly |
+| 🌐 i18n | English & Traditional Chinese (Hong Kong) — toggle via floating button, translations for all UI text |
+| 🗺️ GPS Location | Built-in Leaflet + OpenStreetMap map. Select files, search or drop a pin — GPS coordinates written to EXIF. Reverse geocoding shows address next to each file |
 
 The final result 👇
 
@@ -54,6 +56,19 @@ The final result 👇
 - Writes XMP: Label, Creator, Credit, DateCreated, dc:description
 - Batch download as ZIP with standardized filenames (`FilmName_YYYYMMDDHHMM_XX.jpg`)
 - iOS: Save to Album via share sheet
+- File thumbnails with click-to-full-image preview
+- Multi-select files + map-click to batch-assign GPS
+- Location search via OpenStreetMap Nominatim geocoding
+- Collapsible Origin & Disclaimer sections
+
+## What's New
+
+**2026-06-11** — GPS + i18n update
+- 🌐 English & Traditional Chinese (Hong Kong) with floating language toggle
+- 🗺️ GPS location via Leaflet + OpenStreetMap map — search or drop a pin, coordinates written to EXIF
+- 📍 Reverse geocoding — address shown next to each file after location set
+- 🖼️ File thumbnails with click-to-full-image preview
+- 🔄 Multi-select files to batch-assign GPS location
 
 ## Tech
 
@@ -61,6 +76,8 @@ The final result 👇
 - **JSZip** — client-side ZIP packaging
 - **esbuild** — bundler
 - **Vercel** — deployment
+- **Leaflet.js** — interactive map
+- **OpenStreetMap + Nominatim** — map tiles & geocoding/reverse geocoding
 
 ## Local Dev
 

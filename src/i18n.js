@@ -119,7 +119,16 @@ tpl.en = {
   "processed_success": "{n} file(s) processed successfully",
   "processing_of": "Processing {i} of {n}",
   "files_ready": "{n} file(s) ready",
-  "save": "Save"
+  "save": "Save",
+
+  // Map / GPS
+  "gps_off": "Don't add GPS location",
+  "gps_on": "Add GPS location to EXIF",
+  "select_all": "Select All",
+  "search_location": "Search location...",
+  "search": "Search",
+  "map_hint": "Select file(s) above, then click the map or search to set location",
+  "clear_selected": "Clear Selected"
 };
 
 tpl.zh = {
@@ -204,7 +213,16 @@ tpl.zh = {
   "processed_success": "已成功處理 {n} 個檔案",
   "processing_of": "正在處理 {i}/{n}",
   "files_ready": "已備妥 {n} 個檔案",
-  "save": "儲存"
+  "save": "儲存",
+
+  // Map / GPS
+  "gps_off": "不加入 GPS 位置",
+  "gps_on": "加入 GPS 位置到 EXIF",
+  "select_all": "全選",
+  "search_location": "搜尋位置...",
+  "search": "搜尋",
+  "map_hint": "選擇上方檔案，然後點擊地圖或搜尋以設定位置",
+  "clear_selected": "清除已選位置"
 };
 
 export { t, setLang, toggleLang, applyTranslations, lang };
