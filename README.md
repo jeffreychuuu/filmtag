@@ -4,7 +4,7 @@ Interactive web app for writing EXIF metadata to film-scanned photos — all don
 
 **[filmtag.jeffreychuuu.com](https://filmtag.jeffreychuuu.com)**
 
-> :cn: [中文版（Chinese README）](README.zh.md)
+> :hk: [中文版（Chinese README）](README.zh.md)
 
 ## Why FilmTag?
 
