@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+  <title>FilmTag</title>
+  <style>
+    :root {
+      --bg: #0d0d0d; --surface: #1a1a1a; --surface2: #242424; --border: #333;
+      --text: #ddd; --text-secondary: #999; --accent: #d4a853; --accent-hover: #e0b95e;
+      --green: #50fa7b; --red: #ff6b6b; --radius: 8px; --transition: 0.2s ease;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6;
+    }
+    .container { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    header {
+      text-align: center; padding: 2.5rem 0 2rem;
+      border-bottom: 1px solid var(--border); margin-bottom: 2rem;
+    }
+    header h1 { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.02em; color: #fff; }
+    header p { color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.35rem; }
+
+    .section {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1rem;
+    }
+    .section:hover { border-color: #444; }
+    .section-header {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 0.75rem; font-size: 0.9rem; font-weight: 500; color: #fff;
+    }
+    .section-number {
+      display: flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px; background: var(--accent); color: #000;
+      border-radius: 50%; font-size: 0.7rem; font-weight: 700; flex-shrink: 0;
+    }
+
+    .form-row { display: flex; flex-direction: column; gap: 0.75rem; }
+    label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; display: block; margin-bottom: 0.3rem; }
+    select, input[type="text"], input[type="number"], input[type="date"], input[type="time"] {
+      width: 100%; padding: 0.6rem 0.75rem; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 6px; color: var(--text);
+      font-size: 0.875rem; font-family: inherit; transition: border-color var(--transition);
+      appearance: none; -webkit-appearance: none;
+    }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpath fill='%23999' d='M3 4.5l3 3 3-3'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 0.75rem center;
+      padding-right: 2rem; cursor: pointer;
+    }
+    select:focus, input:focus { outline: none; border-color: var(--accent); }
+    input[type="date"], input[type="time"] { color-scheme: dark; }
+
+    .custom-input { display: none; margin-top: 0.5rem; }
+    .custom-input.show { display: block; }
+    .field-group { display: flex; gap: 0.5rem; }
+    .field-group > div { flex: 1; }
+    .hint { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem; }
+
+    .date-segments { margin-top: 0.75rem; }
+    .segment-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 1rem; margin-bottom: 0.5rem;
+    }
+    .segment-card .seg-label {
+      font-size: 0.8rem; font-weight: 600; color: var(--accent); margin-bottom: 0.5rem;
+    }
+
+    .btn {
+      padding: 0.55rem 1rem; border: 1px solid var(--border); border-radius: 6px;
+      font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all var(--transition); font-family: inherit;
+    }
+    .btn-secondary { background: var(--surface2); color: var(--text); }
+    .btn-secondary:hover { border-color: #555; background: #2a2a2a; }
+    .btn-primary { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-danger { background: transparent; color: #c0392b; border-color: #c0392b; font-size: 0.75rem; padding: 0.35rem 0.75rem; }
+    .btn-danger:hover { background: #c0392b; color: #fff; }
+    .btn-sm { font-size: 0.75rem; padding: 0.4rem 0.85rem; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .actions { display: flex; gap: 0.75rem; margin-top: 2rem; flex-wrap: wrap; }
+
+    .upload-wrap {
+      position: relative; border: 2px dashed var(--border);
+      border-radius: var(--radius); transition: all var(--transition); background: var(--surface);
+    }
+    .upload-wrap:hover, .upload-wrap.dragover { border-color: var(--accent); background: #1a1a10; }
+    .upload-wrap input[type="file"] {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      opacity: 0; cursor: pointer;
+    }
+    .upload-zone { padding: 2.5rem 1.5rem; text-align: center; pointer-events: none; }
+    .upload-zone .upload-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .upload-zone p { color: var(--text-secondary); font-size: 0.85rem; }
+    .upload-zone .supported { font-size: 0.72rem; color: #666; margin-top: 0.35rem; }
+
+    .file-list { margin-top: 1rem; }
+    .file-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+    .file-list-header span { font-size: 0.8rem; color: var(--text-secondary); }
+    .file-item {
+      display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0;
+      border-bottom: 1px solid #1a1a1a; font-size: 0.78rem;
+    }
+    .file-item .fidx {
+      width: 36px; height: 36px; background: #111; border-radius: 4px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #555;
+    }
+    .file-item .fname { flex: 1; min-width: 0; color: var(--text); word-break: break-all; font-family: monospace; font-size: 0.75rem; }
+    .file-item .fsize { color: var(--text-secondary); font-size: 0.7rem; flex-shrink: 0; }
+    .file-item .remove-btn { background: none; border: none; color: #666; cursor: pointer; font-size: 1rem; padding: 0 0.2rem; flex-shrink: 0; }
+    .file-item .remove-btn:hover { color: var(--red); }
+
+    .progress-bar-wrap { width: 100%; height: 6px; background: #111; border-radius: 3px; margin-top: 1rem; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; width: 0%; transition: width 0.3s ease; }
+    .progress-text { font-size: 0.75rem; color: var(--text-secondary); text-align: center; margin-top: 0.35rem; }
+
+    .status-msg {
+      padding: 0.75rem 1rem; border-radius: 6px; font-size: 0.82rem; font-weight: 500; display: none;
+    }
+    .status-msg.success { background: #0e2a1f; color: var(--green); display: block; }
+    .status-msg.error { background: #2a0e0e; color: var(--red); display: block; }
+
+    .summary-panel {
+      display: none; background: var(--surface); border: 1px solid var(--accent);
+      border-radius: var(--radius); margin-top: 1.5rem; overflow: hidden;
+    }
+    .summary-panel.show { display: block; }
+    .summary-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--border);
+      font-weight: 600; font-size: 0.85rem; color: var(--accent);
+    }
+    .summary-body { padding: 1.25rem; }
+    .summary-section { margin-bottom: 1rem; }
+    .summary-section h3 { font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.4rem; }
+    .summary-row { display: flex; justify-content: space-between; padding: 0.2rem 0; font-size: 0.8rem; }
+    .summary-row .k { color: var(--text-secondary); }
+    .summary-row .v { color: var(--text); font-family: monospace; font-size: 0.75rem; text-align: right; }
+    .rename-table { width: 100%; border-collapse: collapse; font-size: 0.7rem; margin-top: 0.5rem; }
+    .rename-table th { text-align: left; color: var(--text-secondary); padding: 0.3rem 0.5rem; border-bottom: 1px solid var(--border); font-weight: 500; }
+    .rename-table td { padding: 0.25rem 0.5rem; border-bottom: 1px solid #1a1a1a; }
+    .rename-table .old-name { color: var(--red); font-family: monospace; word-break: break-all; }
+    .rename-table .new-name { color: var(--green); font-family: monospace; word-break: break-all; }
+
+    @media (max-width: 480px) {
+      .container { padding: 1rem 1rem 3rem; }
+      .section { padding: 1rem; }
+      .field-group { flex-direction: column; }
+      .actions { flex-direction: column; }
+    }
+
+    .gallery { display: none; margin-top: 1.5rem; }
+    .gallery.show { display: block; }
+    .gallery-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .gallery-header span { font-size: 0.85rem; color: var(--accent); font-weight: 600; }
+    .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+    @media (min-width: 481px) { .gallery-grid { grid-template-columns: repeat(4, 1fr); } }
+    .gallery-item {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; overflow: hidden;
+    }
+    .gallery-item canvas { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+    .gallery-item .g-name {
+      font-size: 0.6rem; color: var(--text-secondary); padding: 0.3rem 0.5rem;
+      word-break: break-all; font-family: monospace;
+    }
+    .gallery-item .g-save-btn {
+      width: 100%; padding: 0.4rem; background: var(--surface); border: none;
+      border-top: 1px solid var(--border); color: var(--accent);
+      font-size: 0.7rem; font-weight: 600; cursor: pointer; font-family: inherit;
+    }
+    .gallery-item .g-save-btn:hover { background: #2a2a1a; }
+    .gallery-item .g-save-btn:active { background: var(--accent); color: #000; }
+
+    footer {
+      text-align: center; padding: 2rem 0 1rem; margin-top: 2rem;
+      border-top: 1px solid var(--border); font-size: 0.72rem; color: #555;
+    }
+
+    .easter-egg-btn {
+      position: fixed; bottom: 16px; right: 16px;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--surface2); border: 1px solid var(--border);
+      font-size: 1.4rem; cursor: pointer; z-index: 999;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0.4; transition: opacity 0.2s;
+    }
+    .easter-egg-btn:hover { opacity: 1; }
+
+    .egg-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+      z-index: 1000; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .egg-overlay.show { display: flex; }
+
+    .egg-close {
+      position: absolute; top: 16px; right: 16px;
+      background: none; border: none; color: #fff; font-size: 1.5rem;
+      cursor: pointer; z-index: 1001;
+    }
+
+    .egg-images {
+      display: flex; gap: 1rem; max-width: 90vw; max-height: 80vh;
+      align-items: center; justify-content: center;
+    }
+    .egg-images img {
+      max-width: 45%; max-height: 80vh; object-fit: contain; border-radius: 4px;
+    }
+    @media (max-width: 480px) {
+      .egg-images { flex-direction: column; }
+      .egg-images img { max-width: 90%; max-height: 45vh; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>FilmTag</h1>
+    <p>Upload photos · Set EXIF metadata</p>
+  </header>
+
+  <div class="section">
+    <div class="section-header"><span class="section-number">1</span> Upload Photos</div>
+    <div class="upload-wrap" id="upload-wrap">
+      <input type="file" id="file-input" multiple accept="image/jpeg,image/png,image/tiff,image/dng,.dng">
+      <div class="upload-zone">
+        <div class="upload-icon">📁</div>
+        <p>Click to select files, or drag & drop here</p>
+        <p class="supported">JPEG, TIFF, DNG, PNG (JPEG recommended — EXIF writes to JPEG only)</p>
+      </div>
+    </div>
+    <div class="file-list" id="file-list"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-number">2</span> Author</div>
+    <div class="form-row">
+      <select id="author-select"></select>
+      <div class="custom-input" id="author-custom">
+        <input type="text" id="author-custom-input" placeholder="Enter custom author name">
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-number">3</span> Camera & Lens</div>
+    <div class="form-row">
+      <div><label>Camera</label>
+        <select id="camera-select"></select>
+      </div>
+      <div class="custom-input" id="camera-custom">
+        <div class="field-group">
+          <div><label>Make</label><input type="text" id="camera-make-custom" placeholder="e.g. Fujifilm"></div>
+          <div><label>Model</label><input type="text" id="camera-model-custom" placeholder="e.g. GA645"></div>
+        </div>
+      </div>
+      <div id="lens-dropdown-group">
+        <label>Lens</label><select id="lens-select"></select>
+      </div>
+      <div class="custom-input" id="lens-custom">
+        <div class="field-group"><div><label>Lens Name</label><input type="text" id="lens-name-custom" placeholder="e.g. Summicron-M 50mm f/2"></div></div>
+        <div class="field-group" style="margin-top:0.5rem;">
+          <div><label>Focal Length (mm)</label><input type="text" id="lens-focal" placeholder="e.g. 50"></div>
+          <div><label>Max Aperture</label><input type="text" id="lens-aperture" placeholder="e.g. 2.0"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-number">4</span> Film Stock & ISO</div>
+    <div class="form-row">
+      <select id="film-select"></select>
+      <div class="custom-input" id="film-custom">
+        <div class="field-group">
+          <div><label>Film Stock Name</label><input type="text" id="film-name-custom" placeholder="e.g. Tri-X 400"></div>
+          <div><label>ISO</label><input type="number" id="film-iso-custom" placeholder="e.g. 400"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-number">5</span> Lab</div>
+    <div class="form-row">
+      <select id="lab-select"></select>
+      <div class="custom-input" id="lab-custom">
+        <input type="text" id="lab-custom-input" placeholder="Enter custom lab name">
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-number">6</span> Developing Process</div>
+    <div class="form-row">
+      <select id="process-select"></select>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-number">7</span> Push / Pull</div>
+    <div class="form-row">
+      <select id="pushpull-select"></select>
+      <div class="custom-input" id="pushpull-custom">
+        <input type="text" id="pushpull-custom-input" placeholder="e.g. Push +1.5">
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-number">8</span> Scanner</div>
+    <div class="form-row">
+      <select id="scanner-select"></select>
+      <div class="custom-input" id="scanner-custom">
+        <input type="text" id="scanner-custom-input" placeholder="Enter custom scanner name">
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-number">9</span> Date & Time</div>
+    <div class="form-row">
+      <div><label>Are all photos from the same date?</label>
+        <select id="same-date-select">
+          <option value="yes">Yes — all same date</option>
+          <option value="no">No — multiple date segments</option>
+        </select>
+      </div>
+      <div id="single-date-group">
+        <div class="field-group">
+          <div><label>Shoot Date</label><input type="date" id="single-date-input"></div>
+          <div><label>Start Time (24h)</label><input type="time" id="single-time-input" value="12:00"></div>
+        </div>
+      </div>
+      <div id="multi-date-group" style="display:none;">
+        <p class="hint" id="seg-file-count"></p>
+        <div class="date-segments" id="seg-container"></div>
+        <button class="btn btn-secondary btn-sm" type="button" id="add-seg-btn" style="margin-top:0.5rem;">+ Add Date Segment</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-number">10</span> 😎 Signature</div>
+    <div class="form-row">
+      <label style="font-size:0.85rem;color:var(--text);display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+        <input type="checkbox" id="branding-checkbox" checked style="width:auto;accent-color:var(--accent);">
+        Add "FilmTag by Jeffrey Chu" to EXIF metadata
+      </label>
+      <label style="font-size:0.85rem;color:var(--text);display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+        <input type="checkbox" id="public-checkbox" checked style="width:auto;accent-color:var(--accent);">
+        Make it public (include "FilmTag by Jeffrey Chu" in description)
+      </label>
+    </div>
+  </div>
+
+  <div class="status-msg" id="status-msg"></div>
+
+  <div class="actions">
+    <button class="btn btn-primary" id="review-btn" disabled>Review Summary</button>
+    <button class="btn btn-secondary" id="reset-btn">Reset All</button>
+  </div>
+
+  <div class="summary-panel" id="summary-panel">
+    <div class="summary-header">
+      <span>Review Summary</span>
+      <button class="btn btn-sm btn-secondary" id="summary-close-btn">Close</button>
+    </div>
+    <div class="summary-body" id="summary-body"></div>
+  </div>
+
+  <div id="progress-section" style="display:none;">
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar"></div></div>
+    <p class="progress-text" id="progress-text"></p>
+  </div>
+</div>
+
+  <div class="gallery" id="gallery">
+    <div class="gallery-header">
+      <span id="gallery-title"></span>
+      <button class="btn btn-sm btn-secondary" id="gallery-zip-btn">Download All as ZIP</button>
+    </div>
+    <div class="gallery-grid" id="gallery-grid"></div>
+  </div>
+</div>
+
+<footer>Made by Jeffrey Chu (99% Agentic AI, 1% 🐈 Supervision &amp; 🥃)</footer>
+
+<div class="easter-egg-btn" id="easter-egg-btn">🐈</div>
+
+<div class="egg-overlay" id="egg-overlay">
+  <button class="egg-close" id="egg-close">✕</button>
+  <div class="egg-images">
+    <img src="toro2.jpg" alt="">
+    <img src="mallow.jpg" alt="">
+  </div>
+</div>
+
+<script src="bundle.js"></script>
+</body>
+</html>

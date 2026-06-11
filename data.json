@@ -1,0 +1,91 @@
+{
+  "authors": [
+    "Jeffrey Chu",
+    "Roger Chan"
+  ],
+  "cameras": [
+    {
+      "make": "Leica Camera AG",
+      "model": "Leica MP",
+      "shutter": null,
+      "lenses": [
+        { "name": "Leica Summarit-M 35mm F/2.5", "focal": "35", "aperture": "2.5" },
+        { "name": "Leica Elmarit-M 28mm F/2.8", "focal": "28", "aperture": "2.8" }
+      ]
+    },
+    {
+      "make": "Olympus",
+      "model": "Olympus OM-2Sp",
+      "shutter": null,
+      "lenses": [
+        { "name": "OM-System Zuiko 50mm F/1.4", "focal": "50", "aperture": "1.4" }
+      ]
+    },
+    {
+      "make": "Lomography",
+      "model": "Lomography Simple Use",
+      "shutter": "1/120",
+      "lenses": [
+        { "name": "Plastic Lens 35mm F/9", "focal": "35", "aperture": "9" }
+      ]
+    }
+  ],
+  "films": [
+    { "name": "Kodak Ultramax 400", "iso": "400" },
+    { "name": "Kodak Gold 200", "iso": "200" },
+    { "name": "Kodak ColorPlus 200", "iso": "200" },
+    { "name": "Kodak Ektar 100", "iso": "100" },
+    { "name": "Kodak Portra 160", "iso": "160" },
+    { "name": "Kodak Portra 400", "iso": "400" },
+    { "name": "Kodak Portra 800", "iso": "800" },
+    { "name": "Kodak Ektacolor Pro 160", "iso": "160" },
+    { "name": "Kodak Ektacolor Pro 400", "iso": "400" },
+    { "name": "Kodak Ektacolor Pro 800", "iso": "800" },
+    { "name": "Fujicolor C200", "iso": "200" },
+    { "name": "Fujicolor Superia Premium 400", "iso": "400" },
+    { "name": "Lucky C200", "iso": "200" },
+    { "name": "Crystal 250D AHU - 5207", "iso": "250" },
+    { "name": "Crystal 250D AHU - 5219", "iso": "500" },
+    { "name": "CineStill 50D", "iso": "50" },
+    { "name": "CineStill 400D", "iso": "400" },
+    { "name": "CineStill 800T", "iso": "800" },
+    { "name": "Ilford Pan 100", "iso": "100" },
+    { "name": "Ilford Pan 400", "iso": "400" },
+    { "name": "FilmNeverDie IRO 400", "iso": "400" },
+    { "name": "Retocolor Maple 100", "iso": "100" },
+    { "name": "CAMDI Lost in Tokyo 500", "iso": "500" }
+  ],
+  "labs": [
+    "DOT-WELL Photo Workshop",
+    "Megatoni Production",
+    "TrueFace Pro Lab 金鈿(真面目)",
+    "Photo Garden 金藝",
+    "HK Camera",
+    "Showa",
+    "Colorluxe Express 彩圖麗",
+    "Lucky 樂凱",
+    "Fiona"
+  ],
+  "processes": [
+    "C-41",
+    "ECN-2",
+    "E-6",
+    "B&W",
+    "B&W Reversal"
+  ],
+  "pushpulls": [
+    "Normal",
+    "Push +1",
+    "Push +2",
+    "Push +3",
+    "Pull -1",
+    "Pull -2"
+  ],
+  "scanners": [
+    "Noritsu HS-1800",
+    "Noritsu LS-600",
+    "Fuji Frontier SP3000",
+    "Hasselblad Flextight X1",
+    "Hasselblad Flextight X5"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "filmtag",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "esbuild src/app.js --bundle --outfile=dist/bundle.js && cp public/index.html dist/index.html && cp public/favicon-*.png public/toro2.jpg public/mallow.jpg dist/",
+    "dev": "esbuild src/app.js --bundle --outfile=dist/bundle.js && cp public/index.html dist/index.html && cp public/favicon-*.png public/toro2.jpg public/mallow.jpg dist/ && python3 -m http.server 3333 --directory dist"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1",
+    "piexifjs": "^1.0.6"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}
