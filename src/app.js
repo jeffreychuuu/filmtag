@@ -155,7 +155,7 @@ function escXml(s) {
       filmSel.appendChild(o);
     }
     var oo = document.createElement('option');
-    oo.value = '__custom__'; oo.textContent = 'Other (free text)'; filmSel.appendChild(oo);
+    oo.value = '__custom__'; oo.textContent = t('other_free_text'); filmSel.appendChild(oo);
   })();
 
   function esc(s) {
@@ -188,7 +188,7 @@ function escXml(s) {
       var o = document.createElement('option'); o.value = i; o.textContent = l.name; lensSel.appendChild(o);
     });
     var oo = document.createElement('option');
-    oo.value = '__custom__'; oo.textContent = 'Other (free text)'; lensSel.appendChild(oo);
+    oo.value = '__custom__'; oo.textContent = t('other_free_text'); lensSel.appendChild(oo);
   }
   function updateLensUI() {
     if (cameraSel.value === '__custom__') {
