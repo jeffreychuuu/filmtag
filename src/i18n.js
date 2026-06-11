@@ -141,6 +141,7 @@ tpl.en = {
   "set_gps": "Set GPS Location",
 
   "extracting_exif": "Uploading {n} photos…",
+  "next_roll": "Next Roll 🎞️",
 };
 
 tpl.zh = {
@@ -247,6 +248,7 @@ tpl.zh = {
   "set_gps": "設定 GPS 位置",
 
   "extracting_exif": "正在上傳 {n} 張相…",
+  "next_roll": "下一卷菲林 🎞️",
 };
 
 export { t, setLang, toggleLang, applyTranslations, lang };

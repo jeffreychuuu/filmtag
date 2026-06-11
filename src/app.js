@@ -120,7 +120,7 @@ function escXml(s) {
   var fileDates = {}, clearedDates = {};
   var fileInp = $('file-input'), uploadWrap = $('upload-wrap');
   var fileListEl = $('file-list'), reviewBtn = $('review-btn');
-  var gallery = $('gallery'), galleryGrid = $('gallery-grid'), galleryTitle = $('gallery-title');
+  var gallery = $('gallery-overlay'), galleryGrid = $('gallery-grid'), galleryTitle = $('gallery-title');
   var galleryZipBtn = $('gallery-zip-btn');
   var gpsSection = null, dateSection = null, mapEl = $('map'), mapInfoEl = $('map-info'), clearLocBtn = $('clear-location-btn');
   var mapSearchInput = $('map-search-input'), mapSearchBtn = $('map-search-btn');
@@ -167,8 +167,8 @@ function escXml(s) {
     rebuildSummaryBody();
   }
 
-  var summaryPanel = $('summary-panel'), summaryBody = $('summary-body');
-  var progressSec = $('progress-section'), progBar = $('progress-bar'), progText = $('progress-text');
+  var summaryPanel = $('summary-overlay'), summaryBody = $('summary-body');
+  var progressSec = $('progress-overlay'), progBar = $('progress-bar'), progText = $('progress-text');
   var statusMsg = $('status-msg');
   var loadingEl = $('loading-overlay'), loadingText = $('loading-text');
 
@@ -527,7 +527,7 @@ function escXml(s) {
     bindFileItemClicks();
     initMap();
     renderRanges();
-    selectAllBtn.textContent = Object.keys(selectedSet).length === uploadedFiles.length ? t('unselect_all') : t('select_all');
+    selectAllBtn.textContent = Object.keys(selectedSet).length > 0 ? t('unselect_all') : t('select_all');
     fileActions.style.display = hasS ? 'flex' : 'none';
   }
 
@@ -646,7 +646,7 @@ function escXml(s) {
     } else {
       selectedSet[i] = true; item.classList.add('selected');
     }
-    selectAllBtn.textContent = Object.keys(selectedSet).length === uploadedFiles.length ? t('unselect_all') : t('select_all');
+    selectAllBtn.textContent = Object.keys(selectedSet).length > 0 ? t('unselect_all') : t('select_all');
     var ct = Object.keys(selectedSet).length;
     fileActions.style.display = ct ? 'flex' : 'none';
     renderRanges();
@@ -868,6 +868,7 @@ function escXml(s) {
       '</select></div>';
     html += '</div>';
     html += '<div class="actions" style="margin-top:1rem;">' +
+      '<button class="btn btn-secondary" id="summary-close-btn">' + t('close') + '</button>' +
       '<button class="btn btn-primary" id="confirm-save-btn">' + t('save_to_album') + '</button>' +
       '<button class="btn btn-primary" id="confirm-zip-btn">' + t('download_zip') + '</button></div>';
     return html;
@@ -881,6 +882,8 @@ function escXml(s) {
     generateSummaryThumbnails();
     $('confirm-zip-btn').addEventListener('click', startZipProcess);
     $('confirm-save-btn').addEventListener('click', startSaveProcess);
+    var closeBtn = $('summary-close-btn');
+    if (closeBtn) closeBtn.addEventListener('click', function() { summaryPanel.classList.remove('show'); summaryPage = 1; });
   }
 
   function generateSummaryThumbnails() {
@@ -934,17 +937,16 @@ function escXml(s) {
     summaryPage = 1;
     rebuildSummaryBody();
     summaryPanel.classList.add('show');
-    summaryPanel.scrollIntoView({ behavior: 'smooth' });
   });
 
-  $('summary-close-btn').addEventListener('click', function() { summaryPanel.classList.remove('show'); summaryPage = 1; });
+  $('summary-close-btn') && $('summary-close-btn').addEventListener('click', function() { summaryPanel.classList.remove('show'); summaryPage = 1; });
 
   function startZipProcess() {
     summaryPanel.classList.remove('show');
     var p = collect();
 
     reviewBtn.disabled = true;
-    progressSec.style.display = 'block';
+    progressSec.classList.add('show');
     statusMsg.className = 'status-msg'; statusMsg.style.display = 'none';
 
     var total = uploadedFiles.length, zip = new JSZip();
@@ -966,7 +968,7 @@ function escXml(s) {
           showStatus(t('processed_success', {n: total}), 'success');
           reviewBtn.disabled = false;
           saveCustomOpts();
-          setTimeout(function() { progressSec.style.display = 'none'; progBar.style.width = '0%'; }, 3000);
+          setTimeout(function() { progressSec.classList.remove('show'); progBar.style.width = '0%'; }, 3000);
         });
       }
     }
@@ -1076,7 +1078,7 @@ function escXml(s) {
     var p = collect();
 
     reviewBtn.disabled = true;
-    progressSec.style.display = 'block';
+    progressSec.classList.add('show');
     statusMsg.className = 'status-msg'; statusMsg.style.display = 'none';
     processedFiles = [];
 
@@ -1091,7 +1093,7 @@ function escXml(s) {
       }
       if (active === 0 && completed === total) {
         progText.textContent = t('done_processed', {n: total});
-        progressSec.style.display = 'none';
+        progressSec.classList.remove('show');
         reviewBtn.disabled = false;
         saveCustomOpts();
         showGallery(processedFiles, p, zip);
@@ -1291,8 +1293,7 @@ function escXml(s) {
   });
 
   selectAllBtn.addEventListener('click', function() {
-    var count = Object.keys(selectedSet).length;
-    if (count === uploadedFiles.length) {
+    if (Object.keys(selectedSet).length > 0) {
       selectedSet = {};
     } else {
       for (var i = 0; i < uploadedFiles.length; i++) selectedSet[i] = true;
@@ -1373,7 +1374,6 @@ function escXml(s) {
       })(files[i]);
     }
     gallery.classList.add('show');
-    gallery.scrollIntoView({ behavior: 'smooth' });
 
     galleryZipBtn.onclick = function() {
       zip.generateAsync({ type: 'blob' }).then(function(blob) {
@@ -1383,6 +1383,27 @@ function escXml(s) {
         a.download = 'filmtag_' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '.zip';
         document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
       });
+    };
+
+    var newBtn = $('gallery-new-btn');
+    if (newBtn) newBtn.onclick = function() {
+      gallery.classList.add('fade-out');
+      setTimeout(function() {
+        gallery.classList.remove('show', 'fade-out');
+        galleryGrid.innerHTML = '';
+        summaryPanel.classList.remove('show');
+        summaryBody.innerHTML = '';
+        uploadedFiles = [];
+        gpsData = {}; selectedSet = {}; thumbnailCache = {}; geocodeCache = {}; fileDates = {};
+        currentPage = 1; summaryPage = 1;
+        if (mapMarker) { map.removeLayer(mapMarker); mapMarker = null; }
+        mapInitialized = false;
+        progressSec.classList.remove('show'); progBar.style.width = '0%';
+        statusMsg.className = 'status-msg'; statusMsg.style.display = 'none';
+        reviewBtn.disabled = true;
+        renderFileList();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 300);
     };
   }
 
@@ -1403,7 +1424,7 @@ function escXml(s) {
     gpsData = {}; selectedSet = {}; fileDates = {};
     if (mapMarker) { map.removeLayer(mapMarker); mapMarker = null; }
     mapInitialized = false;
-    progressSec.style.display = 'none'; progBar.style.width = '0%';
+    progressSec.classList.remove('show'); progBar.style.width = '0%';
     statusMsg.className = 'status-msg'; statusMsg.style.display = 'none';
     updateLensUI(); refreshSegments();
   });

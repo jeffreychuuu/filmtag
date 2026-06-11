@@ -63,6 +63,11 @@ The final result 👇
 
 ## What's New
 
+**2026-06-12** — Summary & gallery as modal overlays
+- 📋 Review Summary is now a modal overlay with Close/Save/Download buttons
+- 📸 Gallery overlay after processing — "Next Roll 🎞️" resets and scrolls to top with fade-out animation
+- ⏳ Processing progress bar is now a modal overlay on top of the summary
+
 **2026-06-12** — UI overhaul: date/GPS modals & action buttons
 - 🎯 Select files → show two action buttons: "Set Date & Time" and "Set GPS Location"
 - 📅 Date/time editing moved to a modal overlay with Save/Cancel

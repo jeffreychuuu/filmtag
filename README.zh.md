@@ -63,6 +63,11 @@
 
 ## 新功能
 
+**2026-06-12** — Summary & Gallery 改為 modal overlay
+- 📋 Review Summary 而家係 modal overlay，有 Close/Save/Download 按鈕
+- 📸 處理完成後顯示 Gallery overlay —「Next Roll 🎞️」重置全部並 fade-out 捲回頁頂
+- ⏳ Processing progress bar 而家係 modal overlay，顯示喺 summary 上面
+
 **2026-06-12** — UI 翻新：日期/GPS modal & 操作按鈕
 - 🎯 Select 檔案後顯示兩個操作按鈕：「設定日期時間」同「設定 GPS 位置」
 - 📅 日期時間編輯搬去 modal overlay，有 Save/Cancel
