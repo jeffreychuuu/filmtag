@@ -63,6 +63,12 @@ The final result 👇
 
 ## What's New
 
+**2026-06-12** — Pagination & thumbnail caching
+- 📄 File list pagination — default 5 per page, user can choose 5/10/25/50/All; prev/next controls
+- 📋 Review Summary pagination — same pagination for the file table section
+- ⚡ Thumbnail cache — thumbnails are cached as data URLs after first render; switching pages reuses cached results instantly instead of re-decoding original images
+- 🗺️ Moved "Clear Selected GPS" to its own row next to the search bar for better UX
+
 **2026-06-12** — Performance overhaul for large uploads
 - ⚡ Batch `renderFileList()` — file list now renders once after all EXIF extraction completes, instead of N times for N files
 - ⚡ Cached byte-to-string conversion — binary-to-string is done once per file during EXIF extraction and reused by ZIP/save processing

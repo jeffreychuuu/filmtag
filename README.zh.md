@@ -63,6 +63,12 @@
 
 ## 新功能
 
+**2026-06-12** — 分頁顯示 & 縮圖快取
+- 📄 檔案列表分頁 — default 每頁 5 張，可選 5/10/25/50/全部；上下頁切換
+- 📋 Review Summary 分頁 — 檔案表格同樣支援分頁
+- ⚡ 縮圖快取 — thumbnail 首次 render 後 cache 做 data URL；切頁後即時顯示唔使重新 decode
+- 🗺️ 「清除已選 GPS 位置」按鈕搬去搜尋列獨立一行，UX 更清晰
+
 **2026-06-12** — 大量上傳效能翻新
 - ⚡ 批次 `renderFileList()` — 而家等所有 EXIF 讀完先 render 一次，唔會每張相都 rebuild 成個 list
 - ⚡ 快取 byte-to-string 轉換 — 每張相喺 EXIF 提取時只轉一次，zip/save 時重用，唔使 loop 幾千萬次

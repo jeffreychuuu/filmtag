@@ -127,8 +127,39 @@ function escXml(s) {
   var imgOverlay = $('img-overlay'), imgOverlayImg = $('img-overlay-img'), imgOverlayClose = $('img-overlay-close');
   var selectToolbar = $('select-toolbar'), selectAllBtn = $('select-all-btn');
   var rangeRowsEl = $('range-rows'), addRangeBtn = $('add-range-btn');
-  var gpsData = {}, selectedSet = {}, map = null, mapMarker = null, mapInitialized = false;
+  var gpsData = {}, selectedSet = {}, thumbnailCache = {}, map = null, mapMarker = null, mapInitialized = false;
   var isIPhone = /iPhone|iPad/.test(navigator.userAgent);
+
+  var currentPage = 1, pageSize = 5;
+  var summaryPage = 1, summaryPageSize = 5;
+
+  function getTotalPages() {
+    if (pageSize === 0) return 1;
+    return Math.ceil(uploadedFiles.length / pageSize) || 1;
+  }
+  function goToPage(p) {
+    currentPage = Math.max(1, Math.min(p, getTotalPages()));
+    renderFileList();
+  }
+  function changePageSize(s) {
+    pageSize = parseInt(s, 10);
+    currentPage = 1;
+    renderFileList();
+  }
+
+  function getSummaryTotalPages() {
+    if (summaryPageSize === 0) return 1;
+    return Math.ceil(uploadedFiles.length / summaryPageSize) || 1;
+  }
+  function goToSummaryPage(p) {
+    summaryPage = Math.max(1, Math.min(p, getSummaryTotalPages()));
+    rebuildSummaryBody();
+  }
+  function changeSummaryPageSize(s) {
+    summaryPageSize = parseInt(s, 10);
+    summaryPage = 1;
+    rebuildSummaryBody();
+  }
 
   var summaryPanel = $('summary-panel'), summaryBody = $('summary-body');
   var progressSec = $('progress-section'), progBar = $('progress-bar'), progText = $('progress-text');
@@ -349,6 +380,7 @@ function escXml(s) {
     }
     uploadedFiles.sort(function(a, b) { return a.file.name.localeCompare(b.file.name); });
     for (var k = 0; k < uploadedFiles.length; k++) selectedSet[k] = true;
+    currentPage = 1;
     refreshSegments();
     extractExifFromFiles();
   }
@@ -442,7 +474,9 @@ function escXml(s) {
     gpsSection.style.display = hasS ? 'block' : 'none';
     var h = '<div class="file-list-header"><span>' + t('file_count', {n: uploadedFiles.length}) + '</span>' +
       '<button class="btn btn-sm btn-danger" onclick="clearAll()">' + t('clear_all') + '</button></div>';
-    for (var i = 0; i < uploadedFiles.length; i++) {
+    var start = pageSize === 0 ? 0 : (currentPage - 1) * pageSize;
+    var end = pageSize === 0 ? uploadedFiles.length : Math.min(start + pageSize, uploadedFiles.length);
+    for (var i = start; i < end; i++) {
       var f = uploadedFiles[i];
       var sel = selectedSet[i] ? ' selected' : '';
       var hasGps = gpsData[i];
@@ -460,6 +494,18 @@ function escXml(s) {
         '<button class="remove-btn" onclick="removeOne(' + i + ')">✕</button>' +
         '</div>';
     }
+    var tp = getTotalPages();
+    h += '<div class="pagination">' +
+      '<button class="btn btn-sm btn-secondary pagination-btn" onclick="goToPage(' + (currentPage - 1) + ')"' + (currentPage <= 1 ? ' disabled' : '') + '>◀</button>' +
+      '<span class="page-info">' + t('page_of', {current: currentPage, total: tp}) + '</span>' +
+      '<button class="btn btn-sm btn-secondary pagination-btn" onclick="goToPage(' + (currentPage + 1) + ')"' + (currentPage >= tp ? ' disabled' : '') + '>▶</button>' +
+      '<select onchange="changePageSize(this.value)">' +
+        '<option value="5"' + (pageSize === 5 ? ' selected' : '') + '>5</option>' +
+        '<option value="10"' + (pageSize === 10 ? ' selected' : '') + '>10</option>' +
+        '<option value="25"' + (pageSize === 25 ? ' selected' : '') + '>25</option>' +
+        '<option value="50"' + (pageSize === 50 ? ' selected' : '') + '>50</option>' +
+        '<option value="0"' + (pageSize === 0 ? ' selected' : '') + '>' + t('all') + '</option>' +
+      '</select></div>';
     fileListEl.innerHTML = h;
     generateThumbnails();
     bindFileItemClicks();
@@ -470,28 +516,41 @@ function escXml(s) {
   }
 
   function generateThumbnails() {
-    var queue = [];
+    var queue = [], concurrency = 6;
     for (var i = 0; i < uploadedFiles.length; i++) {
-      var c = document.querySelector('canvas.file-thumb[data-idx="' + i + '"]');
-      if (!c) continue;
-      queue.push({ canvas: c, file: uploadedFiles[i].file });
+      (function(idx) {
+        var c = document.querySelector('canvas.file-thumb[data-idx="' + idx + '"]');
+        if (!c) return;
+        c.removeEventListener('click', thumbnailClick);
+        c.addEventListener('click', thumbnailClick);
+        c._thumbFile = uploadedFiles[idx].file;
+        if (thumbnailCache[idx]) {
+          var img = new Image();
+          img.onload = function() { c.getContext('2d').drawImage(img, 0, 0, 40, 40); };
+          img.src = thumbnailCache[idx];
+        } else {
+          queue.push({ canvas: c, idx: idx, file: uploadedFiles[idx].file });
+        }
+      })(i);
     }
-    var concurrency = 6, next = 0;
+    var next = 0;
     function processNext() {
       if (next >= queue.length) return;
       var item = queue[next++];
       var img = new Image();
       img.onload = function() {
+        if (!item.canvas.parentNode) return;
         var s = Math.min(40 / img.width, 40 / img.height);
         var ctx = item.canvas.getContext('2d');
         ctx.drawImage(img, (40 - img.width * s) / 2, (40 - img.height * s) / 2, img.width * s, img.height * s);
+        var tmp = document.createElement('canvas');
+        tmp.width = 40; tmp.height = 40;
+        tmp.getContext('2d').drawImage(img, (40 - img.width * s) / 2, (40 - img.height * s) / 2, img.width * s, img.height * s);
+        thumbnailCache[item.idx] = tmp.toDataURL();
         URL.revokeObjectURL(img.src);
         processNext();
       };
       img.src = URL.createObjectURL(item.file);
-      item.canvas.removeEventListener('click', thumbnailClick);
-      item.canvas.addEventListener('click', thumbnailClick);
-      item.canvas._thumbFile = item.file;
     }
     for (var i = 0; i < Math.min(concurrency, queue.length); i++) processNext();
   }
@@ -530,23 +589,28 @@ function escXml(s) {
 
   function clearAll() {
     uploadedFiles = [];
-    gpsData = {}; selectedSet = {}; fileDates = {}; clearedDates = {};
+    gpsData = {}; selectedSet = {}; thumbnailCache = {}; fileDates = {}; clearedDates = {};
+    currentPage = 1;
     if (mapMarker) { map.removeLayer(mapMarker); mapMarker = null; }
     refreshSegments();
   }
   function removeOne(i) {
     uploadedFiles.splice(i, 1);
-    var newGps = {}, newSel = {};
+    var newGps = {}, newSel = {}, newCache = {};
     for (var j = 0; j < uploadedFiles.length; j++) {
       var oldIdx = j < i ? j : j + 1;
       if (gpsData[oldIdx]) newGps[j] = gpsData[oldIdx];
       if (selectedSet[oldIdx]) newSel[j] = true;
+      if (thumbnailCache[oldIdx]) newCache[j] = thumbnailCache[oldIdx];
     }
-    gpsData = newGps; selectedSet = newSel;
+    gpsData = newGps; selectedSet = newSel; thumbnailCache = newCache;
+    if (currentPage > getTotalPages()) currentPage = getTotalPages();
     refreshSegments();
     renderRanges();
   }
   window.clearAll = clearAll; window.removeOne = removeOne;
+  window.goToPage = goToPage; window.changePageSize = changePageSize;
+  window.goToSummaryPage = goToSummaryPage; window.changeSummaryPageSize = changeSummaryPageSize;
 
   function buildSelectedFromRanges() {
     var set = {}, max = uploadedFiles.length;
@@ -613,17 +677,7 @@ function escXml(s) {
 
   function syncRange() {
     selectedSet = buildSelectedFromRanges();
-    var items = document.querySelectorAll('.file-item');
-    for (var j = 0; j < items.length; j++) {
-      var idx = parseInt(items[j].getAttribute('data-idx'), 10);
-      if (selectedSet[idx]) items[j].classList.add('selected');
-      else items[j].classList.remove('selected');
-    }
-    var allCount = Object.keys(selectedSet).length;
-    selectAllBtn.textContent = allCount === uploadedFiles.length ? t('unselect_all') : t('select_all');
-    dateSection.style.display = allCount ? 'block' : 'none';
-    gpsSection.style.display = allCount ? 'block' : 'none';
-    renderRanges();
+    renderFileList();
   }
 
   addRangeBtn.addEventListener('click', function() {
@@ -709,10 +763,7 @@ function escXml(s) {
     return c + '_' + fd.fileDate + String(fd.hr).padStart(2,'0') + String(fd.min).padStart(2,'0') + '_' + String(i + 1).padStart(2,'0') + '.' + ext;
   }
 
-  reviewBtn.addEventListener('click', function() {
-    var p = collect();
-    var err = validate(p); if (err) { showStatus(err, 'error'); return; }
-
+  function buildSummaryHtml(p) {
     var html = '';
     html += '<div class="summary-section"><h3>' + t('settings') + '</h3>';
     var rows = [
@@ -727,7 +778,9 @@ function escXml(s) {
 
     html += '<div class="summary-section"><h3>' + t('files_header', {n: uploadedFiles.length}) + '</h3>';
     html += '<table class="rename-table"><tr><th></th><th>' + t('col_index') + '</th><th>' + t('col_original') + '</th><th>' + t('col_new_name') + '</th><th>📍 ' + t('col_location') + '</th><th>🗓️ ' + t('col_date') + '</th></tr>';
-    for (var j = 0; j < uploadedFiles.length; j++) {
+    var start = summaryPageSize === 0 ? 0 : (summaryPage - 1) * summaryPageSize;
+    var end = summaryPageSize === 0 ? uploadedFiles.length : Math.min(start + summaryPageSize, uploadedFiles.length);
+    for (var j = start; j < end; j++) {
       var ext = uploadedFiles[j].file.name.split('.').pop().toLowerCase();
       var nn = newFName(p.film.name, ext, j);
       var gpsLoc = gpsData[j] && gpsData[j].addr ? '📍 ' + esc(gpsData[j].addr) : '<img src="no_gps.png" class="no-gps-icon">';
@@ -735,24 +788,54 @@ function escXml(s) {
       var dateCell2 = dateInfo2 ? '<span class="date-dot">🗓️ ' + dateInfo2.date + ' ' + dateInfo2.time + '</span>' : '<img src="no_date.png" class="no-date-icon">';
       html += '<tr><td><canvas class="summary-thumb" width="40" height="40" data-idx="' + j + '"></canvas></td><td style="color:#555;">' + (j + 1) + '</td><td class="old-name">' + esc(uploadedFiles[j].file.name) + '</td><td class="new-name">' + esc(nn) + '</td><td style="text-align:center;font-size:0.65rem;">' + gpsLoc + '</td><td style="text-align:center;font-size:0.65rem;">' + dateCell2 + '</td></tr>';
     }
-    html += '</table></div>';
+    html += '</table>';
+    var tp = getSummaryTotalPages();
+    html += '<div class="pagination" style="padding:0.75rem 0;">' +
+      '<button class="btn btn-sm btn-secondary pagination-btn" onclick="goToSummaryPage(' + (summaryPage - 1) + ')"' + (summaryPage <= 1 ? ' disabled' : '') + '>◀</button>' +
+      '<span class="page-info">' + t('page_of', {current: summaryPage, total: tp}) + '</span>' +
+      '<button class="btn btn-sm btn-secondary pagination-btn" onclick="goToSummaryPage(' + (summaryPage + 1) + ')"' + (summaryPage >= tp ? ' disabled' : '') + '>▶</button>' +
+      '<select onchange="changeSummaryPageSize(this.value)">' +
+        '<option value="5"' + (summaryPageSize === 5 ? ' selected' : '') + '>5</option>' +
+        '<option value="10"' + (summaryPageSize === 10 ? ' selected' : '') + '>10</option>' +
+        '<option value="25"' + (summaryPageSize === 25 ? ' selected' : '') + '>25</option>' +
+        '<option value="50"' + (summaryPageSize === 50 ? ' selected' : '') + '>50</option>' +
+        '<option value="0"' + (summaryPageSize === 0 ? ' selected' : '') + '>' + t('all') + '</option>' +
+      '</select></div>';
+    html += '</div>';
     html += '<div class="actions" style="margin-top:1rem;">' +
       '<button class="btn btn-primary" id="confirm-save-btn">' + t('save_to_album') + '</button>' +
       '<button class="btn btn-primary" id="confirm-zip-btn">' + t('download_zip') + '</button></div>';
+    return html;
+  }
 
-    summaryBody.innerHTML = html;
-
-    var summaryCanvases = document.querySelectorAll('canvas.summary-thumb');
-    for (var ti = 0; ti < summaryCanvases.length; ti++) {
-      (function(canvas, file) {
-        var img = new Image();
-        img.onload = function() {
-          var s = Math.min(40 / img.width, 40 / img.height);
-          var ctx = canvas.getContext('2d');
-          ctx.drawImage(img, (40 - img.width * s) / 2, (40 - img.height * s) / 2, img.width * s, img.height * s);
-          URL.revokeObjectURL(img.src);
-        };
-        img.src = URL.createObjectURL(file);
+  function rebuildSummaryBody() {
+    var p = collect();
+    var tp = getSummaryTotalPages();
+    summaryPage = Math.max(1, Math.min(summaryPage, tp));
+    summaryBody.innerHTML = buildSummaryHtml(p);
+    var canvases = document.querySelectorAll('canvas.summary-thumb');
+    for (var ti = 0; ti < canvases.length; ti++) {
+      (function(canvas) {
+        var idx = parseInt(canvas.getAttribute('data-idx'), 10);
+        var file = uploadedFiles[idx].file;
+        if (thumbnailCache[idx]) {
+          var img = new Image();
+          img.onload = function() { canvas.getContext('2d').drawImage(img, 0, 0, 40, 40); };
+          img.src = thumbnailCache[idx];
+        } else {
+          var img = new Image();
+          img.onload = function() {
+            var s = Math.min(40 / img.width, 40 / img.height);
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(img, (40 - img.width * s) / 2, (40 - img.height * s) / 2, img.width * s, img.height * s);
+            var tmp = document.createElement('canvas');
+            tmp.width = 40; tmp.height = 40;
+            tmp.getContext('2d').drawImage(img, (40 - img.width * s) / 2, (40 - img.height * s) / 2, img.width * s, img.height * s);
+            thumbnailCache[idx] = tmp.toDataURL();
+            URL.revokeObjectURL(img.src);
+          };
+          img.src = URL.createObjectURL(file);
+        }
         canvas.addEventListener('click', function(e) {
           e.stopPropagation();
           var url = URL.createObjectURL(file);
@@ -760,16 +843,23 @@ function escXml(s) {
           imgOverlayImg.onload = function() { URL.revokeObjectURL(url); };
           imgOverlay.classList.add('show');
         });
-      })(summaryCanvases[ti], uploadedFiles[ti].file);
+      })(canvases[ti]);
     }
-
-    summaryPanel.classList.add('show');
-    summaryPanel.scrollIntoView({ behavior: 'smooth' });
     $('confirm-zip-btn').addEventListener('click', startZipProcess);
     $('confirm-save-btn').addEventListener('click', startSaveProcess);
+  }
+
+  reviewBtn.addEventListener('click', function() {
+    var p = collect();
+    var err = validate(p); if (err) { showStatus(err, 'error'); return; }
+    summaryPage = 1;
+    summaryBody.innerHTML = buildSummaryHtml(p);
+    rebuildSummaryBody();
+    summaryPanel.classList.add('show');
+    summaryPanel.scrollIntoView({ behavior: 'smooth' });
   });
 
-  $('summary-close-btn').addEventListener('click', function() { summaryPanel.classList.remove('show'); });
+  $('summary-close-btn').addEventListener('click', function() { summaryPanel.classList.remove('show'); summaryPage = 1; });
 
   function startZipProcess() {
     summaryPanel.classList.remove('show');
@@ -1076,17 +1166,7 @@ function escXml(s) {
     } else {
       for (var i = 0; i < uploadedFiles.length; i++) selectedSet[i] = true;
     }
-    var items = document.querySelectorAll('.file-item');
-    for (var j = 0; j < items.length; j++) {
-      var idx = parseInt(items[j].getAttribute('data-idx'), 10);
-      if (selectedSet[idx]) items[j].classList.add('selected');
-      else items[j].classList.remove('selected');
-    }
-    selectAllBtn.textContent = Object.keys(selectedSet).length === uploadedFiles.length ? t('unselect_all') : t('select_all');
-    var allCt = Object.keys(selectedSet).length;
-    dateSection.style.display = allCt ? 'block' : 'none';
-    gpsSection.style.display = allCt ? 'block' : 'none';
-    renderRanges();
+    renderFileList();
   });
 
   mapSearchBtn.addEventListener('click', function() {
@@ -1175,7 +1255,7 @@ function escXml(s) {
     for (var j = 0; j < ins.length; j++) ins[j].value = '';
     singleDateInp.valueAsDate = new Date(); singleTimeInp.value = '12:00';
     uploadedFiles = [];
-    summaryPanel.classList.remove('show'); summaryBody.innerHTML = '';
+    summaryPanel.classList.remove('show'); summaryBody.innerHTML = ''; summaryPage = 1;
     gallery.classList.remove('show'); galleryGrid.innerHTML = '';
     gpsSection.style.display = 'none';
     dateSection.style.display = 'none';
@@ -1215,7 +1295,7 @@ function escXml(s) {
       opt.textContent = t('other_free_text');
     });
     summaryPanel.classList.remove('show');
-    summaryBody.innerHTML = '';
+    summaryBody.innerHTML = ''; summaryPage = 1;
     gallery.classList.remove('show');
     galleryGrid.innerHTML = '';
     gpsSection.style.display = 'none';

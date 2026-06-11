@@ -133,6 +133,9 @@ tpl.en = {
 
   "col_location": "Location",
   "col_date": "Date",
+
+  "page_of": "Page {current} of {total}",
+  "all": "All",
 };
 
 tpl.zh = {
@@ -231,6 +234,9 @@ tpl.zh = {
 
   "col_location": "位置",
   "col_date": "日期",
+
+  "page_of": "第 {current} 頁，共 {total} 頁",
+  "all": "全部",
 };
 
 export { t, setLang, toggleLang, applyTranslations, lang };
