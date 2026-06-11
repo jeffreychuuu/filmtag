@@ -63,6 +63,12 @@
 
 ## 新功能
 
+**2026-06-12** — UI 翻新：日期/GPS modal & 操作按鈕
+- 🎯 Select 檔案後顯示兩個操作按鈕：「設定日期時間」同「設定 GPS 位置」
+- 📅 日期時間編輯搬去 modal overlay，有 Save/Cancel
+- 🗺️ GPS 編輯搬去 modal overlay，有地圖、搜尋、Save/Cancel
+- 🔲 Overlay 只可以由 Save/Cancel 關閉，唔會意外 backdrop dismiss
+
 **2026-06-12** — 背景預載 & 順序載入
 - ⚡ Thumbnail prefetch — page 1 thumbnail 完成後，背景 decode 之後嘅頁面（concurrency=2），切頁即時顯示
 - ⚡ 順序啟動 — EXIF 提取先 run，完成後先開始 thumbnail generation，唔會爭 I/O

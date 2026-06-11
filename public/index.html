@@ -335,6 +335,23 @@
       margin: 0 auto; animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85); z-index: 2000;
+      align-items: center; justify-content: center;
+    }
+    .overlay.show { display: flex; }
+    .overlay-content {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 2rem;
+      max-width: 90vw; width: 500px; position: relative;
+    }
+    .overlay-close {
+      position: absolute; top: 12px; right: 12px;
+      background: none; border: none; color: #fff;
+      font-size: 1.3rem; cursor: pointer; z-index: 1;
+    }
+    .file-actions { display: flex; gap: 0.75rem; margin-top: 1rem; }
   </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8584571560750534" crossorigin="anonymous"></script>
 </head>
@@ -379,36 +396,9 @@
         <button class="btn btn-sm btn-secondary" id="select-all-btn" data-i18n="select_all">Select All</button>
       </div>
     </div>
-    <div class="file-sub-section" id="date-section" style="display:none;">
-      <div class="file-sub-header" data-target="date-time-body">
-        <span>📅</span> <span data-i18n="date_time">Shooting Date & Time</span>
-        <span class="collapse-icon open">▾</span>
-      </div>
-      <div class="file-sub-body" id="date-time-body">
-        <div class="field-group">
-          <div><label data-i18n="shoot_date">Shoot Date</label><input type="date" id="single-date-input"></div>
-          <div><label data-i18n="start_time">Start Time (24h, first photo)</label><input type="time" id="single-time-input" value="12:00"></div>
-        </div>
-      </div>
-    </div>
-    <div class="file-sub-section" id="gps-section" style="display:none;">
-      <div class="file-sub-header" data-target="gps-body">
-        <span>📍</span> <span data-i18n="gps_location">GPS Location</span>
-        <span class="collapse-icon open">▾</span>
-      </div>
-      <div class="file-sub-body" id="gps-body">
-        <div class="map-search-row">
-          <input type="text" id="map-search-input" data-i18n-placeholder="search_location" placeholder="Search location..." class="map-search-inp">
-          <button class="btn btn-sm btn-secondary" id="map-search-btn" data-i18n="search">Search</button>
-        </div>
-        <div class="map-search-row">
-          <button class="btn btn-sm btn-danger" id="clear-location-btn" data-i18n="clear_selected">Clear Selected GPS</button>
-        </div>
-        <div id="map" style="height:280px; border-radius:6px;"></div>
-        <div class="map-bottom">
-          <p class="map-info" id="map-info" data-i18n="map_hint">Select file(s) above, then click the map or search to set location</p>
-        </div>
-      </div>
+    <div class="file-actions" id="file-actions" style="display:none;">
+      <button class="btn btn-primary" id="edit-date-btn">📅 <span data-i18n="set_date_time">Set Date & Time</span></button>
+      <button class="btn btn-primary" id="edit-gps-btn">📍 <span data-i18n="set_gps">Set GPS Location</span></button>
     </div>
   </div>
 
@@ -571,6 +561,37 @@
   <div class="loading-box">
     <div class="loading-spinner"></div>
     <p class="loading-text" id="loading-text"></p>
+  </div>
+</div>
+
+<div class="overlay" id="date-overlay">
+  <div class="overlay-content">
+    <h3 style="margin-bottom:1rem;">📅 <span data-i18n="date_time">Shooting Date & Time</span></h3>
+    <div class="field-group" style="margin-bottom:1rem;">
+      <div><label data-i18n="shoot_date">Shoot Date</label><input type="date" id="single-date-input"></div>
+      <div><label data-i18n="start_time">Start Time (24h, first photo)</label><input type="time" id="single-time-input" value="12:00"></div>
+    </div>
+    <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+      <button class="btn btn-sm btn-secondary" id="date-cancel-btn" data-i18n="cancel">Cancel</button>
+      <button class="btn btn-sm btn-primary" id="date-save-btn" data-i18n="save">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="gps-overlay">
+  <div class="overlay-content">
+    <h3 style="margin-bottom:1rem;">📍 <span data-i18n="gps_location">GPS Location</span></h3>
+    <div class="map-search-row">
+      <input type="text" id="map-search-input" data-i18n-placeholder="search_location" placeholder="Search location..." class="map-search-inp">
+      <button class="btn btn-sm btn-secondary" id="map-search-btn" data-i18n="search">Search</button>
+      <button class="btn btn-sm btn-danger" id="clear-location-btn" data-i18n="clear_selected">Clear Selected GPS</button>
+    </div>
+    <div id="map" style="height:280px; border-radius:6px; margin-top:0.75rem;"></div>
+    <p class="map-info" id="map-info" style="margin-top:0.5rem;font-size:0.8rem;color:var(--text-secondary);"></p>
+    <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:0.75rem;">
+      <button class="btn btn-sm btn-secondary" id="gps-cancel-btn" data-i18n="cancel">Cancel</button>
+      <button class="btn btn-sm btn-primary" id="gps-save-btn" data-i18n="save">Save</button>
+    </div>
   </div>
 </div>
 

@@ -122,8 +122,12 @@ function escXml(s) {
   var fileListEl = $('file-list'), reviewBtn = $('review-btn');
   var gallery = $('gallery'), galleryGrid = $('gallery-grid'), galleryTitle = $('gallery-title');
   var galleryZipBtn = $('gallery-zip-btn');
-  var gpsSection = $('gps-section'), dateSection = $('date-section'), mapEl = $('map'), mapInfoEl = $('map-info'), clearLocBtn = $('clear-location-btn');
+  var gpsSection = null, dateSection = null, mapEl = $('map'), mapInfoEl = $('map-info'), clearLocBtn = $('clear-location-btn');
   var mapSearchInput = $('map-search-input'), mapSearchBtn = $('map-search-btn');
+  var fileActions = $('file-actions'), editDateBtn = $('edit-date-btn'), editGpsBtn = $('edit-gps-btn');
+  var dateOverlay = $('date-overlay'), gpsOverlay = $('gps-overlay');
+  var dateSaveBtn = $('date-save-btn'), dateCancelBtn = $('date-cancel-btn');
+  var gpsSaveBtn = $('gps-save-btn'), gpsCancelBtn = $('gps-cancel-btn');
   var imgOverlay = $('img-overlay'), imgOverlayImg = $('img-overlay-img'), imgOverlayClose = $('img-overlay-close');
   var selectToolbar = $('select-toolbar'), selectAllBtn = $('select-all-btn');
   var rangeRowsEl = $('range-rows'), addRangeBtn = $('add-range-btn');
@@ -473,15 +477,12 @@ function escXml(s) {
     if (uploadedFiles.length === 0) {
       fileListEl.innerHTML = ''; reviewBtn.disabled = true;
       selectToolbar.style.display = 'none';
-      dateSection.style.display = 'none';
-      gpsSection.style.display = 'none';
-
+      fileActions.style.display = 'none';
       return;
     }
     selectToolbar.style.display = 'flex';
     var hasS = Object.keys(selectedSet).length > 0;
-    dateSection.style.display = hasS ? 'block' : 'none';
-    gpsSection.style.display = hasS ? 'block' : 'none';
+    fileActions.style.display = hasS ? 'flex' : 'none';
     var h = '<div class="file-list-header"><span>' + t('file_count', {n: uploadedFiles.length}) + '</span>' +
       '<button class="btn btn-sm btn-danger" onclick="clearAll()">' + t('clear_all') + '</button></div>';
     var start = pageSize === 0 ? 0 : (currentPage - 1) * pageSize;
@@ -527,8 +528,7 @@ function escXml(s) {
     initMap();
     renderRanges();
     selectAllBtn.textContent = Object.keys(selectedSet).length === uploadedFiles.length ? t('unselect_all') : t('select_all');
-    dateSection.style.display = hasS ? 'block' : 'none';
-    gpsSection.style.display = hasS ? 'block' : 'none';
+    fileActions.style.display = hasS ? 'flex' : 'none';
   }
 
   function generateThumbnails(onDone) {
@@ -648,8 +648,7 @@ function escXml(s) {
     }
     selectAllBtn.textContent = Object.keys(selectedSet).length === uploadedFiles.length ? t('unselect_all') : t('select_all');
     var ct = Object.keys(selectedSet).length;
-    dateSection.style.display = ct ? 'block' : 'none';
-    gpsSection.style.display = ct ? 'block' : 'none';
+    fileActions.style.display = ct ? 'flex' : 'none';
     renderRanges();
   }
 
@@ -1260,7 +1259,7 @@ function escXml(s) {
   }
 
   function initMap() {
-    if (!gpsSection || gpsSection.style.display === 'none') return;
+    if (!gpsOverlay || !gpsOverlay.classList.contains('show')) return;
     if (mapInitialized) { map.invalidateSize(); return; }
     mapInitialized = true;
     var defPos = [22.3193, 114.1694];
@@ -1300,6 +1299,17 @@ function escXml(s) {
     }
     renderFileList();
   });
+
+  editDateBtn.addEventListener('click', function() { dateOverlay.classList.add('show'); });
+  editGpsBtn.addEventListener('click', function() {
+    gpsOverlay.classList.add('show');
+    setTimeout(function() { mapEl.style.height = '280px'; initMap(); }, 100);
+  });
+  dateCancelBtn.addEventListener('click', function() { dateOverlay.classList.remove('show'); });
+  gpsCancelBtn.addEventListener('click', function() { gpsOverlay.classList.remove('show'); });
+  dateSaveBtn.addEventListener('click', function() { applyDateToSelected(); dateOverlay.classList.remove('show'); });
+  gpsSaveBtn.addEventListener('click', function() { gpsOverlay.classList.remove('show'); });
+  gpsOverlay.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
 
   mapSearchBtn.addEventListener('click', function() {
     var q = mapSearchInput.value.trim();
@@ -1389,8 +1399,7 @@ function escXml(s) {
     uploadedFiles = [];
     summaryPanel.classList.remove('show'); summaryBody.innerHTML = ''; summaryPage = 1;
     gallery.classList.remove('show'); galleryGrid.innerHTML = '';
-    gpsSection.style.display = 'none';
-    dateSection.style.display = 'none';
+    dateOverlay.classList.remove('show'); gpsOverlay.classList.remove('show');
     gpsData = {}; selectedSet = {}; fileDates = {};
     if (mapMarker) { map.removeLayer(mapMarker); mapMarker = null; }
     mapInitialized = false;
@@ -1430,8 +1439,7 @@ function escXml(s) {
     summaryBody.innerHTML = ''; summaryPage = 1;
     gallery.classList.remove('show');
     galleryGrid.innerHTML = '';
-    gpsSection.style.display = 'none';
-    dateSection.style.display = 'none';
+    dateOverlay.classList.remove('show'); gpsOverlay.classList.remove('show');
     refreshSegments();
     renderFileList();
   });

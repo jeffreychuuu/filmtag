@@ -136,6 +136,9 @@ tpl.en = {
 
   "page_of": "Page {current} of {total}",
   "all": "All",
+  "cancel": "Cancel",
+  "set_date_time": "Set Date & Time",
+  "set_gps": "Set GPS Location",
 
   "extracting_exif": "Uploading {n} photos…",
 };
@@ -239,6 +242,9 @@ tpl.zh = {
 
   "page_of": "第 {current} 頁，共 {total} 頁",
   "all": "全部",
+  "cancel": "取消",
+  "set_date_time": "設定日期時間",
+  "set_gps": "設定 GPS 位置",
 
   "extracting_exif": "正在上傳 {n} 張相…",
 };

@@ -63,6 +63,12 @@ The final result 👇
 
 ## What's New
 
+**2026-06-12** — UI overhaul: date/GPS modals & action buttons
+- 🎯 Select files → show two action buttons: "Set Date & Time" and "Set GPS Location"
+- 📅 Date/time editing moved to a modal overlay with Save/Cancel
+- 🗺️ GPS editing moved to modal overlay with map, search, Save/Cancel
+- 🔲 Overlays only close via Save/Cancel — no accidental backdrop dismissals
+
 **2026-06-12** — Background prefetch & sequenced loading
 - ⚡ Thumbnail prefetch — after page 1 thumbnails load, pages 2+ are decoded in background (concurrency=2) so navigation is instant
 - ⚡ Sequenced startup — EXIF extraction now runs before thumbnail generation, no I/O contention
