@@ -117,7 +117,6 @@ function escXml(s) {
   var ppSel = $('pushpull-select'), ppCust = $('pushpull-custom');
   var scanSel = $('scanner-select'), scanCust = $('scanner-custom');
   var singleDateInp = $('single-date-input'), singleTimeInp = $('single-time-input');
-  var clearDateBtn = $('clear-date-btn');
   var fileDates = {}, clearedDates = {};
   var fileInp = $('file-input'), uploadWrap = $('upload-wrap');
   var fileListEl = $('file-list'), reviewBtn = $('review-btn');
@@ -234,15 +233,6 @@ function escXml(s) {
 
   singleDateInp.addEventListener('change', applyDateToSelected);
   singleTimeInp.addEventListener('change', applyDateToSelected);
-
-  clearDateBtn.addEventListener('click', function() {
-    var keys = Object.keys(selectedSet);
-    for (var k = 0; k < keys.length; k++) {
-      delete fileDates[keys[k]];
-      clearedDates[keys[k]] = true;
-    }
-    renderFileList();
-  });
 
   function refreshSegments() {
     renderFileList();
@@ -421,6 +411,7 @@ function escXml(s) {
     var ct = Object.keys(selectedSet).length;
     dateSection.style.display = ct ? 'block' : 'none';
     gpsSection.style.display = ct ? 'block' : 'none';
+    renderRanges();
   }
 
   function clearAll() {

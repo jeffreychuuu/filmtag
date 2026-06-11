@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "esbuild src/app.js --bundle --outfile=dist/bundle.js && cp public/index.html dist/index.html && cp public/favicon-*.png public/toro.jpg public/mallow.jpg public/no_gps.png public/no_date.png dist/",
-    "dev": "esbuild src/app.js --bundle --outfile=dist/bundle.js && cp public/index.html dist/index.html && cp public/favicon-*.png public/toro.jpg public/mallow.jpg public/no_gps.png dist/ && python3 -m http.server 3333 --directory dist"
+    "build": "esbuild src/app.js --bundle --outfile=dist/bundle.js && cp public/index.html dist/index.html && cp public/favicon-*.png public/toro.jpg public/mallow.jpg public/no_gps.png public/no_date.png public/github.png public/instagram.png public/threads.png dist/",
+    "dev": "esbuild src/app.js --bundle --outfile=dist/bundle.js && cp public/index.html dist/index.html && cp public/favicon-*.png public/toro.jpg public/mallow.jpg public/no_gps.png public/no_date.png public/github.png public/instagram.avif public/threads.png dist/ && python3 -m http.server 3333 --directory dist"
   },
   "dependencies": {
     "jszip": "^3.10.1",

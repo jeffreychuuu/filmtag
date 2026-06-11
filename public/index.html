@@ -155,7 +155,6 @@
       .fname, .fsize { display: none; }
       .old-name, .new-name, .rename-table th:nth-child(3), .rename-table th:nth-child(4) { display: none; }
       .g-name { display: none; }
-      #gallery-zip-btn, #confirm-zip-btn { display: none; }
       .file-item { overflow: hidden; gap: 0.2rem; min-width: 0; }
       .file-item .fidx { width: 24px; height: 24px; font-size: 0.55rem; flex-shrink: 0; }
       .file-item .file-thumb { width: 28px; height: 28px; flex-shrink: 0; }
@@ -257,6 +256,7 @@
     }
     .social-links a { color: #888; text-decoration: none; transition: color 0.2s; }
     .social-links a:hover { color: var(--accent); }
+    .social-icon { width: 16px; height: 16px; vertical-align: middle; margin-right: 2px; }
 
     .lang-float-btn {
       position: fixed; bottom: 68px; right: 16px;
@@ -312,9 +312,9 @@
 <div class="container">
   <header>
 <div class="social-links">
-  <a href="https://github.com/jeffreychuuu/filmtag/tree/main" target="_blank" rel="noopener">🐙 GitHub</a>
-  <a href="https://www.instagram.com/jeffreychuphotography/" target="_blank" rel="noopener">📷 Instagram</a>
-  <a href="https://www.threads.com/@jeffreychuphotography" target="_blank" rel="noopener">🧵 Threads</a>
+  <a href="https://github.com/jeffreychuuu/filmtag/tree/main" target="_blank" rel="noopener"><img src="github.png" class="social-icon"> GitHub</a>
+  <a href="https://www.instagram.com/jeffreychuphotography/" target="_blank" rel="noopener"><img src="instagram.png" class="social-icon"> Instagram</a>
+  <a href="https://www.threads.com/@jeffreychuphotography" target="_blank" rel="noopener"><img src="threads.png" class="social-icon"> Threads</a>
 </div>
     <h1>FilmTag</h1>
     <p>Every frame tells a story.<br>FilmTag makes sure none of them are forgotten.</p>
@@ -359,7 +359,6 @@
           <div><label data-i18n="shoot_date">Shoot Date</label><input type="date" id="single-date-input"></div>
           <div><label data-i18n="start_time">Start Time (24h, first photo)</label><input type="time" id="single-time-input" value="12:00"></div>
         </div>
-        <button class="btn btn-sm btn-danger" id="clear-date-btn" style="margin-top:0.5rem;" data-i18n="clear_date">Clear Date</button>
       </div>
     </div>
     <div class="file-sub-section" id="gps-section" style="display:none;">
