@@ -63,6 +63,11 @@ The final result 👇
 
 ## What's New
 
+**2026-06-12** — Background prefetch & sequenced loading
+- ⚡ Thumbnail prefetch — after page 1 thumbnails load, pages 2+ are decoded in background (concurrency=2) so navigation is instant
+- ⚡ Sequenced startup — EXIF extraction now runs before thumbnail generation, no I/O contention
+- 🐛 Fixed: Review Summary button staying disabled after upload
+
 **2026-06-12** — Parallel processing & geocode throttle
 - ⚡ Zip/Save now processes 4 files concurrently instead of 1 — 36 files processed ~3× faster
 - 🗺️ Reverse geocode throttled to 1 req/s with response caching — same coordinates reuse cached address instantly

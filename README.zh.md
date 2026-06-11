@@ -63,6 +63,11 @@
 
 ## 新功能
 
+**2026-06-12** — 背景預載 & 順序載入
+- ⚡ Thumbnail prefetch — page 1 thumbnail 完成後，背景 decode 之後嘅頁面（concurrency=2），切頁即時顯示
+- ⚡ 順序啟動 — EXIF 提取先 run，完成後先開始 thumbnail generation，唔會爭 I/O
+- 🐛 修正：上傳後 Review Summary 按鈕冇正常啟用
+
 **2026-06-12** — 並行處理 & 地理編碼節流
 - ⚡ Zip/Save 而家 4 張相同時處理，36 張加快約 3 倍
 - 🗺️ Reverse geocode 限制 1 req/s + 快取重複座標，唔會再因為 rate limit 而 lost address

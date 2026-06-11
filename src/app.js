@@ -130,7 +130,7 @@ function escXml(s) {
   var gpsData = {}, selectedSet = {}, thumbnailCache = {}, geocodeCache = {}, geocodeQueue = [], geocodeBusy = false, map = null, mapMarker = null, mapInitialized = false;
   var isIPhone = /iPhone|iPad/.test(navigator.userAgent);
 
-  var currentPage = 1, pageSize = 5;
+  var currentPage = 1, pageSize = 5, prefetchTimer = null;
   var summaryPage = 1, summaryPageSize = 5;
 
   function getTotalPages() {
@@ -138,10 +138,12 @@ function escXml(s) {
     return Math.ceil(uploadedFiles.length / pageSize) || 1;
   }
   function goToPage(p) {
+    if (prefetchTimer) { clearTimeout(prefetchTimer); prefetchTimer = null; }
     currentPage = Math.max(1, Math.min(p, getTotalPages()));
     renderFileList();
   }
   function changePageSize(s) {
+    if (prefetchTimer) { clearTimeout(prefetchTimer); prefetchTimer = null; }
     pageSize = parseInt(s, 10);
     currentPage = 1;
     renderFileList();
@@ -381,7 +383,8 @@ function escXml(s) {
     uploadedFiles.sort(function(a, b) { return a.file.name.localeCompare(b.file.name); });
     for (var k = 0; k < uploadedFiles.length; k++) selectedSet[k] = true;
     currentPage = 1;
-    refreshSegments();
+    renderFileList(true);
+    reviewBtn.disabled = false;
     extractExifFromFiles();
   }
 
@@ -459,7 +462,7 @@ function escXml(s) {
     return { date: d.slice(0,4) + '/' + d.slice(4,6) + '/' + d.slice(6,8), time: '12:00' };
   }
 
-  function renderFileList() {
+  function renderFileList(skipThumbs) {
     if (uploadedFiles.length === 0) {
       fileListEl.innerHTML = ''; reviewBtn.disabled = true;
       selectToolbar.style.display = 'none';
@@ -507,7 +510,9 @@ function escXml(s) {
         '<option value="0"' + (pageSize === 0 ? ' selected' : '') + '>' + t('all') + '</option>' +
       '</select></div>';
     fileListEl.innerHTML = h;
-    generateThumbnails();
+    if (!skipThumbs) {
+      generateThumbnails(function() { startPrefetch(currentPage + 1); });
+    }
     bindFileItemClicks();
     gpsSection.style.display = 'block';
     initMap();
@@ -515,7 +520,7 @@ function escXml(s) {
     selectAllBtn.textContent = Object.keys(selectedSet).length === uploadedFiles.length ? t('unselect_all') : t('select_all');
   }
 
-  function generateThumbnails() {
+  function generateThumbnails(onDone) {
     var queue = [], concurrency = 6;
     for (var i = 0; i < uploadedFiles.length; i++) {
       (function(idx) {
@@ -535,7 +540,10 @@ function escXml(s) {
     }
     var next = 0;
     function processNext() {
-      if (next >= queue.length) return;
+      if (next >= queue.length) {
+        if (onDone) { var cb = onDone; onDone = null; cb(); }
+        return;
+      }
       var item = queue[next++];
       var img = new Image();
       img.onload = function() {
@@ -553,6 +561,53 @@ function escXml(s) {
       img.src = URL.createObjectURL(item.file);
     }
     for (var i = 0; i < Math.min(concurrency, queue.length); i++) processNext();
+    if (queue.length === 0 && onDone) { var cb = onDone; onDone = null; cb(); }
+  }
+
+  function startPrefetch(fromPage) {
+    if (prefetchTimer) { clearTimeout(prefetchTimer); prefetchTimer = null; }
+    if (fromPage > getTotalPages() || pageSize === 0) return;
+    var start = (fromPage - 1) * pageSize;
+    var end = Math.min(start + pageSize, uploadedFiles.length);
+
+    var allCached = true;
+    for (var i = start; i < end; i++) {
+      if (!thumbnailCache[i]) { allCached = false; break; }
+    }
+    if (allCached) {
+      prefetchTimer = setTimeout(function() { startPrefetch(fromPage + 1); }, 50);
+      return;
+    }
+
+    var active = 0, next = start, concurrency = 2;
+    function pump() {
+      while (active < concurrency && next < end) {
+        var idx = next++; active++;
+        processFile(idx);
+      }
+      if (active === 0 && next >= end) {
+        prefetchTimer = setTimeout(function() { startPrefetch(fromPage + 1); }, 50);
+      }
+    }
+    function processFile(idx) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          var tmp = document.createElement('canvas');
+          tmp.width = 40; tmp.height = 40;
+          var s = Math.min(40 / img.width, 40 / img.height);
+          tmp.getContext('2d').drawImage(img, (40 - img.width * s) / 2, (40 - img.height * s) / 2, img.width * s, img.height * s);
+          thumbnailCache[idx] = tmp.toDataURL();
+          URL.revokeObjectURL(img.src);
+          active--;
+          pump();
+        };
+        img.src = URL.createObjectURL(new Blob([e.target.result]));
+      };
+      reader.readAsArrayBuffer(uploadedFiles[idx].file);
+    }
+    pump();
   }
 
   function thumbnailClick(e) {
@@ -867,7 +922,6 @@ function escXml(s) {
     var p = collect();
     var err = validate(p); if (err) { showStatus(err, 'error'); return; }
     summaryPage = 1;
-    summaryBody.innerHTML = buildSummaryHtml(p);
     rebuildSummaryBody();
     summaryPanel.classList.add('show');
     summaryPanel.scrollIntoView({ behavior: 'smooth' });
