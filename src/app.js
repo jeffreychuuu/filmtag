@@ -364,16 +364,24 @@ function escXml(s) {
   }
 
   function extractExifFromFiles() {
-    for (var i = 0; i < uploadedFiles.length; i++) {
+    var completed = 0;
+    var total = uploadedFiles.length;
+    if (!total) return;
+    for (var i = 0; i < total; i++) {
       (function(idx) {
         var file = uploadedFiles[idx].file;
         var ext = file.name.split('.').pop().toLowerCase();
-        if (ext !== 'jpg' && ext !== 'jpeg') return;
+        if (ext !== 'jpg' && ext !== 'jpeg') {
+          completed++;
+          if (completed === total) renderFileList();
+          return;
+        }
         var reader = new FileReader();
         reader.onload = function(e) {
-          var jpegStr = '';
           var bytes = new Uint8Array(e.target.result);
+          var jpegStr = '';
           for (var b = 0; b < bytes.length; b++) jpegStr += String.fromCharCode(bytes[b]);
+          uploadedFiles[idx]._jpegStr = jpegStr;
           try {
             var exifObj = piexif.load(jpegStr);
             if (!fileDates[idx]) {
@@ -399,7 +407,8 @@ function escXml(s) {
               }
             }
           } catch(_) {}
-          renderFileList();
+          completed++;
+          if (completed === total) renderFileList();
         };
         reader.readAsArrayBuffer(file);
       })(i);
@@ -461,28 +470,37 @@ function escXml(s) {
   }
 
   function generateThumbnails() {
+    var queue = [];
     for (var i = 0; i < uploadedFiles.length; i++) {
       var c = document.querySelector('canvas.file-thumb[data-idx="' + i + '"]');
       if (!c) continue;
-      (function(canvas, file) {
-        var img = new Image();
-        img.onload = function() {
-          var s = Math.min(40 / img.width, 40 / img.height);
-          var w = img.width * s, h = img.height * s;
-          var ctx = canvas.getContext('2d');
-          ctx.drawImage(img, (40 - w) / 2, (40 - h) / 2, w, h);
-        };
-        img.src = URL.createObjectURL(file);
-        canvas.removeEventListener('click', thumbnailClick);
-        canvas.addEventListener('click', thumbnailClick);
-        canvas._thumbFile = file;
-      })(c, uploadedFiles[i].file);
+      queue.push({ canvas: c, file: uploadedFiles[i].file });
     }
+    var concurrency = 6, next = 0;
+    function processNext() {
+      if (next >= queue.length) return;
+      var item = queue[next++];
+      var img = new Image();
+      img.onload = function() {
+        var s = Math.min(40 / img.width, 40 / img.height);
+        var ctx = item.canvas.getContext('2d');
+        ctx.drawImage(img, (40 - img.width * s) / 2, (40 - img.height * s) / 2, img.width * s, img.height * s);
+        URL.revokeObjectURL(img.src);
+        processNext();
+      };
+      img.src = URL.createObjectURL(item.file);
+      item.canvas.removeEventListener('click', thumbnailClick);
+      item.canvas.addEventListener('click', thumbnailClick);
+      item.canvas._thumbFile = item.file;
+    }
+    for (var i = 0; i < Math.min(concurrency, queue.length); i++) processNext();
   }
 
   function thumbnailClick(e) {
     e.stopPropagation();
-    imgOverlayImg.src = URL.createObjectURL(e.target._thumbFile);
+    var url = URL.createObjectURL(e.target._thumbFile);
+    imgOverlayImg.src = url;
+    imgOverlayImg.onload = function() { URL.revokeObjectURL(url); };
     imgOverlay.classList.add('show');
   }
 
@@ -732,11 +750,14 @@ function escXml(s) {
           var s = Math.min(40 / img.width, 40 / img.height);
           var ctx = canvas.getContext('2d');
           ctx.drawImage(img, (40 - img.width * s) / 2, (40 - img.height * s) / 2, img.width * s, img.height * s);
+          URL.revokeObjectURL(img.src);
         };
         img.src = URL.createObjectURL(file);
         canvas.addEventListener('click', function(e) {
           e.stopPropagation();
-          imgOverlayImg.src = URL.createObjectURL(file);
+          var url = URL.createObjectURL(file);
+          imgOverlayImg.src = url;
+          imgOverlayImg.onload = function() { URL.revokeObjectURL(url); };
           imgOverlay.classList.add('show');
         });
       })(summaryCanvases[ti], uploadedFiles[ti].file);
@@ -788,8 +809,10 @@ function escXml(s) {
 
         if (ext === 'jpg' || ext === 'jpeg') {
           try {
-            var jpegStr = '';
-            for (var b = 0; b < bytes.length; b++) jpegStr += String.fromCharCode(bytes[b]);
+            var jpegStr = entry._jpegStr || '';
+            if (!jpegStr) {
+              for (var b = 0; b < bytes.length; b++) jpegStr += String.fromCharCode(bytes[b]);
+            }
 
             var exifObj;
             try { exifObj = piexif.load(jpegStr); } catch(_) {
@@ -903,8 +926,10 @@ function escXml(s) {
 
         if (ext === 'jpg' || ext === 'jpeg') {
           try {
-            var jpegStr = '';
-            for (var b = 0; b < bytes.length; b++) jpegStr += String.fromCharCode(bytes[b]);
+            var jpegStr = entry._jpegStr || '';
+            if (!jpegStr) {
+              for (var b = 0; b < bytes.length; b++) jpegStr += String.fromCharCode(bytes[b]);
+            }
             var exifObj;
             try { exifObj = piexif.load(jpegStr); } catch(_) {
               exifObj = { '0th': {}, 'Exif': {}, 'GPS': {}, 'Interop': {}, '1st': {}, 'thumbnail': null };
@@ -1099,6 +1124,7 @@ function escXml(s) {
           var scale = Math.min(150 / img.width, 150 / img.height);
           var w = img.width * scale, h = img.height * scale;
           ctx.drawImage(img, (150 - w) / 2, (150 - h) / 2, w, h);
+          URL.revokeObjectURL(img.src);
         };
         img.src = URL.createObjectURL(f.blob);
         item.appendChild(canvas);

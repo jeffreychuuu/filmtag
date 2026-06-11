@@ -63,6 +63,17 @@
 
 ## 新功能
 
+**2026-06-12** — 大量上傳效能翻新
+- ⚡ 批次 `renderFileList()` — 而家等所有 EXIF 讀完先 render 一次，唔會每張相都 rebuild 成個 list
+- ⚡ 快取 byte-to-string 轉換 — 每張相喺 EXIF 提取時只轉一次，zip/save 時重用，唔使 loop 幾千萬次
+- 🖼️ 縮圖生成加 concurrency limit — 最多同時 decode 6 張，唔會因為太多相而 freeze 瀏覽器
+- 💨 Blob URL 記憶體管理 — 所有 `createObjectURL` 用完即 revoke，杜絕 memory leak
+
+**2026-06-12** — Google AdSense 整合
+- 📢 加入 AdSense script 同 meta tag 以便放送廣告
+- 📄 網站根目錄放置 `ads.txt` 供廣告網絡驗證
+- 🔧 Build script 更新，自動複製 `ads.txt` 到 dist/
+
 **2026-06-11** — 相機-鏡頭關聯同儲存修正
 - 📸 自訂鏡頭而家按相機儲存——每部相機只會顯示屬於佢嘅鏡頭
 - 💾 焦距同最大光圈會同鏡頭名稱一齊儲存

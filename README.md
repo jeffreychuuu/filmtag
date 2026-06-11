@@ -63,6 +63,17 @@ The final result 👇
 
 ## What's New
 
+**2026-06-12** — Performance overhaul for large uploads
+- ⚡ Batch `renderFileList()` — file list now renders once after all EXIF extraction completes, instead of N times for N files
+- ⚡ Cached byte-to-string conversion — binary-to-string is done once per file during EXIF extraction and reused by ZIP/save processing
+- 🖼️ Thumbnail generation concurrency limit — max 6 simultaneous image decodes, prevents browser from locking up with many files
+- 💨 Blob URL memory management — all `createObjectURL` calls now properly revoked after use, eliminating memory leaks
+
+**2026-06-12** — Google AdSense integration
+- 📢 Added AdSense script & meta tag for ad serving
+- 📄 `ads.txt` placed at site root for ad network verification
+- 🔧 Build script updated to copy `ads.txt` to dist/
+
 **2026-06-11** — Camera-Lens association & persistence
 - 📸 Custom lenses are now saved per camera — each camera only shows its own saved lenses
 - 💾 Focal length & max aperture are saved alongside the lens name for custom entries
