@@ -1350,6 +1350,13 @@ function escXml(s) {
           URL.revokeObjectURL(img.src);
         };
         img.src = URL.createObjectURL(f.blob);
+        canvas.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var url = URL.createObjectURL(f.blob);
+          imgOverlayImg.src = url;
+          imgOverlayImg.onload = function() { URL.revokeObjectURL(url); };
+          imgOverlay.classList.add('show');
+        });
         item.appendChild(canvas);
 
         var nameEl = document.createElement('div');
