@@ -35,17 +35,14 @@ FilmTag batch-writes EXIF metadata to your scanned photos. Everything happens in
 
 The final result 👇
 
-**Google Photos (Web)**
-![Google Photos Web](img/gphoto_web.png)
-
-**Google Photos (Mobile)**
-![Google Photos Mobile](img/gphoto_mobile.png)
-
-**iPhone Photos**
-![iPhone Photos](img/iphone.png)
-
-**Mac Photos**
-![Mac Photos](img/mac.jpg)
+<table>
+  <tr>
+    <td align="center" width="25%"><b>Google Photos (Web)</b><br><img src="img/gphoto_web.png"></td>
+    <td align="center" width="25%"><b>Google Photos (Mobile)</b><br><img src="img/gphoto_mobile.png"></td>
+    <td align="center" width="25%"><b>iPhone Photos</b><br><img src="img/iphone.png"></td>
+    <td align="center" width="25%"><b>Mac Photos</b><br><img src="img/mac.jpg"></td>
+  </tr>
+</table>
 
 ## Features
 

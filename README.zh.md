@@ -35,17 +35,14 @@
 
 成品效果 👇
 
-**Google Photos（網頁版）**
-![Google Photos Web](img/gphoto_web.png)
-
-**Google Photos（手機版）**
-![Google Photos Mobile](img/gphoto_mobile.png)
-
-**iPhone 相簿**
-![iPhone Photos](img/iphone.png)
-
-**Mac 相簿**
-![Mac Photos](img/mac.jpg)
+<table>
+  <tr>
+    <td align="center" width="25%"><b>Google Photos（網頁版）</b><br><img src="img/gphoto_web.png"></td>
+    <td align="center" width="25%"><b>Google Photos（手機版）</b><br><img src="img/gphoto_mobile.png"></td>
+    <td align="center" width="25%"><b>iPhone 相簿</b><br><img src="img/iphone.png"></td>
+    <td align="center" width="25%"><b>Mac 相簿</b><br><img src="img/mac.jpg"></td>
+  </tr>
+</table>
 
 ## 功能
 
