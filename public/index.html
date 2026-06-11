@@ -64,10 +64,6 @@
     .field-group > div { flex: 1; }
     .hint { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem; }
 
-    .gps-check {
-      font-size: 0.8rem; color: var(--text-secondary);
-      display: flex; align-items: center; gap: 0.35rem; cursor: pointer;
-    }
     .map-search-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
     .btn {
       padding: 0.55rem 1rem; border: 1px solid var(--border); border-radius: 6px;
@@ -100,7 +96,11 @@
     .file-list { margin-top: 1rem; }
     .file-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
     .file-list-header span { font-size: 0.8rem; color: var(--text-secondary); }
-    .select-toolbar { display: flex; gap: 0.5rem; margin-top: 0.5rem; margin-bottom: 0.75rem; }
+    .select-toolbar { display: flex; gap: 0.5rem; margin-top: 0.5rem; margin-bottom: 0.75rem; flex-direction: column; }
+    .range-rows { display: flex; flex-direction: column; gap: 0.35rem; }
+    .range-row { display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; color: var(--text-secondary); }
+    .range-row select { width: auto; font-size: 0.75rem; padding: 0.3rem 0.5rem; }
+    .range-actions { display: flex; gap: 0.5rem; align-items: center; }
     .file-item {
       display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0;
       border-bottom: 1px solid #1a1a1a; font-size: 0.78rem;
@@ -275,13 +275,6 @@
     .file-item:hover { background: #151515; }
     .file-item.selected { outline: 1px solid var(--accent); border-radius: 4px; background: #1a1a10; }
     .file-thumb { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; flex-shrink: 0; background: #111; }
-    .gps-section { margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border); }
-    .gps-toolbar {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;
-    }
-    .gps-mode-row { display: flex; align-items: center; gap: 0.5rem; }
-    .gps-mode-label { font-size: 0.8rem; color: var(--text-secondary); }
     .map-search-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
     .map-search-inp { flex: 1; }
     .map-bottom {
@@ -350,9 +343,13 @@
     </div>
     <div class="file-list" id="file-list"></div>
     <div class="select-toolbar" id="select-toolbar" style="display:none;">
-      <button class="btn btn-sm btn-secondary" id="select-all-btn" data-i18n="select_all">Select All</button>
+      <div class="range-rows" id="range-rows"></div>
+      <div class="range-actions">
+        <button class="btn btn-sm btn-secondary" id="add-range-btn" data-i18n="add_range">+ Add Range</button>
+        <button class="btn btn-sm btn-secondary" id="select-all-btn" data-i18n="select_all">Select All</button>
+      </div>
     </div>
-    <div class="file-sub-section">
+    <div class="file-sub-section" id="date-section" style="display:none;">
       <div class="file-sub-header" data-target="date-time-body">
         <span>📅</span> <span data-i18n="date_time">Shooting Date & Time</span>
         <span class="collapse-icon open">▾</span>
@@ -365,17 +362,12 @@
         <button class="btn btn-sm btn-danger" id="clear-date-btn" style="margin-top:0.5rem;" data-i18n="clear_date">Clear Date</button>
       </div>
     </div>
-    <div class="gps-section" id="gps-section" style="display:none;">
-      <div class="gps-toolbar">
-        <div class="gps-mode-row">
-          <label class="gps-mode-label">📍 GPS Location:</label>
-          <select id="gps-mode-select" style="width:auto; font-size:0.8rem;">
-            <option value="off" data-i18n="gps_off">Don't add GPS location</option>
-            <option value="on" data-i18n="gps_on">Add GPS location to EXIF</option>
-          </select>
-        </div>
+    <div class="file-sub-section" id="gps-section" style="display:none;">
+      <div class="file-sub-header" data-target="gps-body">
+        <span>📍</span> <span data-i18n="gps_location">GPS Location</span>
+        <span class="collapse-icon open">▾</span>
       </div>
-      <div class="gps-controls" id="gps-controls" style="display:none;">
+      <div class="file-sub-body" id="gps-body">
         <div class="map-search-row">
           <input type="text" id="map-search-input" data-i18n-placeholder="search_location" placeholder="Search location..." class="map-search-inp">
           <button class="btn btn-sm btn-secondary" id="map-search-btn" data-i18n="search">Search</button>
@@ -383,7 +375,7 @@
         <div id="map" style="height:280px; border-radius:6px;"></div>
         <div class="map-bottom">
           <p class="map-info" id="map-info" data-i18n="map_hint">Select file(s) above, then click the map or search to set location</p>
-          <button class="btn btn-sm btn-danger" id="clear-location-btn" data-i18n="clear_selected">Clear Selected</button>
+          <button class="btn btn-sm btn-danger" id="clear-location-btn" data-i18n="clear_selected">Clear Selected GPS</button>
         </div>
       </div>
     </div>

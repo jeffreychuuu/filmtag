@@ -121,8 +121,7 @@ tpl.en = {
   "save": "Save",
 
   // Map / GPS
-  "gps_off": "Don't add GPS location",
-  "gps_on": "Add GPS location to EXIF",
+  "gps_location": "GPS Location",
   "select_all": "Select All",
   "unselect_all": "Deselect All",
   "search_location": "Search location...",
@@ -130,6 +129,8 @@ tpl.en = {
   "map_hint": "Select file(s) above, then click the map or search to set location",
   "clear_selected": "Clear Selected GPS",
   "clear_date": "Clear Date",
+
+  "add_range": "+ Add Range",
 
   "col_location": "Location",
   "col_date": "Date",
@@ -219,8 +220,7 @@ tpl.zh = {
   "save": "儲存",
 
   // Map / GPS
-  "gps_off": "不加入 GPS 位置",
-  "gps_on": "加入 GPS 位置到 EXIF",
+  "gps_location": "GPS 位置",
   "select_all": "全選",
   "unselect_all": "取消全選",
   "search_location": "搜尋位置...",
@@ -228,6 +228,8 @@ tpl.zh = {
   "map_hint": "選擇上方檔案，然後點擊地圖或搜尋以設定位置",
   "clear_selected": "清除已選 GPS 位置",
   "clear_date": "清除日期",
+
+  "add_range": "+ 新增範圍",
 
   "col_location": "位置",
   "col_date": "日期",

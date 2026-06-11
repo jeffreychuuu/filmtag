@@ -123,12 +123,11 @@ function escXml(s) {
   var fileListEl = $('file-list'), reviewBtn = $('review-btn');
   var gallery = $('gallery'), galleryGrid = $('gallery-grid'), galleryTitle = $('gallery-title');
   var galleryZipBtn = $('gallery-zip-btn');
-  var gpsSection = $('gps-section'), mapEl = $('map'), mapInfoEl = $('map-info'), clearLocBtn = $('clear-location-btn');
-  var gpsModeSelect = $('gps-mode-select');
-  var selectToolbar = $('select-toolbar'), selectAllBtn = $('select-all-btn');
-  var gpsControls = $('gps-controls');
+  var gpsSection = $('gps-section'), dateSection = $('date-section'), mapEl = $('map'), mapInfoEl = $('map-info'), clearLocBtn = $('clear-location-btn');
   var mapSearchInput = $('map-search-input'), mapSearchBtn = $('map-search-btn');
   var imgOverlay = $('img-overlay'), imgOverlayImg = $('img-overlay-img'), imgOverlayClose = $('img-overlay-close');
+  var selectToolbar = $('select-toolbar'), selectAllBtn = $('select-all-btn');
+  var rangeRowsEl = $('range-rows'), addRangeBtn = $('add-range-btn');
   var gpsData = {}, selectedSet = {}, map = null, mapMarker = null, mapInitialized = false;
   var isIPhone = /iPhone|iPad/.test(navigator.userAgent);
 
@@ -263,6 +262,7 @@ function escXml(s) {
       }
     }
     uploadedFiles.sort(function(a, b) { return a.file.name.localeCompare(b.file.name); });
+    for (var k = 0; k < uploadedFiles.length; k++) selectedSet[k] = true;
     refreshSegments();
     extractExifFromFiles();
   }
@@ -336,14 +336,15 @@ function escXml(s) {
     if (uploadedFiles.length === 0) {
       fileListEl.innerHTML = ''; reviewBtn.disabled = true;
       selectToolbar.style.display = 'none';
-    gpsSection.style.display = 'none';
-    gpsControls.style.display = 'none';
-    gpsModeSelect.value = 'off';
+      dateSection.style.display = 'none';
+      gpsSection.style.display = 'none';
 
       return;
     }
     selectToolbar.style.display = 'flex';
-    gpsSection.style.display = 'block';
+    var hasS = Object.keys(selectedSet).length > 0;
+    dateSection.style.display = hasS ? 'block' : 'none';
+    gpsSection.style.display = hasS ? 'block' : 'none';
     var h = '<div class="file-list-header"><span>' + t('file_count', {n: uploadedFiles.length}) + '</span>' +
       '<button class="btn btn-sm btn-danger" onclick="clearAll()">' + t('clear_all') + '</button></div>';
     for (var i = 0; i < uploadedFiles.length; i++) {
@@ -369,6 +370,8 @@ function escXml(s) {
     bindFileItemClicks();
     gpsSection.style.display = 'block';
     initMap();
+    renderRanges();
+    selectAllBtn.textContent = Object.keys(selectedSet).length === uploadedFiles.length ? t('unselect_all') : t('select_all');
   }
 
   function generateThumbnails() {
@@ -415,6 +418,9 @@ function escXml(s) {
       selectedSet[i] = true; item.classList.add('selected');
     }
     selectAllBtn.textContent = Object.keys(selectedSet).length === uploadedFiles.length ? t('unselect_all') : t('select_all');
+    var ct = Object.keys(selectedSet).length;
+    dateSection.style.display = ct ? 'block' : 'none';
+    gpsSection.style.display = ct ? 'block' : 'none';
   }
 
   function clearAll() {
@@ -433,8 +439,111 @@ function escXml(s) {
     }
     gpsData = newGps; selectedSet = newSel;
     refreshSegments();
+    renderRanges();
   }
   window.clearAll = clearAll; window.removeOne = removeOne;
+
+  function buildSelectedFromRanges() {
+    var set = {}, max = uploadedFiles.length;
+    var rows = rangeRowsEl.querySelectorAll('.range-row');
+    for (var r = 0; r < rows.length; r++) {
+      var sel = rows[r].querySelectorAll('select');
+      if (sel.length < 2) continue;
+      var s = parseInt(sel[0].value, 10), e = parseInt(sel[1].value, 10);
+      if (isNaN(s) || isNaN(e)) continue;
+      s = Math.max(1, s); e = Math.min(max, e);
+      for (var i = s - 1; i < e; i++) set[i] = true;
+    }
+    return set;
+  }
+
+  function renderRanges() {
+    rangeRowsEl.innerHTML = '';
+    if (!uploadedFiles.length) return;
+    var max = uploadedFiles.length;
+    var keys = Object.keys(selectedSet).map(Number).sort(function(a, b) { return a - b; });
+    var ranges = [];
+    if (keys.length) {
+      var s = keys[0] + 1, e = keys[0] + 1;
+      for (var i = 1; i <= keys.length; i++) {
+        if (keys[i] === keys[i - 1] + 1) { e = keys[i] + 1; }
+        else { ranges.push([s, e]); if (i < keys.length) { s = keys[i] + 1; e = keys[i] + 1; } }
+      }
+    }
+    for (var r = 0; r < ranges.length; r++) {
+      var row = document.createElement('div');
+      row.className = 'range-row';
+      var rangeSet = {};
+      for (var i = ranges[r][0]; i <= ranges[r][1]; i++) rangeSet[i] = true;
+      var otherSet = {};
+      for (var j = 0; j < max; j++) { if (selectedSet[j] && !rangeSet[j + 1]) otherSet[j + 1] = true; }
+      row.innerHTML = 'Start: <select class="range-start">' + buildOptions(max, ranges[r][0], otherSet) + '</select> End: <select class="range-end">' + buildOptions(max, ranges[r][1], otherSet) + '</select> <button class="btn btn-sm btn-danger remove-range-btn">✕</button>';
+      row.querySelector('.remove-range-btn').addEventListener('click', function() {
+        this.parentElement.remove();
+        syncRange();
+      });
+      row.querySelector('.range-start').addEventListener('change', function() {
+        var endSel = this.parentElement.querySelector('.range-end');
+        if (parseInt(endSel.value, 10) < parseInt(this.value, 10)) endSel.value = this.value;
+        syncRange();
+      });
+      row.querySelector('.range-end').addEventListener('change', function() {
+        var startSel = this.parentElement.querySelector('.range-start');
+        if (parseInt(startSel.value, 10) > parseInt(this.value, 10)) startSel.value = this.value;
+        syncRange();
+      });
+      rangeRowsEl.appendChild(row);
+    }
+  }
+
+  function buildOptions(max, selected, excludeSet) {
+    var h = '';
+    for (var i = 1; i <= max; i++) {
+      if (excludeSet && excludeSet[i]) continue;
+      var sel = i === selected ? ' selected' : '';
+      h += '<option value="' + i + '"' + sel + '>' + i + '</option>';
+    }
+    return h;
+  }
+
+  function syncRange() {
+    selectedSet = buildSelectedFromRanges();
+    var items = document.querySelectorAll('.file-item');
+    for (var j = 0; j < items.length; j++) {
+      var idx = parseInt(items[j].getAttribute('data-idx'), 10);
+      if (selectedSet[idx]) items[j].classList.add('selected');
+      else items[j].classList.remove('selected');
+    }
+    var allCount = Object.keys(selectedSet).length;
+    selectAllBtn.textContent = allCount === uploadedFiles.length ? t('unselect_all') : t('select_all');
+    dateSection.style.display = allCount ? 'block' : 'none';
+    gpsSection.style.display = allCount ? 'block' : 'none';
+    renderRanges();
+  }
+
+  addRangeBtn.addEventListener('click', function() {
+    var max = uploadedFiles.length;
+    if (!max) return;
+    var def = 1;
+    for (var i = 0; i < max; i++) { if (!selectedSet[i]) { def = i + 1; break; } }
+    var otherSet = {};
+    for (var j = 0; j < max; j++) { if (selectedSet[j]) otherSet[j + 1] = true; }
+    var row = document.createElement('div');
+    row.className = 'range-row';
+    row.innerHTML = 'Start: <select class="range-start">' + buildOptions(max, def, otherSet) + '</select> End: <select class="range-end">' + buildOptions(max, def, otherSet) + '</select> <button class="btn btn-sm btn-danger remove-range-btn">✕</button>';
+    row.querySelector('.remove-range-btn').addEventListener('click', function() { this.parentElement.remove(); syncRange(); });
+    row.querySelector('.range-start').addEventListener('change', function() {
+      var endSel = this.parentElement.querySelector('.range-end');
+      if (parseInt(endSel.value, 10) < parseInt(this.value, 10)) endSel.value = this.value;
+      syncRange();
+    });
+    row.querySelector('.range-end').addEventListener('change', function() {
+      var startSel = this.parentElement.querySelector('.range-start');
+      if (parseInt(startSel.value, 10) > parseInt(this.value, 10)) startSel.value = this.value;
+      syncRange();
+    });
+    rangeRowsEl.appendChild(row);
+  });
 
   function selText(sel) { return sel.options[sel.selectedIndex].text; }
   function getVal(sel, inp) { return sel.value === '__custom__' ? inp.value.trim() : selText(sel); }
@@ -637,7 +746,7 @@ function escXml(s) {
               'FilmTag by Jeffrey Chu | ' +
               'Processed by ' + p.lab + ' (' + p.process + ') | Scanned via ' + p.scanner;
 
-            var gps = gpsModeSelect.value === 'on' ? gpsData[i] : null;
+            var gps = gpsData[i];
             if (gps) {
               exifObj['GPS'] = exifObj['GPS'] || {};
               exifObj['GPS'][piexif.GPSIFD.GPSLatitude] = toDms(gps.lat);
@@ -738,7 +847,7 @@ function escXml(s) {
               ($('public-checkbox').checked ? 'FilmTag by Jeffrey Chu | ' : '') +
               'Photo by ' + p.author + ' | Camera: ' + p.camera.model + ' (' + p.lens.name + ') | Film: ' + p.film.name + ' (ISO ' + p.film.iso + ')' + (p.camera.shutter ? ' | Shutter: ' + p.camera.shutter : '') + ' | Lab: ' + p.lab + ' | Process: ' + p.process + ' (' + p.pushpull + ') | Scanner: ' + p.scanner;
             exifObj['0th'][piexif.ImageIFD.Copyright] = 'FilmTag by Jeffrey Chu | ' + 'Processed by ' + p.lab + ' (' + p.process + ') | Scanned via ' + p.scanner;
-            var gps2 = gpsModeSelect.value === 'on' ? gpsData[i] : null;
+            var gps2 = gpsData[i];
             if (gps2) {
               exifObj['GPS'] = exifObj['GPS'] || {};
               exifObj['GPS'][piexif.GPSIFD.GPSLatitude] = toDms(gps2.lat);
@@ -808,7 +917,7 @@ function escXml(s) {
   }
 
   function initMap() {
-    if (!gpsSection || gpsSection.style.display === 'none' || gpsControls.style.display === 'none') return;
+    if (!gpsSection || gpsSection.style.display === 'none') return;
     if (mapInitialized) { map.invalidateSize(); return; }
     mapInitialized = true;
     var defPos = [22.3193, 114.1694];
@@ -828,17 +937,6 @@ function escXml(s) {
       setGpsForSelected(lat, lng);
     });
   }
-
-  gpsModeSelect.addEventListener('change', function() {
-    if (this.value === 'on') {
-      gpsControls.style.display = 'block';
-      updateGpsDots();
-      initMap();
-    } else {
-      gpsControls.style.display = 'none';
-      updateGpsDots();
-    }
-  });
 
   imgOverlayClose.addEventListener('click', function() { imgOverlay.classList.remove('show'); });
   imgOverlay.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
@@ -864,7 +962,10 @@ function escXml(s) {
       else items[j].classList.remove('selected');
     }
     selectAllBtn.textContent = Object.keys(selectedSet).length === uploadedFiles.length ? t('unselect_all') : t('select_all');
-
+    var allCt = Object.keys(selectedSet).length;
+    dateSection.style.display = allCt ? 'block' : 'none';
+    gpsSection.style.display = allCt ? 'block' : 'none';
+    renderRanges();
   });
 
   mapSearchBtn.addEventListener('click', function() {
@@ -955,8 +1056,7 @@ function escXml(s) {
     summaryPanel.classList.remove('show'); summaryBody.innerHTML = '';
     gallery.classList.remove('show'); galleryGrid.innerHTML = '';
     gpsSection.style.display = 'none';
-    gpsControls.style.display = 'none';
-    gpsModeSelect.value = 'off';
+    dateSection.style.display = 'none';
     gpsData = {}; selectedSet = {}; fileDates = {};
     if (mapMarker) { map.removeLayer(mapMarker); mapMarker = null; }
     mapInitialized = false;
@@ -997,8 +1097,7 @@ function escXml(s) {
     gallery.classList.remove('show');
     galleryGrid.innerHTML = '';
     gpsSection.style.display = 'none';
-    gpsControls.style.display = 'none';
-    gpsModeSelect.value = 'off';
+    dateSection.style.display = 'none';
     refreshSegments();
     renderFileList();
   });
