@@ -45,8 +45,8 @@ tpl.en = {
   "disclaimer_text": "This tool is shared freely with the film photography community. Commercial use or profiteering is strictly prohibited. Unauthorised commercial use will be subject to legal action.",
 
   // Sections
-  "file_setup": "File Setup",
-  "upload_hint": "Click to select files, or drag & drop here",
+  "file_setup": "Film Setup",
+  "upload_hint": "Click to select photos, or drag & drop here",
   "upload_formats": "JPEG, TIFF, DNG, PNG (JPEG recommended \u2014 EXIF writes to JPEG only)",
   "author": "Author",
   "author_placeholder": "Enter custom author name",
@@ -87,11 +87,11 @@ tpl.en = {
 
   // File list / Segments
   "other_free_text": "Other (free text)",
-  "files_range": "Files {s} \u2013 {e}",
-  "end_file_index": "End file index",
+  "files_range": "Photos {s} \u2013 {e}",
+  "end_file_index": "End photo index",
   "remove": "Remove",
-  "total_uploaded": "Total: {n} file(s) uploaded",
-  "file_count": "{n} file(s)",
+  "total_uploaded": "Total: {n} photo(s) uploaded",
+  "file_count": "{n} photo(s)",
   "clear_all": "Remove all photos",
   "unknown": "Unknown",
 
@@ -107,17 +107,17 @@ tpl.en = {
   // Summary
   "settings": "Settings",
   "shutter": "Shutter",
-  "files_header": "Files ({n})",
+  "files_header": "Photos ({n})",
   "col_index": "#",
   "col_original": "Original",
   "col_new_name": "New Name",
 
   // Progress / Gallery
   "creating_zip": "Creating ZIP...",
-  "done_processed": "Done! {n} file(s) processed.",
-  "processed_success": "{n} file(s) processed successfully",
+  "done_processed": "Done! {n} photo(s) processed.",
+  "processed_success": "{n} photo(s) processed successfully",
   "processing_of": "Processing {i} of {n}",
-  "files_ready": "{n} file(s) ready",
+  "files_ready": "{n} photo(s) ready",
   "save": "Save",
 
   // Map / GPS
@@ -126,7 +126,7 @@ tpl.en = {
   "unselect_all": "Deselect All",
   "search_location": "Search location...",
   "search": "Search",
-  "map_hint": "Select file(s) above, then click the map or search to set location",
+  "map_hint": "Select photo(s) above, then click the map or search to set location",
   "clear_selected": "Clear Selected GPS",
 
   "add_range": "+ Add Range",
@@ -152,8 +152,8 @@ tpl.zh = {
   "disclaimer_text": "呢個工具係免費分享俾菲林攝影愛好者嘅，絕不能用作商業用途或謀利用途，否則將追究法律責任。",
 
   // Sections
-  "file_setup": "檔案設定",
-  "upload_hint": "點擊選擇檔案，或拖拽到此處",
+  "file_setup": "菲林設定",
+  "upload_hint": "點擊選擇相片，或拖拽到此處",
   "upload_formats": "JPEG、TIFF、DNG、PNG（建議使用 JPEG — EXIF 僅寫入 JPEG）",
   "author": "作者",
   "author_placeholder": "輸入自定義作者名稱",
@@ -194,11 +194,11 @@ tpl.zh = {
 
   // File list / Segments
   "other_free_text": "其他（自由輸入）",
-  "files_range": "檔案 {s} – {e}",
-  "end_file_index": "結束檔案編號",
+  "files_range": "相片 {s} – {e}",
+  "end_file_index": "結束相片編號",
   "remove": "移除",
-  "total_uploaded": "已上傳：{n} 個檔案",
-  "file_count": "{n} 個檔案",
+  "total_uploaded": "已上傳：{n} 張相",
+  "file_count": "{n} 張相",
   "clear_all": "移除全部相片",
   "unknown": "未知",
 
@@ -214,7 +214,7 @@ tpl.zh = {
   // Summary
   "settings": "設定",
   "shutter": "快門",
-  "files_header": "檔案（{n}）",
+  "files_header": "相片（{n}）",
   "col_index": "#",
   "col_original": "原始檔名",
   "col_new_name": "新檔名",
@@ -224,7 +224,7 @@ tpl.zh = {
   "done_processed": "完成！已處理 {n} 個檔案。",
   "processed_success": "已成功處理 {n} 個檔案",
   "processing_of": "正在處理 {i}/{n}",
-  "files_ready": "已備妥 {n} 個檔案",
+  "files_ready": "已備妥 {n} 張相",
   "save": "儲存",
 
   // Map / GPS

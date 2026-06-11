@@ -1203,7 +1203,7 @@ function escXml(s) {
     }
     updateGpsDots();
     reverseGeocode(lat, lng, keys);
-    mapInfoEl.textContent = keys.length + ' file(s) location set';
+    mapInfoEl.textContent = keys.length + ' photo(s) location set';
   }
 
   function reverseGeocode(lat, lng, indices) {
