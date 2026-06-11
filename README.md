@@ -66,6 +66,7 @@ The final result 👇
 **2026-06-12** — Background prefetch & sequenced loading
 - ⚡ Thumbnail prefetch — after page 1 thumbnails load, pages 2+ are decoded in background (concurrency=2) so navigation is instant
 - ⚡ Sequenced startup — EXIF extraction now runs before thumbnail generation, no I/O contention
+- ⏳ Upload loading overlay — blocks interaction until first page EXIF + thumbnails are ready, then releases
 - 🐛 Fixed: Review Summary button staying disabled after upload
 
 **2026-06-12** — Parallel processing & geocode throttle

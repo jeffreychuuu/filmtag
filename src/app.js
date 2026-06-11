@@ -166,6 +166,7 @@ function escXml(s) {
   var summaryPanel = $('summary-panel'), summaryBody = $('summary-body');
   var progressSec = $('progress-section'), progBar = $('progress-bar'), progText = $('progress-text');
   var statusMsg = $('status-msg');
+  var loadingEl = $('loading-overlay'), loadingText = $('loading-text');
 
   // Populate all select elements from DATA
   function fillSelect(sel, items) {
@@ -402,13 +403,18 @@ function escXml(s) {
     var completed = 0;
     var total = uploadedFiles.length;
     if (!total) return;
+    var firstPageSize = pageSize === 0 ? total : Math.min(pageSize, total);
+    var firstPageDone = false;
+    loadingText.textContent = t('extracting_exif', {n: total});
+    loadingEl.classList.add('show');
     for (var i = 0; i < total; i++) {
       (function(idx) {
         var file = uploadedFiles[idx].file;
         var ext = file.name.split('.').pop().toLowerCase();
         if (ext !== 'jpg' && ext !== 'jpeg') {
           completed++;
-          if (completed === total) renderFileList();
+          if (completed >= firstPageSize && !firstPageDone) { firstPageDone = true; renderFileList(); }
+          if (completed === total) { renderFileList(); }
           return;
         }
         var reader = new FileReader();
@@ -443,6 +449,7 @@ function escXml(s) {
             }
           } catch(_) {}
           completed++;
+          if (completed >= firstPageSize && !firstPageDone) { firstPageDone = true; renderFileList(); }
           if (completed === total) renderFileList();
         };
         reader.readAsArrayBuffer(file);
@@ -511,7 +518,10 @@ function escXml(s) {
       '</select></div>';
     fileListEl.innerHTML = h;
     if (!skipThumbs) {
-      generateThumbnails(function() { startPrefetch(currentPage + 1); });
+      generateThumbnails(function() {
+        loadingEl.classList.remove('show');
+        startPrefetch(currentPage + 1);
+      });
     }
     bindFileItemClicks();
     gpsSection.style.display = 'block';

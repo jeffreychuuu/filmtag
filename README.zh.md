@@ -66,6 +66,7 @@
 **2026-06-12** — 背景預載 & 順序載入
 - ⚡ Thumbnail prefetch — page 1 thumbnail 完成後，背景 decode 之後嘅頁面（concurrency=2），切頁即時顯示
 - ⚡ 順序啟動 — EXIF 提取先 run，完成後先開始 thumbnail generation，唔會爭 I/O
+- ⏳ 上傳 loading overlay — block 畫面直到第一頁 EXIF + thumbnail ready，先 release 俾 user 操作
 - 🐛 修正：上傳後 Review Summary 按鈕冇正常啟用
 
 **2026-06-12** — 並行處理 & 地理編碼節流

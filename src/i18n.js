@@ -136,6 +136,8 @@ tpl.en = {
 
   "page_of": "Page {current} of {total}",
   "all": "All",
+
+  "extracting_exif": "Uploading {n} photos…",
 };
 
 tpl.zh = {
@@ -237,6 +239,8 @@ tpl.zh = {
 
   "page_of": "第 {current} 頁，共 {total} 頁",
   "all": "全部",
+
+  "extracting_exif": "正在上傳 {n} 張相…",
 };
 
 export { t, setLang, toggleLang, applyTranslations, lang };
