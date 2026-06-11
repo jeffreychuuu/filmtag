@@ -4,7 +4,7 @@ Interactive web app for writing EXIF metadata to film-scanned photos — all don
 
 **[filmtag.jeffreychuuu.com](https://filmtag.jeffreychuuu.com)**
 
-> :hk: [中文版（Chinese README）](README.zh.md)
+> 🇭🇰 [中文版（Chinese README）](README.zh.md)
 
 ## Why FilmTag?
 
@@ -33,9 +33,19 @@ FilmTag batch-writes EXIF metadata to your scanned photos. Everything happens in
 | Lab Records | Hong Kong lab presets: DOT-WELL, Megatoni, TrueFace Pro Lab, Photo Garden, HK Camera, Showa, Colorluxe — with Push/Pull and scanner model tracking |
 | Time Sequencing (the best part) | Auto-increments +1 minute per photo, timezone forced to +08:00. Shot a roll across multiple days? Set up date segments with individual start times — Google Photos will order them perfectly |
 
-The final result in Google Photos 👇
+The final result 👇
 
-![FilmTag EXIF in Google Photos](docs/google-photos-demo.png)
+**Google Photos (Web)**
+![Google Photos Web](img/gphoto_web.png)
+
+**Google Photos (Mobile)**
+![Google Photos Mobile](img/gphoto_mobile.png)
+
+**iPhone Photos**
+![iPhone Photos](img/iphone.png)
+
+**Mac Photos**
+![Mac Photos](img/mac.jpg)
 
 ## Features
 
@@ -66,6 +76,18 @@ npm run dev    # http://localhost:3333
 ## Deploy
 
 Push to GitHub → import in Vercel → Root Directory = `.` (repo root). Vercel auto-runs `npm run build`, serves `dist/`.
+
+## Origin
+
+FilmTag started as a CLI tool for myself and a few friends — I'm a film photography beginner who happens to write code for a living, and I just wanted an easy way to tag my scans with proper metadata. Before a trip, I worried that a lab might send scans back while I was away, so I turned it into a web app I could use from anywhere.
+
+## Disclaimer
+
+This tool is shared freely with the film photography community. Commercial use or profiteering is strictly prohibited. Unauthorised commercial use will be subject to legal action.
+
+---
+
+© 2026 Jeffrey Chu. All rights reserved.
 
 ## Shared Config
 

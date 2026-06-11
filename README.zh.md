@@ -4,7 +4,7 @@
 
 **[filmtag.jeffreychuuu.com](https://filmtag.jeffreychuuu.com)**
 
-> :uk: [English README](README.md)
+> 🇭🇰 :uk: [English README](README.md)
 
 ## 點解要用 FilmTag？
 
@@ -33,9 +33,19 @@
 | 🧪 沖掃紀錄 | 內建香港主流沖掃工作室：DOT-WELL、Megatoni、TrueFace Pro Lab 金鈿、Photo Garden 金藝、HK Camera、Showa、Colorluxe 彩圖麗——仲支援記錄 Push/Pull 同掃描器型號 |
 | 🕐 時間排序（最正嗰個功能） | 每張相片自動遞增 1 分鐘，時區強制寫入 +08:00。一卷菲林跨唔同日子拍？可以分段設定日期同起始時間，Google Photos 就會完美排好順序 |
 
-成品喺 Google Photos 見到嘅效果 👇
+成品效果 👇
 
-![FilmTag EXIF in Google Photos](docs/google-photos-demo.png)
+**Google Photos（網頁版）**
+![Google Photos Web](img/gphoto_web.png)
+
+**Google Photos（手機版）**
+![Google Photos Mobile](img/gphoto_mobile.png)
+
+**iPhone 相簿**
+![iPhone Photos](img/iphone.png)
+
+**Mac 相簿**
+![Mac Photos](img/mac.jpg)
 
 ## 功能
 
@@ -66,6 +76,18 @@ npm run dev    # http://localhost:3333
 ## 部署
 
 Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄）。Vercel 會自動執行 `npm run build`，serve `dist/`。
+
+## 起源
+
+起初只係寫咗個命令行工具俾自己同朋友用——我本身係菲林攝影入門者，咁啱又係做程式開發，純粹想有個方便嘅方法幫掃描檔加返相片資訊。後尾準備去旅行，驚沖掃舖喺旅行期間傳返啲掃描檔過嚟冇得整理，就索性整咗個網站出嚟，自己喺外地都處理得到。
+
+## 聲明
+
+呢個工具係免費分享俾菲林攝影愛好者嘅，絕不能用作商業用途或謀利用途，否則將追究法律責任。
+
+---
+
+© 2026 Jeffrey Chu. 版權所有，保留一切權利。
 
 ## 共用設定
 
