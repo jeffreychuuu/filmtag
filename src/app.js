@@ -116,16 +116,16 @@ function escXml(s) {
   var labSel = $('lab-select'), labCust = $('lab-custom');
   var ppSel = $('pushpull-select'), ppCust = $('pushpull-custom');
   var scanSel = $('scanner-select'), scanCust = $('scanner-custom');
-  var sameDateSel = $('same-date-select');
-  var singleDG = $('single-date-group'), multiDG = $('multi-date-group');
-  var segContainer = $('seg-container'), segCount = $('seg-file-count'), addSegBtn = $('add-seg-btn');
   var singleDateInp = $('single-date-input'), singleTimeInp = $('single-time-input');
+  var clearDateBtn = $('clear-date-btn');
+  var fileDates = {}, clearedDates = {};
   var fileInp = $('file-input'), uploadWrap = $('upload-wrap');
   var fileListEl = $('file-list'), reviewBtn = $('review-btn');
   var gallery = $('gallery'), galleryGrid = $('gallery-grid'), galleryTitle = $('gallery-title');
   var galleryZipBtn = $('gallery-zip-btn');
   var gpsSection = $('gps-section'), mapEl = $('map'), mapInfoEl = $('map-info'), clearLocBtn = $('clear-location-btn');
-  var gpsModeSelect = $('gps-mode-select'), selectAllBtn = $('select-all-btn');
+  var gpsModeSelect = $('gps-mode-select');
+  var selectToolbar = $('select-toolbar'), selectAllBtn = $('select-all-btn');
   var gpsControls = $('gps-controls');
   var mapSearchInput = $('map-search-input'), mapSearchBtn = $('map-search-btn');
   var imgOverlay = $('img-overlay'), imgOverlayImg = $('img-overlay-img'), imgOverlayClose = $('img-overlay-close');
@@ -218,62 +218,39 @@ function escXml(s) {
     lensCust.classList.toggle('show', lensSel.value === '__custom__');
   });
 
-  sameDateSel.addEventListener('change', function() {
-    if (sameDateSel.value === 'yes') { singleDG.style.display = 'block'; multiDG.style.display = 'none'; }
-    else {
-      singleDG.style.display = 'none'; multiDG.style.display = 'block';
-      if (segContainer.children.length === 0) addSegment();
-      refreshSegments();
-    }
-  });
+  singleDateInp.valueAsDate = new Date();
+  singleTimeInp.value = '12:00';
 
-  function makeSegCard(start) {
-    var total = uploadedFiles.length || 36;
-    var defEnd = Math.min(start + 35, total);
-    var card = document.createElement('div');
-    card.className = 'segment-card';
-    card.innerHTML =
-      '<div class="seg-label">' + t('files_range', {s: start, e: defEnd}) + '</div>' +
-      '<div style="margin-bottom:0.5rem;"><label>' + t('end_file_index') + '</label>' +
-      '<input type="number" class="seg-end" min="' + start + '" max="' + total + '" value="' + defEnd + '"></div>' +
-      '<div class="field-group">' +
-      '<div><label>' + t('shoot_date') + '</label><input type="date" class="seg-date"></div>' +
-      '<div><label>' + t('start_time') + '</label><input type="time" class="seg-time" value="12:00"></div>' +
-      '</div>' +
-      '<button class="btn btn-danger" style="margin-top:0.5rem;" type="button">' + t('remove') + '</button>';
-    card.querySelector('.seg-end').addEventListener('change', refreshSegments);
-    card.querySelector('button').addEventListener('click', function() { card.remove(); refreshSegments(); });
-    return card;
+  function applyDateToSelected() {
+    var keys = Object.keys(selectedSet);
+    if (!keys.length) return;
+    var dv = singleDateInp.value, tv = singleTimeInp.value;
+    if (!dv || !tv) return;
+    var fd = dv.replace(/-/g, ''), ed = dv.replace(/-/g, ':');
+    var p = tv.split(':'), h = parseInt(p[0], 10) || 0, m = parseInt(p[1], 10) || 0;
+    for (var k = 0; k < keys.length; k++) {
+      fileDates[keys[k]] = { fileDate: fd, exifDate: ed, hr: h, min: m + k };
+      delete clearedDates[keys[k]];
+    }
+    renderFileList();
   }
 
-  function refreshSegments() {
-    var total = uploadedFiles.length || 36;
-    var cards = segContainer.querySelectorAll('.segment-card');
-    var cum = 0;
-    for (var i = 0; i < cards.length; i++) {
-      var se = cards[i].querySelector('.seg-end');
-      var ev = parseInt(se.value, 10);
-      if (isNaN(ev) || ev <= 0) ev = total;
-      var st = cum + 1; if (ev < st) ev = st; if (ev > total) ev = total;
-      se.value = ev; se.min = st; se.max = total;
-      cards[i].querySelector('.s1').textContent = st;
-      cards[i].querySelector('.s2').textContent = ev;
-      cards[i].querySelector('.seg-label').textContent = t('files_range', {s: st, e: ev});
-      cum = ev;
+  singleDateInp.addEventListener('change', applyDateToSelected);
+  singleTimeInp.addEventListener('change', applyDateToSelected);
+
+  clearDateBtn.addEventListener('click', function() {
+    var keys = Object.keys(selectedSet);
+    for (var k = 0; k < keys.length; k++) {
+      delete fileDates[keys[k]];
+      clearedDates[keys[k]] = true;
     }
-    segCount.textContent = uploadedFiles.length > 0 ? t('total_uploaded', {n: uploadedFiles.length}) : '';
+    renderFileList();
+  });
+
+  function refreshSegments() {
     renderFileList();
     reviewBtn.disabled = uploadedFiles.length === 0;
   }
-
-  function addSegment() {
-    var cards = segContainer.querySelectorAll('.segment-card');
-    var st = cards.length === 0 ? 1 : (parseInt(cards[cards.length - 1].querySelector('.seg-end').value, 10) || (uploadedFiles.length || 36)) + 1;
-    segContainer.appendChild(makeSegCard(st));
-    refreshSegments();
-  }
-  addSegBtn.addEventListener('click', addSegment);
-  singleDateInp.valueAsDate = new Date();
 
   fileInp.addEventListener('change', function(e) { handleFiles(e.target.files); fileInp.value = ''; });
   uploadWrap.addEventListener('dragover', function(e) { e.preventDefault(); uploadWrap.classList.add('dragover'); });
@@ -289,19 +266,85 @@ function escXml(s) {
     }
     uploadedFiles.sort(function(a, b) { return a.file.name.localeCompare(b.file.name); });
     refreshSegments();
+    extractExifFromFiles();
+  }
+
+  function dmsToDecimal(dms, ref) {
+    if (!dms || dms.length < 3) return null;
+    var deg = dms[0][0] / dms[0][1];
+    var min = dms[1][0] / dms[1][1];
+    var sec = dms[2][0] / dms[2][1];
+    var dec = deg + min / 60 + sec / 3600;
+    if (ref === 'S' || ref === 'W') dec = -dec;
+    return dec;
+  }
+
+  function extractExifFromFiles() {
+    for (var i = 0; i < uploadedFiles.length; i++) {
+      (function(idx) {
+        var file = uploadedFiles[idx].file;
+        var ext = file.name.split('.').pop().toLowerCase();
+        if (ext !== 'jpg' && ext !== 'jpeg') return;
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var jpegStr = '';
+          var bytes = new Uint8Array(e.target.result);
+          for (var b = 0; b < bytes.length; b++) jpegStr += String.fromCharCode(bytes[b]);
+          try {
+            var exifObj = piexif.load(jpegStr);
+            if (!fileDates[idx]) {
+              var dt = exifObj['Exif'][piexif.ExifIFD.DateTimeOriginal] || exifObj['0th'][piexif.ImageIFD.DateTime];
+              if (dt) {
+                var dp = dt.split(' ')[0].split(':');
+                var tp = dt.split(' ')[1].split(':');
+                if (dp.length === 3 && tp.length >= 2) {
+                  fileDates[idx] = { fileDate: dp.join(''), exifDate: dp.join(':'), hr: parseInt(tp[0], 10), min: parseInt(tp[1], 10) };
+                  delete clearedDates[idx];
+                }
+              }
+            }
+            if (!gpsData[idx]) {
+              var gps = exifObj['GPS'];
+              if (gps && gps[piexif.GPSIFD.GPSLatitude] && gps[piexif.GPSIFD.GPSLongitude]) {
+                var lat = dmsToDecimal(gps[piexif.GPSIFD.GPSLatitude], gps[piexif.GPSIFD.GPSLatitudeRef]);
+                var lng = dmsToDecimal(gps[piexif.GPSIFD.GPSLongitude], gps[piexif.GPSIFD.GPSLongitudeRef]);
+                if (lat !== null && lng !== null) {
+                  gpsData[idx] = { lat: lat, lng: lng, addr: '' };
+                }
+              }
+            }
+          } catch(_) {}
+          renderFileList();
+        };
+        reader.readAsArrayBuffer(file);
+      })(i);
+    }
+  }
+
+  function computeDateForFile(idx) {
+    if (clearedDates[idx - 1]) return null;
+    var fd = fileDates[idx - 1];
+    if (fd) {
+      var ds = fd.fileDate;
+      return { date: ds.slice(0,4) + '/' + ds.slice(4,6) + '/' + ds.slice(6,8), time: String(fd.hr).padStart(2,'0') + ':' + String(fd.min).padStart(2,'0') };
+    }
+    var now = new Date();
+    var d = now.getFullYear().toString() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
+    return { date: d.slice(0,4) + '/' + d.slice(4,6) + '/' + d.slice(6,8), time: '12:00' };
   }
 
   function renderFileList() {
     if (uploadedFiles.length === 0) {
       fileListEl.innerHTML = ''; reviewBtn.disabled = true;
-      segCount.textContent = '';
+      selectToolbar.style.display = 'none';
     gpsSection.style.display = 'none';
     gpsControls.style.display = 'none';
     gpsModeSelect.value = 'off';
 
       return;
     }
-    segCount.textContent = t('total_uploaded', {n: uploadedFiles.length});
+    selectToolbar.style.display = 'flex';
+    gpsSection.style.display = 'block';
     var h = '<div class="file-list-header"><span>' + t('file_count', {n: uploadedFiles.length}) + '</span>' +
       '<button class="btn btn-sm btn-danger" onclick="clearAll()">' + t('clear_all') + '</button></div>';
     for (var i = 0; i < uploadedFiles.length; i++) {
@@ -310,12 +353,15 @@ function escXml(s) {
       var hasGps = gpsModeSelect.value === 'on' && gpsData[i];
       var addrTxt = hasGps && gpsData[i].addr ? ' <span class="gps-addr">' + esc(gpsData[i].addr) + '</span>' : '';
       var dot = hasGps ? '📍' + addrTxt : '<img src="no_gps.png" class="no-gps-icon">';
+      var dateInfo = computeDateForFile(i + 1);
+      var dateDot = dateInfo ? '<span class="date-dot">🗓️ ' + dateInfo.date + ' ' + dateInfo.time + '</span>' : '<img src="no_date.png" class="no-date-icon">';
       h += '<div class="file-item' + sel + '" data-idx="' + i + '">' +
         '<canvas class="file-thumb" data-idx="' + i + '" width="40" height="40"></canvas>' +
         '<div class="fidx">#' + String(i + 1).padStart(2, '0') + '</div>' +
         '<div class="fname">' + esc(f.file.name) + '</div>' +
         '<div class="fsize">' + fmtSize(f.file.size) + '</div>' +
         '<span class="file-gps-dot">' + dot + '</span>' +
+        dateDot +
         '<button class="remove-btn" onclick="removeOne(' + i + ')">✕</button>' +
         '</div>';
     }
@@ -369,13 +415,12 @@ function escXml(s) {
     } else {
       selectedSet[i] = true; item.classList.add('selected');
     }
-    var keys = Object.keys(selectedSet);
-    selectAllBtn.textContent = keys.length === uploadedFiles.length ? t('select_all') + ' (All)' : t('select_all');
+    selectAllBtn.textContent = Object.keys(selectedSet).length === uploadedFiles.length ? t('unselect_all') : t('select_all');
   }
 
   function clearAll() {
     uploadedFiles = [];
-    gpsData = {}; selectedSet = {};
+    gpsData = {}; selectedSet = {}; fileDates = {}; clearedDates = {};
     if (mapMarker) { map.removeLayer(mapMarker); mapMarker = null; }
     refreshSegments();
   }
@@ -421,47 +466,32 @@ function escXml(s) {
     if (!p.film.name) return t('film_required'); if (!p.lab) return t('lab_required');
     if (!p.scanner) return t('scanner_required'); return null;
   }
-  function getSegments(total) {
-    if (sameDateSel.value === 'yes') {
-      var dv = singleDateInp.value, tv = singleTimeInp.value;
-      if (!dv) return null;
-      var ed = dv.replace(/-/g, ':'), fd = dv.replace(/-/g, '');
-      var p = tv.split(':'), h = parseInt(p[0], 10) || 0, m = parseInt(p[1], 10) || 0;
-      return [{ start: 1, end: total > 0 ? total : 36, fileDate: fd, exifDate: ed, startHour: h, startMin: m }];
-    }
-    var cards = segContainer.querySelectorAll('.segment-card');
-    if (!cards.length) return null;
-    var sgs = [];
-    for (var i = 0; i < cards.length; i++) {
-      var de = cards[i].querySelector('.seg-date'), te = cards[i].querySelector('.seg-time');
-      if (!de.value || !te.value) return null;
-      var ed2 = de.value.replace(/-/g, ':'), fd2 = de.value.replace(/-/g, '');
-      var p2 = te.value.split(':'), h2 = parseInt(p2[0], 10) || 0, m2 = parseInt(p2[1], 10) || 0;
-      sgs.push({ start: sgs.length ? sgs[sgs.length - 1].end + 1 : 1, end: parseInt(cards[i].querySelector('.seg-end').value, 10) || total,
-        fileDate: fd2, exifDate: ed2, startHour: h2, startMin: m2 });
-    }
-    return sgs.length ? sgs : null;
+
+  function getFileDate(i) {
+    var fd = fileDates[i];
+    if (fd) return fd;
+    var now = new Date();
+    var d = now.getFullYear().toString() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
+    return { fileDate: d, exifDate: d.slice(0,4) + ':' + d.slice(4,6) + ':' + d.slice(6,8), hr: 12, min: i };
   }
-  function segForIdx(sgs, idx) { for (var i = 0; i < sgs.length; i++) { if (idx >= sgs[i].start && idx <= sgs[i].end) return sgs[i]; } return sgs[0]; }
-  function calcTS(seg, idx) {
-    var off = idx - seg.start, min = seg.startMin + off, hr = seg.startHour + Math.floor(min / 60);
-    min %= 60; hr %= 24;
-    return { hr: hr, min: min, str: String(hr).padStart(2, '0') + ':' + String(min).padStart(2, '0') + ':00' };
-  }
-  function newFName(film, seg, idx, hr, min, ext) {
-    var c = film
+
+  function newFilmPrefix(film) {
+    return film
       .split(/[^a-zA-Z0-9]+/)
       .filter(function(w) { return w.length > 0; })
       .map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase(); })
       .join('');
-    return c + '_' + seg.fileDate + String(hr).padStart(2, '0') + String(min).padStart(2, '0') + '_' + String(idx).padStart(2, '0') + '.' + ext;
+  }
+
+  function newFName(film, ext, i) {
+    var fd = getFileDate(i);
+    var c = newFilmPrefix(film);
+    return c + '_' + fd.fileDate + String(fd.hr).padStart(2,'0') + String(fd.min).padStart(2,'0') + '_' + String(i + 1).padStart(2,'0') + '.' + ext;
   }
 
   reviewBtn.addEventListener('click', function() {
     var p = collect();
     var err = validate(p); if (err) { showStatus(err, 'error'); return; }
-    var sgs = getSegments(uploadedFiles.length);
-    if (!sgs) { showStatus(t('date_required'), 'error'); return; }
 
     var html = '';
     html += '<div class="summary-section"><h3>' + t('settings') + '</h3>';
@@ -476,12 +506,14 @@ function escXml(s) {
     html += '</div>';
 
     html += '<div class="summary-section"><h3>' + t('files_header', {n: uploadedFiles.length}) + '</h3>';
-    html += '<table class="rename-table"><tr><th>' + t('col_index') + '</th><th>' + t('col_original') + '</th><th>' + t('col_new_name') + '</th></tr>';
+    html += '<table class="rename-table"><tr><th></th><th>' + t('col_index') + '</th><th>' + t('col_original') + '</th><th>' + t('col_new_name') + '</th><th>📍 ' + t('col_location') + '</th><th>🗓️ ' + t('col_date') + '</th></tr>';
     for (var j = 0; j < uploadedFiles.length; j++) {
-      var idx = j + 1, seg2 = segForIdx(sgs, idx), ts = calcTS(seg2, idx);
       var ext = uploadedFiles[j].file.name.split('.').pop().toLowerCase();
-      var nn = newFName(p.film.name, seg2, idx, ts.hr, ts.min, ext);
-      html += '<tr><td style="color:#555;">' + idx + '</td><td class="old-name">' + esc(uploadedFiles[j].file.name) + '</td><td class="new-name">' + esc(nn) + '</td></tr>';
+      var nn = newFName(p.film.name, ext, j);
+      var gpsLoc = gpsData[j] && gpsData[j].addr ? '📍 ' + esc(gpsData[j].addr) : '<img src="no_gps.png" class="no-gps-icon">';
+      var dateInfo2 = computeDateForFile(j + 1);
+      var dateCell2 = dateInfo2 ? '<span class="date-dot">🗓️ ' + dateInfo2.date + ' ' + dateInfo2.time + '</span>' : '<img src="no_date.png" class="no-date-icon">';
+      html += '<tr><td><canvas class="summary-thumb" width="40" height="40" data-idx="' + j + '"></canvas></td><td style="color:#555;">' + (j + 1) + '</td><td class="old-name">' + esc(uploadedFiles[j].file.name) + '</td><td class="new-name">' + esc(nn) + '</td><td style="text-align:center;font-size:0.65rem;">' + gpsLoc + '</td><td style="text-align:center;font-size:0.65rem;">' + dateCell2 + '</td></tr>';
     }
     html += '</table></div>';
     html += '<div class="actions" style="margin-top:1rem;">' +
@@ -489,6 +521,20 @@ function escXml(s) {
       '<button class="btn btn-primary" id="confirm-zip-btn">' + t('download_zip') + '</button></div>';
 
     summaryBody.innerHTML = html;
+
+    var summaryCanvases = document.querySelectorAll('canvas.summary-thumb');
+    for (var ti = 0; ti < summaryCanvases.length; ti++) {
+      (function(canvas, file) {
+        var img = new Image();
+        img.onload = function() {
+          var s = Math.min(40 / img.width, 40 / img.height);
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, (40 - img.width * s) / 2, (40 - img.height * s) / 2, img.width * s, img.height * s);
+        };
+        img.src = URL.createObjectURL(file);
+      })(summaryCanvases[ti], uploadedFiles[ti].file);
+    }
+
     summaryPanel.classList.add('show');
     summaryPanel.scrollIntoView({ behavior: 'smooth' });
     $('confirm-zip-btn').addEventListener('click', startZipProcess);
@@ -499,8 +545,7 @@ function escXml(s) {
 
   function startZipProcess() {
     summaryPanel.classList.remove('show');
-    var p = collect(), sgs = getSegments(uploadedFiles.length);
-    if (!sgs) return showStatus(t('date_error'), 'error');
+    var p = collect();
 
     reviewBtn.disabled = true;
     progressSec.style.display = 'block';
@@ -522,9 +567,9 @@ function escXml(s) {
         });
         return;
       }
-      var entry = uploadedFiles[i], idx = i + 1, seg = segForIdx(sgs, idx);
-      var ts = calcTS(seg, idx), ext = entry.file.name.split('.').pop().toLowerCase();
-      var nn = newFName(p.film.name, seg, idx, ts.hr, ts.min, ext);
+      var entry = uploadedFiles[i], ext = entry.file.name.split('.').pop().toLowerCase();
+      var fd = getFileDate(i);
+      var nn = newFName(p.film.name, ext, i);
 
       progBar.style.width = Math.round(((i + 1) / total) * 100) + '%';
       progText.textContent = t('processing_of', {i: i + 1, n: total});
@@ -550,7 +595,7 @@ function escXml(s) {
             exifObj['0th'][piexif.ImageIFD.Software] = brand ? p.scanner + ' (FilmTag by Jeffrey Chu)' : p.scanner;
             exifObj['Exif'][0x828D] = p.process + ' (' + p.pushpull + ')';
 
-            var dateTimeStr = seg.exifDate + ' ' + ts.str + '+08:00';
+            var dateTimeStr = fd.exifDate + ' ' + String(fd.hr).padStart(2,'0') + ':' + String(fd.min).padStart(2,'0') + ':00+08:00';
             exifObj['0th'][piexif.ImageIFD.DateTime] = dateTimeStr;
             exifObj['Exif'][piexif.ExifIFD.DateTimeOriginal] = dateTimeStr;
             exifObj['Exif'][piexif.ExifIFD.DateTimeDigitized] = dateTimeStr;
@@ -620,8 +665,7 @@ function escXml(s) {
 
   function startSaveProcess() {
     summaryPanel.classList.remove('show');
-    var p = collect(), sgs = getSegments(uploadedFiles.length);
-    if (!sgs) return showStatus(t('date_error'), 'error');
+    var p = collect();
 
     reviewBtn.disabled = true;
     progressSec.style.display = 'block';
@@ -638,9 +682,9 @@ function escXml(s) {
         showGallery(processedFiles, p, zip);
         return;
       }
-      var entry = uploadedFiles[i], idx = i + 1, seg = segForIdx(sgs, idx);
-      var ts = calcTS(seg, idx), ext = entry.file.name.split('.').pop().toLowerCase();
-      var nn = newFName(p.film.name, seg, idx, ts.hr, ts.min, ext);
+      var entry = uploadedFiles[i], ext = entry.file.name.split('.').pop().toLowerCase();
+      var fd = getFileDate(i);
+      var nn = newFName(p.film.name, ext, i);
 
       progBar.style.width = Math.round(((i + 1) / total) * 100) + '%';
       progText.textContent = t('processing_of', {i: i + 1, n: total});
@@ -662,7 +706,7 @@ function escXml(s) {
             exifObj['0th'][piexif.ImageIFD.Artist] = p.author;
             var brand = branding();
             exifObj['0th'][piexif.ImageIFD.Software] = brand ? p.scanner + ' (FilmTag by Jeffrey Chu)' : p.scanner;
-            var dt = seg.exifDate + ' ' + ts.str + '+08:00';
+            var dt = fd.exifDate + ' ' + String(fd.hr).padStart(2,'0') + ':' + String(fd.min).padStart(2,'0') + ':00+08:00';
             exifObj['0th'][piexif.ImageIFD.DateTime] = dt;
             exifObj['Exif'][piexif.ExifIFD.DateTimeOriginal] = dt;
             exifObj['Exif'][piexif.ExifIFD.DateTimeDigitized] = dt;
@@ -737,11 +781,6 @@ function escXml(s) {
     updateGpsDots();
     reverseGeocode(lat, lng, keys);
     mapInfoEl.textContent = keys.length + ' file(s) location set';
-    var items = document.querySelectorAll('.file-item');
-    for (var j = 0; j < items.length; j++) items[j].classList.remove('selected');
-    selectedSet = {};
-
-    selectAllBtn.textContent = t('select_all');
   }
 
   function reverseGeocode(lat, lng, indices) {
@@ -790,12 +829,10 @@ function escXml(s) {
   gpsModeSelect.addEventListener('change', function() {
     if (this.value === 'on') {
       gpsControls.style.display = 'block';
-      selectAllBtn.style.display = '';
       updateGpsDots();
       initMap();
     } else {
       gpsControls.style.display = 'none';
-      selectAllBtn.style.display = 'none';
       updateGpsDots();
     }
   });
@@ -808,7 +845,6 @@ function escXml(s) {
     for (var k = 0; k < keys.length; k++) delete gpsData[keys[k]];
     if (mapMarker) { map.removeLayer(mapMarker); mapMarker = null; }
     updateGpsDots();
-    applyTranslations();
   });
 
   selectAllBtn.addEventListener('click', function() {
@@ -824,7 +860,7 @@ function escXml(s) {
       if (selectedSet[idx]) items[j].classList.add('selected');
       else items[j].classList.remove('selected');
     }
-    selectAllBtn.textContent = Object.keys(selectedSet).length === uploadedFiles.length ? t('select_all') + ' (All)' : t('select_all');
+    selectAllBtn.textContent = Object.keys(selectedSet).length === uploadedFiles.length ? t('unselect_all') : t('select_all');
 
   });
 
@@ -912,15 +948,13 @@ function escXml(s) {
     var ins = document.querySelectorAll('input[type="text"], input[type="number"]');
     for (var j = 0; j < ins.length; j++) ins[j].value = '';
     singleDateInp.valueAsDate = new Date(); singleTimeInp.value = '12:00';
-    sameDateSel.value = 'yes'; sameDateSel.dispatchEvent(new Event('change'));
-    segContainer.innerHTML = ''; uploadedFiles = [];
+    uploadedFiles = [];
     summaryPanel.classList.remove('show'); summaryBody.innerHTML = '';
     gallery.classList.remove('show'); galleryGrid.innerHTML = '';
     gpsSection.style.display = 'none';
     gpsControls.style.display = 'none';
     gpsModeSelect.value = 'off';
-    selectAllBtn.style.display = 'none';
-    gpsData = {}; selectedSet = {};
+    gpsData = {}; selectedSet = {}; fileDates = {};
     if (mapMarker) { map.removeLayer(mapMarker); mapMarker = null; }
     mapInitialized = false;
     progressSec.style.display = 'none'; progBar.style.width = '0%';
@@ -931,6 +965,15 @@ function escXml(s) {
   updateLensUI();
 
   document.querySelectorAll('.section-collapse-header').forEach(function(header) {
+    header.addEventListener('click', function() {
+      var target = document.getElementById(header.dataset.target);
+      var icon = header.querySelector('.collapse-icon');
+      target.classList.toggle('collapsed');
+      icon.classList.toggle('open');
+    });
+  });
+
+  document.querySelectorAll('.file-sub-header').forEach(function(header) {
     header.addEventListener('click', function() {
       var target = document.getElementById(header.dataset.target);
       var icon = header.querySelector('.collapse-icon');
@@ -953,7 +996,6 @@ function escXml(s) {
     gpsSection.style.display = 'none';
     gpsControls.style.display = 'none';
     gpsModeSelect.value = 'off';
-    selectAllBtn.style.display = 'none';
     refreshSegments();
     renderFileList();
   });

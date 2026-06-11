@@ -64,16 +64,11 @@
     .field-group > div { flex: 1; }
     .hint { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem; }
 
-    .date-segments { margin-top: 0.75rem; }
-    .segment-card {
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 6px; padding: 1rem; margin-bottom: 0.5rem;
+    .gps-check {
+      font-size: 0.8rem; color: var(--text-secondary);
+      display: flex; align-items: center; gap: 0.35rem; cursor: pointer;
     }
-    .segment-card .seg-label {
-      font-size: 0.8rem; font-weight: 600; color: var(--accent); margin-bottom: 0.5rem;
-    }
-
-    .btn {
+    .map-search-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
       padding: 0.55rem 1rem; border: 1px solid var(--border); border-radius: 6px;
       font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all var(--transition); font-family: inherit;
     }
@@ -104,6 +99,7 @@
     .file-list { margin-top: 1rem; }
     .file-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
     .file-list-header span { font-size: 0.8rem; color: var(--text-secondary); }
+    .select-toolbar { display: flex; gap: 0.5rem; margin-top: 0.5rem; margin-bottom: 0.75rem; }
     .file-item {
       display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0;
       border-bottom: 1px solid #1a1a1a; font-size: 0.78rem;
@@ -144,6 +140,7 @@
     .summary-row .k { color: var(--text-secondary); }
     .summary-row .v { color: var(--text); font-family: monospace; font-size: 0.75rem; text-align: right; }
     .rename-table { width: 100%; border-collapse: collapse; font-size: 0.7rem; margin-top: 0.5rem; }
+    .summary-thumb { display: block; border-radius: 3px; }
     .rename-table th { text-align: left; color: var(--text-secondary); padding: 0.3rem 0.5rem; border-bottom: 1px solid var(--border); font-weight: 500; }
     .rename-table td { padding: 0.25rem 0.5rem; border-bottom: 1px solid #1a1a1a; }
     .rename-table .old-name { color: var(--red); font-family: monospace; word-break: break-all; }
@@ -272,6 +269,15 @@
     .map-info { font-size: 0.72rem; color: var(--text-secondary); }
     .file-gps-dot { font-size: 0.65rem; flex-shrink: 0; }
     .gps-addr { font-size: 0.6rem; color: var(--text-secondary); margin-left: 3px; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle; }
+    .date-dot { font-size: 0.6rem; color: var(--text-secondary); flex-shrink: 0; display: inline-flex; align-items: center; gap: 2px; margin-left: 4px; }
+    .no-date-icon { width: 14px; height: 14px; opacity: 0.3; vertical-align: middle; margin-left: 4px; flex-shrink: 0; }
+
+    .file-sub-section { margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border); }
+    .file-sub-header { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none; font-size: 0.85rem; font-weight: 500; color: #fff; }
+    .file-sub-header:hover { color: var(--accent); }
+    .file-sub-body { overflow: hidden; transition: max-height 0.3s ease; }
+    .file-sub-body.collapsed { max-height: 0; }
+    .file-sub-body:not(.collapsed) { max-height: 40rem; margin-top: 0.75rem; }
 
     .file-thumb { cursor: pointer; }
     .no-gps-icon { width: 14px; height: 14px; opacity: 0.3; vertical-align: middle; }
@@ -311,7 +317,7 @@
   </div>
 
   <div class="section">
-    <div class="section-header"><span class="section-number">1</span> <span data-i18n="upload_photos">Upload Photos</span></div>
+    <div class="section-header"><span class="section-number">1</span> <span data-i18n="file_setup">File Setup</span></div>
     <div class="upload-wrap" id="upload-wrap">
       <input type="file" id="file-input" multiple accept="image/jpeg,image/png,image/tiff,image/dng,.dng">
       <div class="upload-zone">
@@ -321,16 +327,31 @@
       </div>
     </div>
     <div class="file-list" id="file-list"></div>
+    <div class="select-toolbar" id="select-toolbar" style="display:none;">
+      <button class="btn btn-sm btn-secondary" id="select-all-btn" data-i18n="select_all">Select All</button>
+    </div>
+    <div class="file-sub-section">
+      <div class="file-sub-header" data-target="date-time-body">
+        <span>📅</span> <span data-i18n="date_time">Shooting Date & Time</span>
+        <span class="collapse-icon open">▾</span>
+      </div>
+      <div class="file-sub-body" id="date-time-body">
+        <div class="field-group">
+          <div><label data-i18n="shoot_date">Shoot Date</label><input type="date" id="single-date-input"></div>
+          <div><label data-i18n="start_time">Start Time (24h, first photo)</label><input type="time" id="single-time-input" value="12:00"></div>
+        </div>
+        <button class="btn btn-sm btn-danger" id="clear-date-btn" style="margin-top:0.5rem;" data-i18n="clear_date">Clear Date</button>
+      </div>
+    </div>
     <div class="gps-section" id="gps-section" style="display:none;">
       <div class="gps-toolbar">
         <div class="gps-mode-row">
-          <label class="gps-mode-label">GPS Location:</label>
+          <label class="gps-mode-label">📍 GPS Location:</label>
           <select id="gps-mode-select" style="width:auto; font-size:0.8rem;">
             <option value="off" data-i18n="gps_off">Don't add GPS location</option>
             <option value="on" data-i18n="gps_on">Add GPS location to EXIF</option>
           </select>
         </div>
-        <button class="btn btn-sm btn-secondary" id="select-all-btn" data-i18n="select_all" style="display:none;">Select All</button>
       </div>
       <div class="gps-controls" id="gps-controls" style="display:none;">
         <div class="map-search-row">
@@ -432,30 +453,7 @@
   </div>
 
   <div class="section">
-    <div class="section-header"><span class="section-number">9</span> <span data-i18n="date_time">Date & Time</span></div>
-    <div class="form-row">
-      <div><label data-i18n="date_question">Are all photos from the same date?</label>
-        <select id="same-date-select">
-          <option value="yes" data-i18n="date_yes">Yes — all same date</option>
-          <option value="no" data-i18n="date_no">No — multiple date segments</option>
-        </select>
-      </div>
-      <div id="single-date-group">
-        <div class="field-group">
-          <div><label data-i18n="shoot_date">Shoot Date</label><input type="date" id="single-date-input"></div>
-          <div><label data-i18n="start_time">Start Time (24h)</label><input type="time" id="single-time-input" value="12:00"></div>
-        </div>
-      </div>
-      <div id="multi-date-group" style="display:none;">
-        <p class="hint" id="seg-file-count"></p>
-        <div class="date-segments" id="seg-container"></div>
-        <button class="btn btn-secondary btn-sm" type="button" id="add-seg-btn" style="margin-top:0.5rem;" data-i18n="add_segment">+ Add Date Segment</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-header"><span class="section-number">10</span> <span data-i18n="signature">😎 Signature</span></div>
+    <div class="section-header"><span class="section-number">9</span> <span data-i18n="signature">😎 Signature</span></div>
     <div class="form-row">
       <label style="font-size:0.85rem;color:var(--text);display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
         <input type="checkbox" id="branding-checkbox" checked style="width:auto;accent-color:var(--accent);">

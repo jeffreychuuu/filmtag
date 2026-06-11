@@ -45,7 +45,7 @@ tpl.en = {
   "disclaimer_text": "This tool is shared freely with the film photography community. Commercial use or profiteering is strictly prohibited. Unauthorised commercial use will be subject to legal action.",
 
   // Sections
-  "upload_photos": "Upload Photos",
+  "file_setup": "File Setup",
   "upload_hint": "Click to select files, or drag & drop here",
   "upload_formats": "JPEG, TIFF, DNG, PNG (JPEG recommended \u2014 EXIF writes to JPEG only)",
   "author": "Author",
@@ -67,12 +67,12 @@ tpl.en = {
   "push_pull": "Push / Pull",
   "scanner": "Scanner",
   "scanner_placeholder": "Enter custom scanner name",
-  "date_time": "Date & Time",
+  "date_time": "Shooting Date & Time",
   "date_question": "Are all photos from the same date?",
   "date_yes": "Yes \u2014 all same date",
   "date_no": "No \u2014 multiple date segments",
   "shoot_date": "Shoot Date",
-  "start_time": "Start Time (24h)",
+  "start_time": "Start Time (24h, first photo)",
   "add_segment": "+ Add Date Segment",
   "signature": "\u{1F60E} Signature",
   "signature_label": "Add \"FilmTag by Jeffrey Chu\" to EXIF metadata",
@@ -93,7 +93,7 @@ tpl.en = {
   "remove": "Remove",
   "total_uploaded": "Total: {n} file(s) uploaded",
   "file_count": "{n} file(s)",
-  "clear_all": "Clear All",
+  "clear_all": "Remove all photos",
   "unknown": "Unknown",
 
   // Validation
@@ -125,10 +125,15 @@ tpl.en = {
   "gps_off": "Don't add GPS location",
   "gps_on": "Add GPS location to EXIF",
   "select_all": "Select All",
+  "unselect_all": "Deselect All",
   "search_location": "Search location...",
   "search": "Search",
   "map_hint": "Select file(s) above, then click the map or search to set location",
-  "clear_selected": "Clear Selected"
+  "clear_selected": "Clear Selected GPS",
+  "clear_date": "Clear Date",
+
+  "col_location": "Location",
+  "col_date": "Date",
 };
 
 tpl.zh = {
@@ -139,7 +144,7 @@ tpl.zh = {
   "disclaimer_text": "呢個工具係免費分享俾菲林攝影愛好者嘅，絕不能用作商業用途或謀利用途，否則將追究法律責任。",
 
   // Sections
-  "upload_photos": "上傳相片",
+  "file_setup": "檔案設定",
   "upload_hint": "點擊選擇檔案，或拖拽到此處",
   "upload_formats": "JPEG、TIFF、DNG、PNG（建議使用 JPEG — EXIF 僅寫入 JPEG）",
   "author": "作者",
@@ -161,12 +166,12 @@ tpl.zh = {
   "push_pull": "推動 / 拉回",
   "scanner": "掃描器",
   "scanner_placeholder": "輸入自定義掃描器名稱",
-  "date_time": "日期 & 時間",
+  "date_time": "拍攝日期 & 時間",
   "date_question": "所有相片是否同一日期？",
   "date_yes": "是 — 全部同一日期",
   "date_no": "否 — 多個日期分段",
   "shoot_date": "拍攝日期",
-  "start_time": "開始時間 (24小時)",
+  "start_time": "開始時間 (24小時, 第一張相)",
   "add_segment": "+ 新增日期分段",
   "signature": "😎 簽名",
   "signature_label": "於 EXIF 中加入「FilmTag by Jeffrey Chu」",
@@ -187,7 +192,7 @@ tpl.zh = {
   "remove": "移除",
   "total_uploaded": "已上傳：{n} 個檔案",
   "file_count": "{n} 個檔案",
-  "clear_all": "清除全部",
+  "clear_all": "移除全部相片",
   "unknown": "未知",
 
   // Validation
@@ -219,10 +224,15 @@ tpl.zh = {
   "gps_off": "不加入 GPS 位置",
   "gps_on": "加入 GPS 位置到 EXIF",
   "select_all": "全選",
+  "unselect_all": "取消全選",
   "search_location": "搜尋位置...",
   "search": "搜尋",
   "map_hint": "選擇上方檔案，然後點擊地圖或搜尋以設定位置",
-  "clear_selected": "清除已選位置"
+  "clear_selected": "清除已選 GPS 位置",
+  "clear_date": "清除日期",
+
+  "col_location": "位置",
+  "col_date": "日期",
 };
 
 export { t, setLang, toggleLang, applyTranslations, lang };
