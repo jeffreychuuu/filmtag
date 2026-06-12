@@ -72,12 +72,27 @@ Upload 你嘅 scans，揀你嘅 gear 同菲林，set 拍攝日期——佢會喺
 
 ## 技術
 
+### 技術棧
 - **piexifjs** — 瀏覽器端 EXIF 讀寫
 - **JSZip** — 用戶端 ZIP 打包
 - **esbuild** — 打包工具
 - **Vercel** — 部署
 - **Leaflet.js** — 互動地圖
 - **OpenStreetMap + Nominatim** — 地圖圖磚、地理編碼／逆向地理編碼
+
+### 專案結構
+
+```
+src/
+  app.js      ← 主程式：狀態管理、事件綁定、檔案/日期/處理邏輯
+  i18n.js     ← 英文 & 繁體中文翻譯
+  utils.js    ← 純工具函數（toDms、injectXmp、esc、fmtSize 等）
+  gear.js     ← Gear 下拉選單、自訂選項儲存、資料驗證
+  gps.js      ← Leaflet 地圖、逆向地理編碼、位置標記
+public/
+  index.html  ← App 外殼，所有 UI 標記
+data.json     ← 內建預設（相機、鏡頭、菲林、沖掃工作室）
+```
 
 ## 本地開發
 
@@ -119,9 +134,9 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 
 ### 版本類型
 
-- `npm run release` → **patch** (1.0.2 → 1.0.3)
-- `npm version minor` → **minor** (1.0.2 → 1.1.0)
-- `npm version major` → **major** (1.0.2 → 2.0.0)
+- `npm run release` → **patch** (1.1.0 → 1.1.1)
+- `npm version minor` → **minor** (1.1.0 → 1.2.0)
+- `npm version major` → **major** (1.1.0 → 2.0.0)
 
 ## 起源
 
@@ -148,12 +163,12 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 <details>
 <summary>撳開嚟睇</summary>
 
-**1.0.2 (2026-06-14)** — README 重寫、版號顯示、發佈流程
+**1.1.0 (2026-06-14)** — README 重寫、版號顯示、發佈流程
 - 📝 README 改寫：敘事式開場、HK presets、serverless 說明
 - 🚀 App 底部顯示版號、Release Workflow 文件化
 - 📦 更新日誌改用 details 摺疊 + version heading
 
-**1.0.1 (2026-06-12)** — 預設日期改用檔案 modified time
+**2026-06-12** — 預設日期改用檔案 modified time
 - 🕐 冇 EXIF 拍攝日期時，改用第一張相嘅 `lastModified` 做基準，每張 +1 分鐘（唔再係硬食今日 12:00）
 - 📍 GPS Save 制而家會 apply 地圖 marker 位置俾 selected files；冇 marker 時 disable
 - 🎨 用字更新：「Author」→「Artist」、「file」→「photo / 相 / 菲林」
@@ -197,7 +212,7 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 - 📄 網站根目錄放置 `ads.txt` 供廣告網絡驗證
 - 🔧 Build script 更新，自動複製 `ads.txt` 到 dist/
 
-**1.0.0 (2026-06-11)** — 相機-鏡頭關聯同儲存修正
+**2026-06-11** — 相機-鏡頭關聯同儲存修正
 - 📸 自訂鏡頭而家按相機儲存——每部相機只會顯示屬於佢嘅鏡頭
 - 💾 焦距同最大光圈會同鏡頭名稱一齊儲存
 - 🐛 修正：相機揀自訂時鏡頭資料冇儲存到 localStorage

@@ -72,12 +72,27 @@ The final result 👇
 
 ## Tech
 
+### Stack
 - **piexifjs** — browser-side EXIF read/write
 - **JSZip** — client-side ZIP packaging
 - **esbuild** — bundler
 - **Vercel** — deployment
 - **Leaflet.js** — interactive map
 - **OpenStreetMap + Nominatim** — map tiles & geocoding/reverse geocoding
+
+### Project Structure
+
+```
+src/
+  app.js      ← Entry point: state, event binding, file/date/process logic
+  i18n.js     ← English & Traditional Chinese translations
+  utils.js    ← Pure utility functions (toDms, injectXmp, esc, fmtSize, etc.)
+  gear.js     ← Gear dropdowns, custom options persistence, validation
+  gps.js      ← Leaflet map, reverse geocoding, location tagging
+public/
+  index.html  ← App shell with all UI markup
+data.json     ← Built-in presets (cameras, lenses, films, labs)
+```
 
 ## Local Dev
 
@@ -119,9 +134,9 @@ This project follows semver. The source of truth is `package.json` → `version`
 
 ### Version bump types
 
-- `npm run release` → **patch** (1.0.2 → 1.0.3)
-- `npm version minor` → **minor** (1.0.2 → 1.1.0)
-- `npm version major` → **major** (1.0.2 → 2.0.0)
+- `npm run release` → **patch** (1.1.0 → 1.1.1)
+- `npm version minor` → **minor** (1.1.0 → 1.2.0)
+- `npm version major` → **major** (1.1.0 → 2.0.0)
 
 ## Origin
 
@@ -148,12 +163,12 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 <details>
 <summary>Click to expand</summary>
 
-**1.0.2 (2026-06-14)** — README rewrite, version injection, release workflow
+**1.1.0 (2026-06-14)** — README rewrite, version injection, release workflow
 - 📝 README rewrite with narrative pitch, HK presets, serverless note
 - 🚀 In-app version display (footer), release workflow documented
 - 📦 Changelog collapsed under details tag with version headings
 
-**1.0.1 (2026-06-12)** — Fallback date from file modified time
+**2026-06-12** — Fallback date from file modified time
 - 🕐 When no EXIF date is found, falls back to the first file's `lastModified` timestamp, +1 minute per photo (instead of hardcoded today 12:00)
 - 📍 GPS Save button now applies the map marker position to selected files; disabled when no marker is placed
 - 🎨 Terminology: "Author" → "Artist", "file" → "photo" in all UI text
@@ -197,7 +212,7 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 - 📄 `ads.txt` placed at site root for ad network verification
 - 🔧 Build script updated to copy `ads.txt` to dist/
 
-**1.0.0 (2026-06-11)** — Camera-Lens association & persistence
+**2026-06-11** — Camera-Lens association & persistence
 - 📸 Custom lenses are now saved per camera — each camera only shows its own saved lenses
 - 💾 Focal length & max aperture are saved alongside the lens name for custom entries
 - 🐛 Fixed: custom lens not saving to localStorage when camera is set to custom
