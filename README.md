@@ -152,9 +152,9 @@ This project follows semver. The source of truth is `package.json` → `version`
 
 ### Version bump types
 
-- `npm run release` → **patch** (1.1.1 → 1.1.2)
-- `npm version minor` → **minor** (1.1.1 → 1.2.0)
-- `npm version major` → **major** (1.1.1 → 2.0.0)
+- `npm run release` → **patch** (1.1.3 → 1.1.4)
+- `npm version minor` → **minor** (1.1.3 → 1.2.0)
+- `npm version major` → **major** (1.1.3 → 2.0.0)
 
 ## Origin
 
@@ -180,6 +180,11 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 
 <details>
 <summary>Click to expand</summary>
+
+**1.1.3 (2026-06-14)** — Fix add range + Clear GPS button
+- 🐛 Fixed: "Add Range" button not working after module refactor
+- ✏️ "Clear Selected GPS" renamed to "Clear" and moved below map
+- 🖼️ Upload restricted to `.jpg` / `.jpeg` only (TIFF/DNG/PNG rejected)
 
 **1.1.2 (2026-06-14)** — Restrict upload to JPEG only
 - 🖼️ Upload filter: only `.jpg` / `.jpeg` accepted; TIFF/DNG/PNG rejected with warning

@@ -152,9 +152,9 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 
 ### 版本類型
 
-- `npm run release` → **patch** (1.1.1 → 1.1.2)
-- `npm version minor` → **minor** (1.1.1 → 1.2.0)
-- `npm version major` → **major** (1.1.1 → 2.0.0)
+- `npm run release` → **patch** (1.1.3 → 1.1.4)
+- `npm version minor` → **minor** (1.1.3 → 1.2.0)
+- `npm version major` → **major** (1.1.3 → 2.0.0)
 
 ## 起源
 
@@ -180,6 +180,11 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 
 <details>
 <summary>撳開嚟睇</summary>
+
+**1.1.3 (2026-06-14)** — 修正 Add Range + Clear GPS 按鈕
+- 🐛 修正：模組重構後「Add Range」按鈕失靈
+- ✏️ 「Clear Selected GPS」改為「清除」並搬移到地圖下面
+- 🖼️ 上傳限制為只接受 `.jpg` / `.jpeg`（TIFF/DNG/PNG 會被拒絕）
 
 **1.1.2 (2026-06-14)** — 限制上傳只接受 JPEG
 - 🖼️ 上傳過濾：只接受 `.jpg` / `.jpeg`；TIFF/DNG/PNG 會被拒絕並顯示警告
