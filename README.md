@@ -8,21 +8,30 @@ Interactive web app for writing EXIF metadata to film-scanned photos — all don
 
 ## Why FilmTag?
 
-### The Problem
+You just got your scans back from the lab. The colours are perfect. The grain is *chef's kiss*. You're hyped.
 
-The most frustrating part of shooting film isn't waiting for development — it's getting your scans back and finding zero EXIF data. No camera, no lens, no ISO, no dates. For anyone who wants to properly organize their film work, it's a real headache.
+Then you open Google Photos and your entire roll shows up as one clump — all dated the day the lab scanned them. That moody street shot from three weeks ago? Sitting right next to your dinner photos from last Tuesday. Useless.
 
-### The Solution
+No camera. No lens. No date. Just vibes.
 
-FilmTag batch-writes EXIF metadata to your scanned photos. Everything happens in the browser — no installs, no server uploads.
+If you're the type who actually cares about keeping a clean digital archive of your analog work — you know exactly how maddening this is. You're spending real money on film, chemistry, and scanning, only to get back JPEGs with the metadata soul of a blank Word document.
 
-### How It Works
+So I built **filmtag** to fix this.
 
-1. Enter your camera, lens, film stock, and lab details
-2. Pick your shooting dates (supports multiple date segments per roll)
-3. Time is auto-generated starting from your chosen moment, +1 minute per photo
-4. Upload your scanned files (JPEG, TIFF, etc.)
-5. Download the tagged files with full EXIF — upload to Google Photos for perfect chronological order
+### What it does
+
+Upload your scans, pick your gear and film stock, set the shooting date — and it batch-injects complete EXIF data into every file in seconds. No manual editing. No Lightroom workarounds. No spreadsheets.
+
+### What gets written
+
+**EXIF:** Camera make/model, lens, ISO, focal length, aperture, shutter, date/time, GPS, artist, copyright, description  
+**XMP:** Creator, credit, date created, label, description
+
+### Your Setup, Remembered
+
+The default presets are built around Hong Kong 🇭🇰 — local labs like Megatoni, DOT-WELL, and TrueFare, plus my gear like the Leica MP and Olympus OM-2Sp. But everything is customisable. Type in any camera, lens, or lab you use, and **filmtag** saves it to your browser's local storage — so next time your gear shows up right in the dropdown.
+
+One thing worth knowing: local storage is tied to your browser. Clear your data, switch browsers, or use a private window, and your saved presets won't carry over. It's a trade-off for keeping the tool completely serverless — **nothing you type or upload is ever sent to a server**. Your photos stay on your device, full stop.
 
 ### Highlight Features
 
@@ -61,7 +70,51 @@ The final result 👇
 - Location search via OpenStreetMap Nominatim geocoding
 - Collapsible Origin & Disclaimer sections
 
+## Tech
+
+- **piexifjs** — browser-side EXIF read/write
+- **JSZip** — client-side ZIP packaging
+- **esbuild** — bundler
+- **Vercel** — deployment
+- **Leaflet.js** — interactive map
+- **OpenStreetMap + Nominatim** — map tiles & geocoding/reverse geocoding
+
+## Local Dev
+
+```bash
+npm install
+npm run build
+npm run dev    # http://localhost:3333
+```
+
+## Deploy
+
+Push to GitHub → import in Vercel → Root Directory = `.` (repo root). Vercel auto-runs `npm run build`, serves `dist/`.
+
+## Origin
+
+FilmTag started as a CLI tool for myself and a few friends — I'm a film photography beginner who happens to write code for a living, and I just wanted an easy way to tag my scans with proper metadata. Before a trip, I worried that a lab might send scans back while I was away, so I turned it into a web app I could use from anywhere.
+
+## Disclaimer
+
+This tool is shared freely with the film photography community. Commercial use or profiteering is strictly prohibited. Unauthorised commercial use will be subject to legal action.
+
+---
+
+© 2026 Jeffrey Chu. All rights reserved.
+
+## Shared Config
+
+`data.json` defines all dropdown options (cameras, lenses, films, labs, processes, pushpulls, scanners). Edit this file to update options across all deployments.
+
+## License
+
+This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You may freely use, modify, and share it for noncommercial purposes. Commercial use or profiteering is strictly prohibited. See the `LICENSE` file for details.
+
 ## What's New
+
+<details>
+<summary>Click to expand</summary>
 
 **2026-06-12** — Fallback date from file modified time
 - 🕐 When no EXIF date is found, falls back to the first file's `lastModified` timestamp, +1 minute per photo (instead of hardcoded today 12:00)
@@ -128,44 +181,4 @@ The final result 👇
 - 🧹 Clear Date / Clear Selected GPS buttons for selected files
 - 📋 Review summary now shows 40×40 thumbnails + Location + Date columns
 - 🏷️ "Add FilmTag credit to photo description" checkbox replaces old signature options
-
-## Tech
-
-- **piexifjs** — browser-side EXIF read/write
-- **JSZip** — client-side ZIP packaging
-- **esbuild** — bundler
-- **Vercel** — deployment
-- **Leaflet.js** — interactive map
-- **OpenStreetMap + Nominatim** — map tiles & geocoding/reverse geocoding
-
-## Local Dev
-
-```bash
-npm install
-npm run build
-npm run dev    # http://localhost:3333
-```
-
-## Deploy
-
-Push to GitHub → import in Vercel → Root Directory = `.` (repo root). Vercel auto-runs `npm run build`, serves `dist/`.
-
-## Origin
-
-FilmTag started as a CLI tool for myself and a few friends — I'm a film photography beginner who happens to write code for a living, and I just wanted an easy way to tag my scans with proper metadata. Before a trip, I worried that a lab might send scans back while I was away, so I turned it into a web app I could use from anywhere.
-
-## Disclaimer
-
-This tool is shared freely with the film photography community. Commercial use or profiteering is strictly prohibited. Unauthorised commercial use will be subject to legal action.
-
----
-
-© 2026 Jeffrey Chu. All rights reserved.
-
-## Shared Config
-
-`data.json` defines all dropdown options (cameras, lenses, films, labs, processes, pushpulls, scanners). Edit this file to update options across all deployments.
-
-## License
-
-This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You may freely use, modify, and share it for noncommercial purposes. Commercial use or profiteering is strictly prohibited. See the `LICENSE` file for details.
+</details>

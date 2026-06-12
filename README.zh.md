@@ -8,21 +8,30 @@
 
 ## 點解要用 FilmTag？
 
-### 痛點
+啱啱拎返啲 scans——色水 perfect，grain 位靚到癲，你成個人都熱血緊。
 
-每次影完菲林，最煩唔係等沖掃——係拎返啲 JPG 之後，發現入面乜 EXIF 都冇。相機、鏡頭、ISO、拍攝日期，全部空白。對想好好整理底片作品嘅人嚟講，真係有啲崩潰。
+跟住你打開 Google Photos，發現成卷菲林全部逼埋同一日——全部顯示係 lab scan 嗰日。三個禮拜前喺街頭影嘅 moody shot？同緊上星期二 dinner 相擺埋一齊。冇鬼用。
 
-### 解決方案
+冇相機。冇鏡頭。冇日期。得個樣。
 
-所以我索性自己寫咗個工具，可以幫沖掃後嘅 JPG 一次過加返 EXIF。全部喺瀏覽器入面完成，唔使裝任何嘢，唔使上傳去伺服器。
+如果你係嗰種真係會 care 保持 analog 作品數位檔案整齊嘅人——你知呢種感覺有幾痴線。你用真金白銀買菲林、沖掃，結果拎返嚟嘅 JPEG metadata 空白到好似一個空嘅 Word 檔。
 
-### 使用流程
+所以我整咗 **filmtag** 嚟解決呢個問題。
 
-1. 入網站選擇你嘅相機／鏡頭／菲林等資料
-2. 揀返拍攝日期（可以每卷菲林設唔同日子）
-3. 佢會自動幫每張相嘅時間由你揀嗰刻開始，每張加一分鐘
-4. 上傳你嘅菲林掃描電子檔（JPEG、TIFF 等）
-5. Download 返有完整 EXIF 嘅檔案，upload 去 Google Photos 就會自動排好順序
+### 做咩嘅
+
+Upload 你嘅 scans，揀你嘅 gear 同菲林，set 拍攝日期——佢會喺幾秒內 batch 注入完整 EXIF 資料。唔使手動編輯。唔使 Lightroom 偷雞。唔使試算表。
+
+### 會寫入咩嘢
+
+**EXIF：** Camera make/model、lens、ISO、focal length、aperture、shutter、date/time、GPS、artist、copyright、description  
+**XMP：** Creator、credit、date created、label、description
+
+### 你嘅設定，自動記低
+
+預設係圍繞香港 🇭🇰 嚟設定——本地沖掃工作室如 Megatoni、DOT-WELL、TrueFare，同埋我嘅器材如 Leica MP 同 Olympus OM-2Sp。但全部都可以自訂。輸入任何你用嘅相機、鏡頭或 Lab，**filmtag** 會自動 save 落你瀏覽器嘅 local storage——下次開返就會喺 dropdown 見到。
+
+有一點要留意：local storage 同你個瀏覽器綁死。清 browser data、轉瀏覽器、或者用私密模式，你嘅設定就會唔見。呢個取捨換嚟嘅係呢個工具完全 serverless——**你輸入嘅任何嘢、上傳嘅任何相，都唔會送去任何伺服器**。你啲相永遠留喺你部機度，就係咁簡單。
 
 ### 重點功能
 
@@ -61,7 +70,51 @@
 - OpenStreetMap Nominatim 地名搜尋功能
 - 可摺疊嘅起源與聲明區塊
 
+## 技術
+
+- **piexifjs** — 瀏覽器端 EXIF 讀寫
+- **JSZip** — 用戶端 ZIP 打包
+- **esbuild** — 打包工具
+- **Vercel** — 部署
+- **Leaflet.js** — 互動地圖
+- **OpenStreetMap + Nominatim** — 地圖圖磚、地理編碼／逆向地理編碼
+
+## 本地開發
+
+```bash
+npm install
+npm run build
+npm run dev    # http://localhost:3333
+```
+
+## 部署
+
+Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄）。Vercel 會自動執行 `npm run build`，serve `dist/`。
+
+## 起源
+
+起初只係寫咗個命令行工具俾自己同朋友用——我本身係菲林攝影入門者，咁啱又係做程式開發，純粹想有個方便嘅方法幫掃描檔加返相片資訊。後尾準備去旅行，驚沖掃舖喺旅行期間傳返啲掃描檔過嚟冇得整理，就索性整咗個網站出嚟，自己喺外地都處理得到。
+
+## 聲明
+
+呢個工具係免費分享俾菲林攝影愛好者嘅，絕不能用作商業用途或謀利用途，否則將追究法律責任。
+
+---
+
+© 2026 Jeffrey Chu. 版權所有，保留一切權利。
+
+## 共用設定
+
+`data.json` 定義所有下拉選單選項（相機、鏡頭、菲林、工作室、沖洗方式、Push/Pull、掃描器）。編輯呢個檔案就可以更新所有部署嘅選項。
+
+## 許可證 (License)
+
+本專案採用 **PolyForm Noncommercial License 1.0.0** 許可證。你可以自由非商業用途地使用、修改及分享，但嚴禁任何商業或謀利用途。詳情請參閱 `LICENSE` 檔案。
+
 ## 新功能
+
+<details>
+<summary>撳開嚟睇</summary>
 
 **2026-06-12** — 預設日期改用檔案 modified time
 - 🕐 冇 EXIF 拍攝日期時，改用第一張相嘅 `lastModified` 做基準，每張 +1 分鐘（唔再係硬食今日 12:00）
@@ -128,44 +181,4 @@
 - 🧹 清除日期 / 清除已選 GPS 位置按鈕
 - 📋 摘要檢視新增 40×40 縮圖、位置欄、日期欄
 - 🏷️「在相片描述中加入 FilmTag 署名」選項取代舊簽名設定
-
-## 技術
-
-- **piexifjs** — 瀏覽器端 EXIF 讀寫
-- **JSZip** — 用戶端 ZIP 打包
-- **esbuild** — 打包工具
-- **Vercel** — 部署
-- **Leaflet.js** — 互動地圖
-- **OpenStreetMap + Nominatim** — 地圖圖磚、地理編碼／逆向地理編碼
-
-## 本地開發
-
-```bash
-npm install
-npm run build
-npm run dev    # http://localhost:3333
-```
-
-## 部署
-
-Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄）。Vercel 會自動執行 `npm run build`，serve `dist/`。
-
-## 起源
-
-起初只係寫咗個命令行工具俾自己同朋友用——我本身係菲林攝影入門者，咁啱又係做程式開發，純粹想有個方便嘅方法幫掃描檔加返相片資訊。後尾準備去旅行，驚沖掃舖喺旅行期間傳返啲掃描檔過嚟冇得整理，就索性整咗個網站出嚟，自己喺外地都處理得到。
-
-## 聲明
-
-呢個工具係免費分享俾菲林攝影愛好者嘅，絕不能用作商業用途或謀利用途，否則將追究法律責任。
-
----
-
-© 2026 Jeffrey Chu. 版權所有，保留一切權利。
-
-## 共用設定
-
-`data.json` 定義所有下拉選單選項（相機、鏡頭、菲林、工作室、沖洗方式、Push/Pull、掃描器）。編輯呢個檔案就可以更新所有部署嘅選項。
-
-## 許可證 (License)
-
-本專案採用 **PolyForm Noncommercial License 1.0.0** 許可證。你可以自由非商業用途地使用、修改及分享，但嚴禁任何商業或謀利用途。詳情請參閱 `LICENSE` 檔案。
+</details>
