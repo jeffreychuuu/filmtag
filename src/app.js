@@ -156,6 +156,30 @@ document.addEventListener('DOMContentLoaded', function() {
   uploadWrap.addEventListener('dragleave', function() { uploadWrap.classList.remove('dragover'); });
   uploadWrap.addEventListener('drop', function(e) { e.preventDefault(); uploadWrap.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
 
+  S.addRangeBtn.addEventListener('click', function() {
+    var max = S.uploadedFiles.length;
+    if (!max) return;
+    var def = 1;
+    for (var i = 0; i < max; i++) { if (!S.selectedSet[i]) { def = i + 1; break; } }
+    var otherSet = {};
+    for (var j = 0; j < max; j++) { if (S.selectedSet[j]) otherSet[j + 1] = true; }
+    var row = document.createElement('div');
+    row.className = 'range-row';
+    row.innerHTML = 'Start: <select class="range-start">' + buildOptions(max, def, otherSet) + '</select> End: <select class="range-end">' + buildOptions(max, def, otherSet) + '</select> <button class="btn btn-sm btn-danger remove-range-btn">✕</button>';
+    row.querySelector('.remove-range-btn').addEventListener('click', function() { this.parentElement.remove(); syncRange(); });
+    row.querySelector('.range-start').addEventListener('change', function() {
+      var endSel = this.parentElement.querySelector('.range-end');
+      if (parseInt(endSel.value, 10) < parseInt(this.value, 10)) endSel.value = this.value;
+      syncRange();
+    });
+    row.querySelector('.range-end').addEventListener('change', function() {
+      var startSel = this.parentElement.querySelector('.range-start');
+      if (parseInt(startSel.value, 10) > parseInt(this.value, 10)) startSel.value = this.value;
+      syncRange();
+    });
+    S.rangeRowsEl.appendChild(row);
+  });
+
   reviewBtn.addEventListener('click', function() {
     var p = collect();
     var err = validate(p); if (err) { showStatus(err, 'error'); return; }

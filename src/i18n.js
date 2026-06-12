@@ -127,7 +127,7 @@ tpl.en = {
   "search_location": "Search location...",
   "search": "Search",
   "map_hint": "Select photo(s) above, then click the map or search to set location",
-  "clear_selected": "Clear Selected GPS",
+  "clear_selected": "Clear",
 
   "add_range": "+ Add Range",
 
@@ -240,7 +240,7 @@ tpl.zh = {
   "search_location": "搜尋位置...",
   "search": "搜尋",
   "map_hint": "選擇上方檔案，然後點擊地圖或搜尋以設定位置",
-  "clear_selected": "清除已選 GPS 位置",
+  "clear_selected": "清除",
 
   "add_range": "+ 新增範圍",
 
