@@ -165,3 +165,7 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 ## 共用設定
 
 `data.json` 定義所有下拉選單選項（相機、鏡頭、菲林、工作室、沖洗方式、Push/Pull、掃描器）。編輯呢個檔案就可以更新所有部署嘅選項。
+
+## 許可證 (License)
+
+本專案採用 **PolyForm Noncommercial License 1.0.0** 許可證。你可以自由非商業用途地使用、修改及分享，但嚴禁任何商業或謀利用途。詳情請參閱 `LICENSE` 檔案。

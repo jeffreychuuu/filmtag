@@ -165,3 +165,7 @@ This tool is shared freely with the film photography community. Commercial use o
 ## Shared Config
 
 `data.json` defines all dropdown options (cameras, lenses, films, labs, processes, pushpulls, scanners). Edit this file to update options across all deployments.
+
+## License
+
+This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You may freely use, modify, and share it for noncommercial purposes. Commercial use or profiteering is strictly prohibited. See the `LICENSE` file for details.
