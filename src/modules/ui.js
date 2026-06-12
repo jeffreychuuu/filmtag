@@ -294,7 +294,7 @@ export function buildSummaryHtml(p) {
   var html = '';
   html += '<div class="summary-section"><h3>' + t('settings') + '</h3>';
   var rows = [
-    [t('author'), p.author], [t('camera'), p.camera.make + ' ' + p.camera.model],
+    [t('artist'), p.artist], [t('camera'), p.camera.make + ' ' + p.camera.model],
     [t('lens'), p.lens.name + (p.lens.focal ? ' (' + p.lens.focal + 'mm)' : '') + (p.lens.aperture ? ' F/' + p.lens.aperture : '')],
     [t('film_stock'), p.film.name + ' (ISO ' + p.film.iso + ')'], [t('lab'), p.lab],
     [t('process'), p.process + ' (' + p.pushpull + ')'], [t('scanner'), p.scanner]

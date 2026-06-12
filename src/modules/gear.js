@@ -1,14 +1,14 @@
 import { t } from '../i18n.js';
 import { esc } from '../lib/utils.js';
 
-var CAMERAS, $, authorSel, authorCust, cameraSel, cameraCust, lensDrop, lensSel, lensCust;
+var CAMERAS, $, artistSel, artistCust, cameraSel, cameraCust, lensDrop, lensSel, lensCust;
 var filmSel, filmCust, labSel, labCust, ppSel, ppCust, scanSel, scanCust;
 var selectedSet, gpsData;
 
 export function initGear(refs) {
   CAMERAS = refs.CAMERAS;
   $ = refs.$;
-  authorSel = refs.authorSel; authorCust = refs.authorCust;
+  artistSel = refs.artistSel; artistCust = refs.artistCust;
   cameraSel = refs.cameraSel; cameraCust = refs.cameraCust;
   lensDrop = refs.lensDrop; lensSel = refs.lensSel; lensCust = refs.lensCust;
   filmSel = refs.filmSel; filmCust = refs.filmCust;
@@ -71,7 +71,7 @@ export function saveCustomOpts() {
   var data = {};
   try { data = JSON.parse(localStorage.getItem('filmtag-custom-opts') || '{}'); } catch(_) {}
   var fields = [
-    {sel: authorSel, inp: $('author-custom-input'), key: 'author'},
+    {sel: artistSel, inp: $('artist-custom-input'), key: 'artist'},
     {sel: cameraSel, inp: $('camera-model-custom'), key: 'cameraModel'},
     {sel: lensSel, inp: $('lens-name-custom'), key: 'lensName'},
     {sel: filmSel, inp: $('film-name-custom'), key: 'filmName'},
@@ -196,7 +196,7 @@ function filmInfo() {
 // Collect all gear/params into a single params object for processing
 export function collect() {
   return {
-    author: getVal(authorSel, $('author-custom-input')), camera: camInfo(), lens: lensInfo(),
+    artist: getVal(artistSel, $('artist-custom-input')), camera: camInfo(), lens: lensInfo(),
     film: filmInfo(), lab: getVal(labSel, $('lab-custom-input')), process: selText($('process-select')),
     pushpull: getVal(ppSel, $('pushpull-custom-input')), scanner: getVal(scanSel, $('scanner-custom-input'))
   };
@@ -204,7 +204,7 @@ export function collect() {
 
 // Validate that all required fields are filled, return error message or null
 export function validate(p) {
-  if (!p.author) return t('author_required'); if (!p.lens.name) return t('lens_required');
+  if (!p.artist) return t('artist_required'); if (!p.lens.name) return t('lens_required');
   if (!p.film.name) return t('film_required'); if (!p.lab) return t('lab_required');
   if (!p.scanner) return t('scanner_required'); return null;
 }

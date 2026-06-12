@@ -48,8 +48,8 @@ tpl.en = {
   "file_setup": "Film Setup",
   "upload_hint": "Click to select photos, or drag & drop here",
   "upload_formats": "JPEG, TIFF, DNG, PNG (JPEG recommended \u2014 EXIF writes to JPEG only)",
-  "author": "Artist",
-  "author_placeholder": "Enter custom artist name",
+  "artist": "Artist",
+  "artist_placeholder": "Enter custom artist name",
   "camera_lens": "Camera & Lens",
   "camera": "Camera",
   "make": "Make",
@@ -96,7 +96,7 @@ tpl.en = {
   "unknown": "Unknown",
 
   // Validation
-  "author_required": "Artist is required",
+  "artist_required": "Artist is required",
   "lens_required": "Lens name is required",
   "film_required": "Film stock is required",
   "lab_required": "Lab is required",
@@ -161,8 +161,8 @@ tpl.zh = {
   "file_setup": "菲林設定",
   "upload_hint": "點擊選擇相片，或拖拽到此處",
   "upload_formats": "JPEG、TIFF、DNG、PNG（建議使用 JPEG — EXIF 僅寫入 JPEG）",
-  "author": "藝術家",
-  "author_placeholder": "輸入自定義藝術家名稱",
+  "artist": "藝術家",
+  "artist_placeholder": "輸入自定義藝術家名稱",
   "camera_lens": "相機 & 鏡頭",
   "camera": "相機",
   "make": "製造商",
@@ -209,7 +209,7 @@ tpl.zh = {
   "unknown": "未知",
 
   // Validation
-  "author_required": "請填寫作者",
+  "artist_required": "請填寫藝術家",
   "lens_required": "請填寫鏡頭名稱",
   "film_required": "請填寫菲林",
   "lab_required": "請填寫沖掃工作室",

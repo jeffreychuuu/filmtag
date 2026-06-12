@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
   S.geocodeBusy = false; S.map = null; S.mapMarker = null; S.mapInitialized = false;
   S.reverseGeocode = reverseGeocode;
 
-  var authorSel = $('author-select'), authorCust = $('author-custom'), cameraSel = $('camera-select'), cameraCust = $('camera-custom');
+  var artistSel = $('artist-select'), artistCust = $('artist-custom'), cameraSel = $('camera-select'), cameraCust = $('camera-custom');
   var lensDrop = $('lens-dropdown-group'), lensSel = $('lens-select'), lensCust = $('lens-custom');
   var filmSel = $('film-select'), filmCust = $('film-custom'), labSel = $('lab-select'), labCust = $('lab-custom');
   var ppSel = $('pushpull-select'), ppCust = $('pushpull-custom'), scanSel = $('scanner-select'), scanCust = $('scanner-custom');
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var statusMsg = $('status-msg');
   var loadingEl = $('loading-overlay'), loadingText = $('loading-text');
 
-  S.authorSel = authorSel; S.authorCust = authorCust; S.cameraSel = cameraSel; S.cameraCust = cameraCust;
+  S.artistSel = artistSel; S.artistCust = artistCust; S.cameraSel = cameraSel; S.cameraCust = cameraCust;
   S.lensDrop = lensDrop; S.lensSel = lensSel; S.lensCust = lensCust;
   S.filmSel = filmSel; S.filmCust = filmCust; S.labSel = labSel; S.labCust = labCust;
   S.ppSel = ppSel; S.ppCust = ppCust; S.scanSel = scanSel; S.scanCust = scanCust;
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
   window.goToPage = goToPage; window.changePageSize = changePageSize;
   window.goToSummaryPage = goToSummaryPage; window.changeSummaryPageSize = changeSummaryPageSize;
 
-  fillSelectWithCustom(authorSel, DATA.authors, 'author');
+  fillSelectWithCustom(artistSel, DATA.artists, 'artist');
   fillSelectWithCustom(cameraSel, DATA.cameras.map(function(c) { return c.model; }), 'cameraModel');
   fillSelectWithCustom(labSel, DATA.labs, 'lab');
   fillSelectWithCustom(scanSel, DATA.scanners, 'scanner');
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var oo = document.createElement('option');
     oo.value = '__custom__'; oo.textContent = t('other_free_text'); filmSel.appendChild(oo);
   })();
-  setupCustom(authorSel, authorCust);
+  setupCustom(artistSel, artistCust);
   setupCustom(cameraSel, cameraCust);
   setupCustom(labSel, labCust);
   setupCustom(ppSel, ppCust);

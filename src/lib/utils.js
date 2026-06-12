@@ -62,11 +62,11 @@ export function injectXmp(jpegStr, params, lab, process, scanner) {
     ' xmlns:photoshop="http://ns.adobe.com/photoshop/1.0/"' +
     ' xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/">' +
     '<xmp:Label>' + escXml(params.film.name + ' (' + params.pushpull + ')') + '</xmp:Label>' +
-    '<xmp:Creator>' + escXml(params.author) + '</xmp:Creator>' +
+    '<xmp:Creator>' + escXml(params.artist) + '</xmp:Creator>' +
     '<photoshop:Credit>' + escXml('Processed by ' + lab + ' (' + process + ') | Scanned via ' + scanner) + '</photoshop:Credit>' +
     '<xmp:DateCreated>' + escXml(params.dateTime) + '</xmp:DateCreated>' +
-    '<dc:creator>' + escXml(params.author) + '</dc:creator>' +
-    (params.publicDesc ? '<dc:description>' + escXml('FilmTag by Jeffrey Chu | Photo by ' + params.author + ' | Camera: ' + params.camera.model + ' (' + params.lens.name + ') | Film: ' + params.film.name + ' (ISO ' + params.film.iso + ')' + (params.camera.shutter ? ' | Shutter: ' + params.camera.shutter : '') + ' | Lab: ' + lab + ' | Process: ' + process + ' (' + params.pushpull + ') | Scanner: ' + scanner) + '</dc:description>' : '<dc:description>' + escXml('Photo by ' + params.author + ' | Camera: ' + params.camera.model + ' (' + params.lens.name + ') | Film: ' + params.film.name + ' (ISO ' + params.film.iso + ')' + (params.camera.shutter ? ' | Shutter: ' + params.camera.shutter : '') + ' | Lab: ' + lab + ' | Process: ' + process + ' (' + params.pushpull + ') | Scanner: ' + scanner) + '</dc:description>') +
+    '<dc:creator>' + escXml(params.artist) + '</dc:creator>' +
+    (params.publicDesc ? '<dc:description>' + escXml('FilmTag by Jeffrey Chu | Photo by ' + params.artist + ' | Camera: ' + params.camera.model + ' (' + params.lens.name + ') | Film: ' + params.film.name + ' (ISO ' + params.film.iso + ')' + (params.camera.shutter ? ' | Shutter: ' + params.camera.shutter : '') + ' | Lab: ' + lab + ' | Process: ' + process + ' (' + params.pushpull + ') | Scanner: ' + scanner) + '</dc:description>' : '<dc:description>' + escXml('Photo by ' + params.artist + ' | Camera: ' + params.camera.model + ' (' + params.lens.name + ') | Film: ' + params.film.name + ' (ISO ' + params.film.iso + ')' + (params.camera.shutter ? ' | Shutter: ' + params.camera.shutter : '') + ' | Lab: ' + lab + ' | Process: ' + process + ' (' + params.pushpull + ') | Scanner: ' + scanner) + '</dc:description>') +
     '</rdf:Description>' +
     '</rdf:RDF>' +
     '</x:xmpmeta>' +
