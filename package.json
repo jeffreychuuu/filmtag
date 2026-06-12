@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "esbuild src/app.js --bundle --outfile=dist/bundle.js --define:FILMTAG_VERSION=$(node -e \"var v=require('./package.json').version;process.stdout.write(JSON.stringify(v + (process.env.VERCEL_ENV === 'production' ? '' : process.env.VERCEL === '1' ? '-dev' : '-local')))\") && cp public/index.html dist/index.html && cp public/favicon-*.png public/toro.jpg public/mallow.jpg public/no_gps.png public/no_date.png ads.txt dist/",
-    "dev": "esbuild src/app.js --bundle --outfile=dist/bundle.js --define:FILMTAG_VERSION=$(node -e \"var v=require('./package.json').version;process.stdout.write(JSON.stringify(v + '-dev'))\") && cp public/index.html dist/index.html && cp public/favicon-*.png public/toro.jpg public/mallow.jpg public/no_gps.png public/no_date.png ads.txt dist/ && python3 -m http.server 3333 --directory dist",
+    "dev": "esbuild src/app.js --bundle --outfile=dist/bundle.js --define:FILMTAG_VERSION=$(node -e \"var v=require('./package.json').version;process.stdout.write(JSON.stringify(v + '-local'))\") && cp public/index.html dist/index.html && cp public/favicon-*.png public/toro.jpg public/mallow.jpg public/no_gps.png public/no_date.png ads.txt dist/ && python3 -m http.server 3333 --directory dist",
     "release": "npm version patch"
   },
   "dependencies": {
