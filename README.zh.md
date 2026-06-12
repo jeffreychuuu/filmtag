@@ -181,6 +181,14 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 <details>
 <summary>撳開嚟睇</summary>
 
+**1.1.1 (2026-06-14)** — 程式碼模組化、Vitest 57 個測試
+- 🧩 `app.js` 由 1505 行拆為 6 個 modules（而家 249 行）
+- 🧪 加入 Vitest + happy-dom 測試框架（57 個測試），支援 TDD
+- 🏷️ 用字更新：「Author」全面改為「Artist」（code、DOM、data.json、翻譯）
+- 🗂️ 專案重組：`lib/` 放工具函數，`modules/` 放邏輯
+- 🐛 修正：範圍選擇 dropdown filter、Next Roll 按鈕、review summary 按鈕
+- ⚠️ 免責聲明：撳 Disagree 後會封鎖頁面，需要 refresh 先用到
+
 **1.0.1 (2026-06-14)** — README 重寫、版號顯示、發佈流程
 - 📝 README 改寫：敘事式開場、HK presets、serverless 說明
 - 🚀 App 底部顯示版號、Release Workflow 文件化

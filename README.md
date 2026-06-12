@@ -181,6 +181,14 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 <details>
 <summary>Click to expand</summary>
 
+**1.1.1 (2026-06-14)** — Codebase refactored into modules, Vitest + 57 tests
+- 🧩 `app.js` split from 1505→249 lines into 6 modules under `src/modules/`
+- 🧪 Vitest + happy-dom test suite (57 tests), TDD-ready
+- 🏷️ Terminology: "Author" → "Artist" in code, DOM, data.json, and translations
+- 🗂️ Project restructured: `lib/` for utils, `modules/` for logic
+- 🐛 Fixed: range selection dropdown filter, `Next Roll` gallery button, review summary buttons
+- ⚠️ Disclaimer modal: Disagree now blocks access until refresh
+
 **1.0.1 (2026-06-14)** — README rewrite, version injection, release workflow
 - 📝 README rewrite with narrative pitch, HK presets, serverless note
 - 🚀 In-app version display (footer), release workflow documented
