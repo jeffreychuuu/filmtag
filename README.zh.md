@@ -84,7 +84,7 @@ Upload 你嘅 scans，揀你嘅 gear 同菲林，set 拍攝日期——佢會喺
 
 ```
 src/
-  app.js            ← 主程式 (~314 行)：狀態初始化、事件綁定、模組接線
+  app.js            ← 主程式 (~249 行)：狀態初始化、事件綁定、模組接線
   i18n.js           ← 英文 & 繁體中文翻譯
   lib/
     utils.js        ← 純工具函數（toDms、injectXmp、esc、fmtSize…）
@@ -95,10 +95,22 @@ src/
     process.js      ← ZIP/儲存處理、EXIF 注入
     ui.js           ← 檔案列表、摘要、縮圖、選擇、範圍
     upload.js       ← 檔案上傳 & EXIF 提取
+  __tests__/        ← Vitest 測試套件（57 個測試）
+    lib/utils.test.js
+    modules/{date,gear,ui}.test.js
 public/
   index.html        ← App 外殼，所有 UI 標記
 data.json           ← 內建預設（相機、鏡頭、菲林、沖掃工作室）
 ```
+
+### 測試
+
+```bash
+npm test              # 執行所有測試一次
+npm run test:watch    # 監聽模式，適合 TDD
+```
+
+採用 **Vitest** + **happy-dom**。純工具函數（utils.js）同依賴狀態嘅模組邏輯（date、gear、ui）都已覆蓋。開發時建議先 run test 確保冇破壞現有功能。
 
 ## 本地開發
 
@@ -140,9 +152,9 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 
 ### 版本類型
 
-- `npm run release` → **patch** (1.0.1 → 1.0.2)
-- `npm version minor` → **minor** (1.0.1 → 1.1.0)
-- `npm version major` → **major** (1.0.1 → 2.0.0)
+- `npm run release` → **patch** (1.1.1 → 1.1.2)
+- `npm version minor` → **minor** (1.1.1 → 1.2.0)
+- `npm version major` → **major** (1.1.1 → 2.0.0)
 
 ## 起源
 
