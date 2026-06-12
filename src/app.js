@@ -2,6 +2,12 @@ import piexif from 'piexifjs';
 import JSZip from 'jszip';
 import DATA from '../data.json';
 import { t, setLang, toggleLang, applyTranslations, lang } from './i18n.js';
+import { toDms, strToUtf8Binary, toUcs2Binary, injectXmp, escXml, esc, fmtSize, dmsToDecimal, newFilmPrefix } from './utils.js';
+import { initGear, fillSelect, fillSelectWithCustom, saveCustomOpts, setupCustom, updateLensUI, collect, validate } from './gear.js';
+import { initGps, initMap, updateGpsDots, updateGpsSaveBtn, setGpsForSelected } from './gps.js';
+
+// Register custom EXIF tags used by exiftool -Instructions
+piexif.TAGS.Exif[0x828D] = { name: 'Instructions', type: 'Ascii' };
 
 var APP_VERSION = typeof FILMTAG_VERSION !== 'undefined' ? FILMTAG_VERSION : 'dev';
 document.addEventListener('DOMContentLoaded', function() {
@@ -25,104 +31,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 })();
-
-function toDms(coord) {
-  var abs = Math.abs(coord);
-  var d = Math.floor(abs);
-  var m = Math.floor((abs - d) * 60);
-  var s = Math.round(((abs - d) * 60 - m) * 60 * 100);
-  return [[d, 1], [m, 1], [s, 100]];
-}
-
-// Register custom EXIF tags used by exiftool -Instructions
-piexif.TAGS.Exif[0x828D] = { name: 'Instructions', type: 'Ascii' };
-
-function strToUtf8Binary(s) {
-  var out = '';
-  for (var i = 0; i < s.length; i++) {
-    var c = s.charCodeAt(i);
-    if (c < 0x80) {
-      out += String.fromCharCode(c);
-    } else if (c < 0x800) {
-      out += String.fromCharCode(0xC0 | (c >> 6));
-      out += String.fromCharCode(0x80 | (c & 0x3F));
-    } else if (c >= 0xD800 && c < 0xE000) {
-      var c2 = s.charCodeAt(i + 1);
-      var cp = 0x10000 + ((c - 0xD800) << 10) + (c2 - 0xDC00);
-      out += String.fromCharCode(0xF0 | (cp >> 18));
-      out += String.fromCharCode(0x80 | ((cp >> 12) & 0x3F));
-      out += String.fromCharCode(0x80 | ((cp >> 6) & 0x3F));
-      out += String.fromCharCode(0x80 | (cp & 0x3F));
-      i++;
-    } else {
-      out += String.fromCharCode(0xE0 | (c >> 12));
-      out += String.fromCharCode(0x80 | ((c >> 6) & 0x3F));
-      out += String.fromCharCode(0x80 | (c & 0x3F));
-    }
-  }
-  return out;
-}
-
-function toUcs2Binary(s) {
-  var out = '';
-  for (var i = 0; i < s.length; i++) {
-    var c = s.charCodeAt(i);
-    out += String.fromCharCode(c & 0xFF, (c >> 8) & 0xFF);
-  }
-  return out;
-}
-
-// Inject XMP Label, Credit, and Description into JPEG binary string
-function injectXmp(jpegStr, params, lab, process, scanner) {
-  var xmpXML = '<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>' +
-    '<x:xmpmeta xmlns:x="adobe:ns:meta/">' +
-    '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">' +
-    '<rdf:Description rdf:about=""' +
-    ' xmlns:xmp="http://ns.adobe.com/xap/1.0/"' +
-    ' xmlns:dc="http://purl.org/dc/elements/1.1/"' +
-    ' xmlns:photoshop="http://ns.adobe.com/photoshop/1.0/"' +
-    ' xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/">' +
-    '<xmp:Label>' + escXml(params.film.name + ' (' + params.pushpull + ')') + '</xmp:Label>' +
-    '<xmp:Creator>' + escXml(params.author) + '</xmp:Creator>' +
-    '<photoshop:Credit>' + escXml('Processed by ' + lab + ' (' + process + ') | Scanned via ' + scanner) + '</photoshop:Credit>' +
-    '<xmp:DateCreated>' + escXml(params.dateTime) + '</xmp:DateCreated>' +
-    '<dc:creator>' + escXml(params.author) + '</dc:creator>' +
-    (params.publicDesc ? '<dc:description>' + escXml('FilmTag by Jeffrey Chu | Photo by ' + params.author + ' | Camera: ' + params.camera.model + ' (' + params.lens.name + ') | Film: ' + params.film.name + ' (ISO ' + params.film.iso + ')' + (params.camera.shutter ? ' | Shutter: ' + params.camera.shutter : '') + ' | Lab: ' + lab + ' | Process: ' + process + ' (' + params.pushpull + ') | Scanner: ' + scanner) + '</dc:description>' : '<dc:description>' + escXml('Photo by ' + params.author + ' | Camera: ' + params.camera.model + ' (' + params.lens.name + ') | Film: ' + params.film.name + ' (ISO ' + params.film.iso + ')' + (params.camera.shutter ? ' | Shutter: ' + params.camera.shutter : '') + ' | Lab: ' + lab + ' | Process: ' + process + ' (' + params.pushpull + ') | Scanner: ' + scanner) + '</dc:description>') +
-    '</rdf:Description>' +
-    '</rdf:RDF>' +
-    '</x:xmpmeta>' +
-    '<?xpacket end="w"?>';
-
-  var xmpUtf8 = strToUtf8Binary(xmpXML);
-  var xmpData = 'http://ns.adobe.com/xap/1.0/\x00' + xmpUtf8;
-  var segLen = xmpData.length + 2;
-  var xmpSegment = '\xFF\xE1' +
-    String.fromCharCode(segLen >> 8, segLen & 0xFF) +
-    xmpData;
-
-  // Remove existing XMP APP1 segments
-  var cleaned = '';
-  var pos = 0;
-  while (pos < jpegStr.length) {
-    if (jpegStr.charCodeAt(pos) === 0xFF && jpegStr.charCodeAt(pos + 1) === 0xE1 &&
-        jpegStr.slice(pos + 4, pos + 33) === 'http://ns.adobe.com/xap/1.0/\x00') {
-      var segLen2 = (jpegStr.charCodeAt(pos + 2) << 8) | jpegStr.charCodeAt(pos + 3);
-      pos += 2 + segLen2;
-    } else {
-      cleaned += jpegStr.charAt(pos);
-      pos++;
-    }
-  }
-
-  if (cleaned.charCodeAt(0) === 0xFF && cleaned.charCodeAt(1) === 0xD8) {
-    return cleaned.slice(0, 2) + xmpSegment + cleaned.slice(2);
-  }
-  return cleaned;
-}
-
-function escXml(s) {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
 
 (function() {
   'use strict';
@@ -154,21 +62,42 @@ function escXml(s) {
   var imgOverlay = $('img-overlay'), imgOverlayImg = $('img-overlay-img'), imgOverlayClose = $('img-overlay-close');
   var selectToolbar = $('select-toolbar'), selectAllBtn = $('select-all-btn');
   var rangeRowsEl = $('range-rows'), addRangeBtn = $('add-range-btn');
-  var gpsData = {}, selectedSet = {}, thumbnailCache = {}, geocodeCache = {}, geocodeQueue = [], geocodeBusy = false, map = null, mapMarker = null, mapInitialized = false;
+  var gpsData = {}, selectedSet = {}, thumbnailCache = {}, geocodeCache = {}, geocodeQueue = [];
   var isIPhone = /iPhone|iPad/.test(navigator.userAgent);
 
   var currentPage = 1, pageSize = 5, prefetchTimer = null;
   var summaryPage = 1, summaryPageSize = 5;
 
+  var refs = { CAMERAS: CAMERAS, $: $,
+    authorSel: authorSel, authorCust: authorCust,
+    cameraSel: cameraSel, cameraCust: cameraCust,
+    lensDrop: lensDrop, lensSel: lensSel, lensCust: lensCust,
+    filmSel: filmSel, filmCust: filmCust,
+    labSel: labSel, labCust: labCust,
+    ppSel: ppSel, ppCust: ppCust,
+    scanSel: scanSel, scanCust: scanCust,
+    selectedSet: selectedSet, gpsData: gpsData,
+    geocodeCache: geocodeCache, geocodeQueue: geocodeQueue
+  };
+  refs.geocodeBusy = false; refs.map = null; refs.mapMarker = null; refs.mapInitialized = false;
+  refs.gpsOverlay = gpsOverlay; refs.gpsSaveBtn = gpsSaveBtn; refs.mapEl = mapEl;
+  refs.mapInfoEl = mapInfoEl; refs.clearLocBtn = clearLocBtn;
+  refs.mapSearchInput = mapSearchInput; refs.mapSearchBtn = mapSearchBtn;
+  initGear(refs);
+  initGps(refs);
+
+  // Calculate total pages for file list pagination
   function getTotalPages() {
     if (pageSize === 0) return 1;
     return Math.ceil(uploadedFiles.length / pageSize) || 1;
   }
+  // Navigate file list to a specific page
   function goToPage(p) {
     if (prefetchTimer) { clearTimeout(prefetchTimer); prefetchTimer = null; }
     currentPage = Math.max(1, Math.min(p, getTotalPages()));
     renderFileList();
   }
+  // Change number of files shown per page
   function changePageSize(s) {
     if (prefetchTimer) { clearTimeout(prefetchTimer); prefetchTimer = null; }
     pageSize = parseInt(s, 10);
@@ -176,14 +105,17 @@ function escXml(s) {
     renderFileList();
   }
 
+  // Calculate total pages for review summary pagination
   function getSummaryTotalPages() {
     if (summaryPageSize === 0) return 1;
     return Math.ceil(uploadedFiles.length / summaryPageSize) || 1;
   }
+  // Navigate review summary to a specific page
   function goToSummaryPage(p) {
     summaryPage = Math.max(1, Math.min(p, getSummaryTotalPages()));
     rebuildSummaryBody();
   }
+  // Change number of files per page in review summary
   function changeSummaryPageSize(s) {
     summaryPageSize = parseInt(s, 10);
     summaryPage = 1;
@@ -195,82 +127,8 @@ function escXml(s) {
   var statusMsg = $('status-msg');
   var loadingEl = $('loading-overlay'), loadingText = $('loading-text');
 
-  // Populate all select elements from DATA
-  function fillSelect(sel, items) {
-    for (var i = 0; i < items.length; i++) {
-      var o = document.createElement('option');
-      o.textContent = items[i];
-      sel.appendChild(o);
-    }
-  }
-  function fillSelectWithCustom(sel, items, key) {
-    fillSelect(sel, items);
-    if (key) {
-      var saved = loadSavedOpt(key);
-      for (var i = 0; i < saved.length; i++) {
-        var o = document.createElement('option');
-        o.textContent = saved[i]; sel.appendChild(o);
-      }
-    }
-    var oo = document.createElement('option');
-    oo.value = '__custom__'; oo.textContent = t('other_free_text'); sel.appendChild(oo);
-  }
-
-  function loadSavedOpt(key) {
-    try {
-      var data = JSON.parse(localStorage.getItem('filmtag-custom-opts') || '{}');
-      return data[key] || [];
-    } catch(_) { return []; }
-  }
-  function loadSavedLensesForCamera(cameraModel) {
-    try {
-      var data = JSON.parse(localStorage.getItem('filmtag-custom-opts') || '{}');
-      if (data.lensByCamera && data.lensByCamera[cameraModel]) return data.lensByCamera[cameraModel];
-      return data.lensName || [];
-    } catch(_) { return []; }
-  }
-  function currentCameraModel() {
-    if (cameraSel.value === '__custom__') return $('camera-model-custom').value.trim();
-    if (cameraSel.selectedIndex < CAMERAS.length) return CAMERAS[cameraSel.selectedIndex].model;
-    return cameraSel.value;
-  }
-
-  function saveCustomOpts() {
-    var data = {};
-    try { data = JSON.parse(localStorage.getItem('filmtag-custom-opts') || '{}'); } catch(_) {}
-    var fields = [
-      {sel: authorSel, inp: $('author-custom-input'), key: 'author'},
-      {sel: cameraSel, inp: $('camera-model-custom'), key: 'cameraModel'},
-      {sel: lensSel, inp: $('lens-name-custom'), key: 'lensName'},
-      {sel: filmSel, inp: $('film-name-custom'), key: 'filmName'},
-      {sel: labSel, inp: $('lab-custom-input'), key: 'lab'},
-      {sel: scanSel, inp: $('scanner-custom-input'), key: 'scanner'},
-      {sel: ppSel, inp: $('pushpull-custom-input'), key: 'pushPull'}
-    ];
-    for (var i = 0; i < fields.length; i++) {
-      if (fields[i].sel.value === '__custom__' && fields[i].inp.value.trim()) {
-        var v = fields[i].inp.value.trim();
-        if (!data[fields[i].key]) data[fields[i].key] = [];
-        if (fields[i].key === 'lensName') {
-          var cameraModel = currentCameraModel();
-          if (!cameraModel) continue;
-          if (!data.lensByCamera) data.lensByCamera = {};
-          if (!data.lensByCamera[cameraModel]) data.lensByCamera[cameraModel] = [];
-          data.lensByCamera[cameraModel] = data.lensByCamera[cameraModel].filter(function(x) { return x.name !== v; });
-          data.lensByCamera[cameraModel].unshift({ name: v, focal: $('lens-focal').value.trim(), aperture: $('lens-aperture').value.trim() });
-          data.lensByCamera[cameraModel] = data.lensByCamera[cameraModel].slice(0, 5);
-        } else {
-          if (!data[fields[i].key]) data[fields[i].key] = [];
-          data[fields[i].key] = data[fields[i].key].filter(function(x) { return x !== v; });
-          data[fields[i].key].unshift(v);
-          data[fields[i].key] = data[fields[i].key].slice(0, 5);
-        }
-      }
-    }
-    localStorage.setItem('filmtag-custom-opts', JSON.stringify(data));
-  }
+  // Populate gear dropdowns
   fillSelectWithCustom(authorSel, DATA.authors, 'author');
-
   fillSelectWithCustom(cameraSel, DATA.cameras.map(function(c) { return c.model; }), 'cameraModel');
   fillSelectWithCustom(labSel, DATA.labs, 'lab');
   fillSelectWithCustom(scanSel, DATA.scanners, 'scanner');
@@ -285,7 +143,7 @@ function escXml(s) {
       o.setAttribute('data-iso', DATA.films[i].iso);
       filmSel.appendChild(o);
     }
-    var savedFilms = loadSavedOpt('filmName');
+    var savedFilms = JSON.parse(localStorage.getItem('filmtag-custom-opts') || '{}').filmName || [];
     for (var si = 0; si < savedFilms.length; si++) {
       var o2 = document.createElement('option');
       o2.textContent = savedFilms[si]; filmSel.appendChild(o2);
@@ -294,23 +152,6 @@ function escXml(s) {
     oo.value = '__custom__'; oo.textContent = t('other_free_text'); filmSel.appendChild(oo);
   })();
 
-  function esc(s) {
-    var d = document.createElement('div');
-    d.appendChild(document.createTextNode(s));
-    return d.innerHTML;
-  }
-
-  function fmtSize(bytes) {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / 1048576).toFixed(1) + ' MB';
-  }
-
-  function setupCustom(sel, cust) {
-    function toggle() { cust.classList.toggle('show', sel.value === '__custom__'); }
-    sel.addEventListener('change', toggle);
-    toggle();
-  }
   setupCustom(authorSel, authorCust);
   setupCustom(cameraSel, cameraCust);
   setupCustom(labSel, labCust);
@@ -318,52 +159,6 @@ function escXml(s) {
   setupCustom(scanSel, scanCust);
   setupCustom(filmSel, filmCust);
 
-  function populateLenses(idx) {
-    lensSel.innerHTML = '';
-    CAMERAS[idx].lenses.forEach(function(l, i) {
-      var o = document.createElement('option'); o.value = i; o.textContent = l.name; lensSel.appendChild(o);
-    });
-    var savedLenses = loadSavedLensesForCamera(CAMERAS[idx].model);
-    for (var si = 0; si < savedLenses.length; si++) {
-      var o2 = document.createElement('option');
-      if (typeof savedLenses[si] === 'object') {
-        o2.textContent = savedLenses[si].name;
-        if (savedLenses[si].focal) o2.setAttribute('data-focal', savedLenses[si].focal);
-        if (savedLenses[si].aperture) o2.setAttribute('data-aperture', savedLenses[si].aperture);
-      } else {
-        o2.textContent = savedLenses[si];
-      }
-      lensSel.appendChild(o2);
-    }
-    var oo = document.createElement('option');
-    oo.value = '__custom__'; oo.textContent = t('other_free_text'); lensSel.appendChild(oo);
-  }
-  function updateLensUI() {
-    if (cameraSel.value === '__custom__') {
-      lensDrop.style.display = 'none'; lensCust.classList.add('show'); lensSel.value = '__custom__';
-    } else if (cameraSel.selectedIndex >= CAMERAS.length) {
-      lensDrop.style.display = 'block';
-      lensSel.innerHTML = '';
-      var savedLenses = loadSavedLensesForCamera(cameraSel.value);
-      for (var si = 0; si < savedLenses.length; si++) {
-        var o = document.createElement('option');
-        if (typeof savedLenses[si] === 'object') {
-          o.textContent = savedLenses[si].name;
-          if (savedLenses[si].focal) o.setAttribute('data-focal', savedLenses[si].focal);
-          if (savedLenses[si].aperture) o.setAttribute('data-aperture', savedLenses[si].aperture);
-        } else {
-          o.textContent = savedLenses[si];
-        }
-        lensSel.appendChild(o);
-      }
-      var oo = document.createElement('option');
-      oo.value = '__custom__'; oo.textContent = t('other_free_text'); lensSel.appendChild(oo);
-      lensCust.classList.remove('show');
-    } else {
-      lensDrop.style.display = 'block'; populateLenses(cameraSel.selectedIndex);
-      lensCust.classList.toggle('show', lensSel.value === '__custom__');
-    }
-  }
   cameraSel.addEventListener('change', updateLensUI);
   lensSel.addEventListener('change', function() {
     if (cameraSel.value === '__custom__') return;
@@ -373,6 +168,7 @@ function escXml(s) {
   singleDateInp.valueAsDate = new Date();
   singleTimeInp.value = '12:00';
 
+  // Apply current date/time inputs to all selected files, auto-incrementing minutes
   function applyDateToSelected() {
     var keys = Object.keys(selectedSet);
     if (!keys.length) return;
@@ -391,6 +187,7 @@ function escXml(s) {
   singleDateInp.addEventListener('change', applyDateToSelected);
   singleTimeInp.addEventListener('change', applyDateToSelected);
 
+  // Re-render file list and toggle review button state
   function refreshSegments() {
     renderFileList();
     reviewBtn.disabled = uploadedFiles.length === 0;
@@ -401,6 +198,7 @@ function escXml(s) {
   uploadWrap.addEventListener('dragleave', function() { uploadWrap.classList.remove('dragover'); });
   uploadWrap.addEventListener('drop', function(e) { e.preventDefault(); uploadWrap.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
 
+  // Process selected/dropped files: deduplicate, sort, select all, render, extract EXIF
   function handleFiles(files) {
     for (var i = 0; i < files.length; i++) {
       var f = files[i];
@@ -416,16 +214,8 @@ function escXml(s) {
     extractExifFromFiles();
   }
 
-  function dmsToDecimal(dms, ref) {
-    if (!dms || dms.length < 3) return null;
-    var deg = dms[0][0] / dms[0][1];
-    var min = dms[1][0] / dms[1][1];
-    var sec = dms[2][0] / dms[2][1];
-    var dec = deg + min / 60 + sec / 3600;
-    if (ref === 'S' || ref === 'W') dec = -dec;
-    return dec;
-  }
 
+  // Read EXIF date + GPS from each uploaded JPEG, render once first page is ready
   function extractExifFromFiles() {
     var completed = 0;
     var total = uploadedFiles.length;
@@ -484,6 +274,7 @@ function escXml(s) {
     }
   }
 
+  // Compute display date/time for file at 1-based index (custom date or fallback to lastModified)
   function computeDateForFile(idx) {
     if (clearedDates[idx - 1]) return null;
     var fd = fileDates[idx - 1];
@@ -497,6 +288,7 @@ function escXml(s) {
     return { date: dd.slice(0,4) + '/' + dd.slice(4,6) + '/' + dd.slice(6,8), time: String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') };
   }
 
+  // Render paginated file list with thumbnails, GPS indicators, date info, and selection UI
   function renderFileList(skipThumbs) {
     if (uploadedFiles.length === 0) {
       fileListEl.innerHTML = ''; reviewBtn.disabled = true;
@@ -555,6 +347,7 @@ function escXml(s) {
     fileActions.style.display = hasS ? 'flex' : 'none';
   }
 
+  // Generate 40×40 thumbnail canvases for all files (cached or fresh decode, concurrency=6)
   function generateThumbnails(onDone) {
     var queue = [], concurrency = 6;
     for (var i = 0; i < uploadedFiles.length; i++) {
@@ -574,6 +367,7 @@ function escXml(s) {
       })(i);
     }
     var next = 0;
+    // Decode next queued file and render its thumbnail
     function processNext() {
       if (next >= queue.length) {
         if (onDone) { var cb = onDone; onDone = null; cb(); }
@@ -599,6 +393,7 @@ function escXml(s) {
     if (queue.length === 0 && onDone) { var cb = onDone; onDone = null; cb(); }
   }
 
+  // Prefetch thumbnails for upcoming pages in background (concurrency=2) for instant navigation
   function startPrefetch(fromPage) {
     if (prefetchTimer) { clearTimeout(prefetchTimer); prefetchTimer = null; }
     if (fromPage > getTotalPages() || pageSize === 0) return;
@@ -615,6 +410,7 @@ function escXml(s) {
     }
 
     var active = 0, next = start, concurrency = 2;
+    // Pump the prefetch queue until all files on this page are cached
     function pump() {
       while (active < concurrency && next < end) {
         var idx = next++; active++;
@@ -624,6 +420,7 @@ function escXml(s) {
         prefetchTimer = setTimeout(function() { startPrefetch(fromPage + 1); }, 50);
       }
     }
+    // Decode and cache a single thumbnail for prefetch
     function processFile(idx) {
       var reader = new FileReader();
       reader.onload = function(e) {
@@ -645,6 +442,7 @@ function escXml(s) {
     pump();
   }
 
+  // Show full-size image overlay when a thumbnail is clicked
   function thumbnailClick(e) {
     e.stopPropagation();
     var url = URL.createObjectURL(e.target._thumbFile);
@@ -653,6 +451,7 @@ function escXml(s) {
     imgOverlay.classList.add('show');
   }
 
+  // Attach click handlers to all .file-item elements
   function bindFileItemClicks() {
     var items = document.querySelectorAll('.file-item');
     for (var k = 0; k < items.length; k++) {
@@ -661,6 +460,7 @@ function escXml(s) {
     }
   }
 
+  // Toggle file selection on click and update selection UI
   function fileItemClick(e) {
     if (e.target.closest('.remove-btn')) return;
     var item = e.currentTarget;
@@ -676,13 +476,15 @@ function escXml(s) {
     renderRanges();
   }
 
+  // Remove all uploaded files and reset all state
   function clearAll() {
     uploadedFiles = [];
     gpsData = {}; selectedSet = {}; thumbnailCache = {}; geocodeCache = {}; fileDates = {}; clearedDates = {};
     currentPage = 1;
-    if (mapMarker) { map.removeLayer(mapMarker); mapMarker = null; }
+    if (refs.mapMarker) { refs.map.removeLayer(refs.mapMarker); refs.mapMarker = null; }
     refreshSegments();
   }
+  // Remove a single file by index and reindex dependent state objects
   function removeOne(i) {
     uploadedFiles.splice(i, 1);
     var newGps = {}, newSel = {}, newCache = {};
@@ -701,6 +503,7 @@ function escXml(s) {
   window.goToPage = goToPage; window.changePageSize = changePageSize;
   window.goToSummaryPage = goToSummaryPage; window.changeSummaryPageSize = changeSummaryPageSize;
 
+  // Build file selection set from range-row dropdown values
   function buildSelectedFromRanges() {
     var set = {}, max = uploadedFiles.length;
     var rows = rangeRowsEl.querySelectorAll('.range-row');
@@ -715,6 +518,7 @@ function escXml(s) {
     return set;
   }
 
+  // Render range-selection UI rows based on current selection state
   function renderRanges() {
     rangeRowsEl.innerHTML = '';
     if (!uploadedFiles.length) return;
@@ -754,6 +558,7 @@ function escXml(s) {
     }
   }
 
+  // Build HTML option strings for range dropdowns, excluding already-used indices
   function buildOptions(max, selected, excludeSet) {
     var h = '';
     for (var i = 1; i <= max; i++) {
@@ -764,6 +569,7 @@ function escXml(s) {
     return h;
   }
 
+  // Recalculate selectedSet from range rows and re-render
   function syncRange() {
     selectedSet = buildSelectedFromRanges();
     renderFileList();
@@ -793,43 +599,7 @@ function escXml(s) {
     rangeRowsEl.appendChild(row);
   });
 
-  function selText(sel) { return sel.options[sel.selectedIndex].text; }
-  function getVal(sel, inp) { return sel.value === '__custom__' ? inp.value.trim() : selText(sel); }
-  function camInfo() {
-    if (cameraSel.value === '__custom__' || cameraSel.selectedIndex >= CAMERAS.length) {
-      var model = cameraSel.value === '__custom__' ? ($('camera-model-custom').value.trim() || t('unknown')) : cameraSel.value;
-      return { make: $('camera-make-custom').value.trim() || t('unknown'), model: model, shutter: null };
-    }
-    var c = CAMERAS[cameraSel.selectedIndex]; return { make: c.make, model: c.model, shutter: c.shutter };
-  }
-  function lensInfo() {
-    if (cameraSel.value === '__custom__' || lensSel.value === '__custom__')
-      return { name: $('lens-name-custom').value.trim(), focal: $('lens-focal').value.trim(), aperture: $('lens-aperture').value.trim() };
-    if (cameraSel.selectedIndex >= CAMERAS.length || lensSel.selectedIndex >= CAMERAS[cameraSel.selectedIndex].lenses.length) {
-      var o = lensSel.options[lensSel.selectedIndex];
-      return { name: selText(lensSel), focal: o.getAttribute('data-focal') || '', aperture: o.getAttribute('data-aperture') || '' };
-    }
-    var l = CAMERAS[cameraSel.selectedIndex].lenses[lensSel.selectedIndex];
-    return { name: l.name, focal: l.focal, aperture: l.aperture };
-  }
-  function filmInfo() {
-    if (filmSel.value === '__custom__') return { name: $('film-name-custom').value.trim(), iso: $('film-iso-custom').value.trim() };
-    var o = filmSel.options[filmSel.selectedIndex];
-    return { name: o.textContent, iso: o.getAttribute('data-iso') };
-  }
-  function collect() {
-    return {
-      author: getVal(authorSel, $('author-custom-input')), camera: camInfo(), lens: lensInfo(),
-      film: filmInfo(), lab: getVal(labSel, $('lab-custom-input')), process: selText($('process-select')),
-      pushpull: getVal(ppSel, $('pushpull-custom-input')), scanner: getVal(scanSel, $('scanner-custom-input'))
-    };
-  }
-  function validate(p) {
-    if (!p.author) return t('author_required'); if (!p.lens.name) return t('lens_required');
-    if (!p.film.name) return t('film_required'); if (!p.lab) return t('lab_required');
-    if (!p.scanner) return t('scanner_required'); return null;
-  }
-
+  // Resolve effective date for a file (custom date or fallback to lastModified)
   function getFileDate(i) {
     var fd = fileDates[i];
     if (fd) return fd;
@@ -839,20 +609,15 @@ function escXml(s) {
     return { fileDate: dd, exifDate: dd.slice(0,4) + ':' + dd.slice(4,6) + ':' + dd.slice(6,8), hr: d.getHours(), min: d.getMinutes() };
   }
 
-  function newFilmPrefix(film) {
-    return film
-      .split(/[^a-zA-Z0-9]+/)
-      .filter(function(w) { return w.length > 0; })
-      .map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase(); })
-      .join('');
-  }
 
+  // Build output filename: FilmPrefix_YYYYMMDDHHMM_XX.ext
   function newFName(film, ext, i) {
     var fd = getFileDate(i);
     var c = newFilmPrefix(film);
     return c + '_' + fd.fileDate + String(fd.hr).padStart(2,'0') + String(fd.min).padStart(2,'0') + '_' + String(i + 1).padStart(2,'0') + '.' + ext;
   }
 
+  // Build review summary HTML: settings panel + rename table with pagination
   function buildSummaryHtml(p) {
     var html = '';
     html += '<div class="summary-section"><h3>' + t('settings') + '</h3>';
@@ -899,6 +664,7 @@ function escXml(s) {
     return html;
   }
 
+  // Rebuild the review summary panel body and attach event listeners
   function rebuildSummaryBody() {
     var p = collect();
     var tp = getSummaryTotalPages();
@@ -911,6 +677,7 @@ function escXml(s) {
     if (closeBtn) closeBtn.addEventListener('click', function() { summaryPanel.classList.remove('show'); summaryPage = 1; });
   }
 
+  // Generate 40×40 thumbnails for summary table (cached or fresh decode)
   function generateSummaryThumbnails() {
     var queue = [], concurrency = 6;
     var canvases = document.querySelectorAll('canvas.summary-thumb');
@@ -935,6 +702,7 @@ function escXml(s) {
       })(canvases[ti]);
     }
     var next = 0;
+    // Decode next queued summary thumbnail
     function processNext() {
       if (next >= queue.length) return;
       var item = queue[next++];
@@ -966,6 +734,7 @@ function escXml(s) {
 
   $('summary-close-btn') && $('summary-close-btn').addEventListener('click', function() { summaryPanel.classList.remove('show'); summaryPage = 1; });
 
+  // Process all files → inject EXIF/XMP → package as ZIP download (concurrency=4)
   function startZipProcess() {
     summaryPanel.classList.remove('show');
     var p = collect();
@@ -1098,6 +867,7 @@ function escXml(s) {
 
   var processedFiles = [];
 
+  // Process all files → inject EXIF/XMP → save to device album (iOS share or download)
   function startSaveProcess() {
     summaryPanel.classList.remove('show');
     var p = collect();
@@ -1210,114 +980,13 @@ function escXml(s) {
     startNext();
   }
 
-  function updateGpsDots() {
-    var items = document.querySelectorAll('.file-item');
-    for (var j = 0; j < items.length; j++) {
-      var i = parseInt(items[j].getAttribute('data-idx'), 10);
-      var dot = items[j].querySelector('.file-gps-dot');
-      var hasDotGps = gpsData[i];
-      if (dot) dot.innerHTML = hasDotGps ? '📍' + (gpsData[i].addr ? ' <span class="gps-addr">' + esc(gpsData[i].addr) + '</span>' : '') : '<img src="no_gps.png" class="no-gps-icon">';
-    }
-  }
-
-  function updateGpsSaveBtn() {
-    gpsSaveBtn.disabled = !mapMarker;
-  }
-
-  function setGpsForSelected(lat, lng) {
-    var keys = Object.keys(selectedSet);
-    if (!keys.length) return;
-    for (var k = 0; k < keys.length; k++) {
-      gpsData[keys[k]] = { lat: lat, lng: lng, addr: '' };
-    }
-    updateGpsDots();
-    reverseGeocode(lat, lng, keys);
-    mapInfoEl.textContent = keys.length + ' photo(s) location set';
-  }
-
-  function reverseGeocode(lat, lng, indices) {
-    var key = lat.toFixed(5) + ',' + lng.toFixed(5);
-    if (geocodeCache[key]) {
-      var addr = geocodeCache[key];
-      for (var k = 0; k < indices.length; k++) {
-        if (gpsData[indices[k]]) gpsData[indices[k]].addr = addr;
-      }
-      updateGpsDots();
-      return;
-    }
-    for (var q = 0; q < geocodeQueue.length; q++) {
-      if (geocodeQueue[q].key === key) {
-        for (var k2 = 0; k2 < indices.length; k2++) {
-          if (geocodeQueue[q].indices.indexOf(indices[k2]) === -1) {
-            geocodeQueue[q].indices.push(indices[k2]);
-          }
-        }
-        return;
-      }
-    }
-    geocodeQueue.push({ key: key, lat: lat, lng: lng, indices: indices.slice() });
-    processGeocodeQueue();
-  }
-
-  function processGeocodeQueue() {
-    if (geocodeBusy || !geocodeQueue.length) return;
-    geocodeBusy = true;
-    var item = geocodeQueue.shift();
-    fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + item.lat + '&lon=' + item.lng)
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        var addr = '';
-        if (data.address) {
-          var p = [];
-          if (data.address.road) p.push(data.address.road);
-          if (data.address.suburb) p.push(data.address.suburb);
-          else if (data.address.city || data.address.town) p.push(data.address.city || data.address.town);
-          if (!p.length) addr = data.name || data.display_name || '';
-          else addr = p.join(', ');
-        }
-        geocodeCache[item.key] = addr;
-        for (var k = 0; k < item.indices.length; k++) {
-          if (gpsData[item.indices[k]]) gpsData[item.indices[k]].addr = addr;
-        }
-        updateGpsDots();
-        geocodeBusy = false;
-        setTimeout(processGeocodeQueue, 1000);
-      })
-      .catch(function() {
-        geocodeBusy = false;
-        setTimeout(processGeocodeQueue, 1000);
-      });
-  }
-
-  function initMap() {
-    if (!gpsOverlay || !gpsOverlay.classList.contains('show')) return;
-    if (mapInitialized) { map.invalidateSize(); return; }
-    mapInitialized = true;
-    var defPos = [22.3193, 114.1694];
-    map = L.map('map').setView(defPos, 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(map);
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function(pos) {
-        map.setView([pos.coords.latitude, pos.coords.longitude], 13);
-      }, function() {});
-    }
-    map.on('click', function(e) {
-      var lat = e.latlng.lat, lng = e.latlng.lng;
-      if (mapMarker) mapMarker.setLatLng([lat, lng]);
-      else mapMarker = L.marker([lat, lng]).addTo(map);
-      setGpsForSelected(lat, lng); updateGpsSaveBtn();
-    });
-  }
-
   imgOverlayClose.addEventListener('click', function() { imgOverlay.classList.remove('show'); });
   imgOverlay.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
 
   clearLocBtn.addEventListener('click', function() {
     var keys = Object.keys(selectedSet);
     for (var k = 0; k < keys.length; k++) delete gpsData[keys[k]];
-    if (mapMarker) { map.removeLayer(mapMarker); mapMarker = null; updateGpsSaveBtn(); }
+    if (refs.mapMarker) { refs.map.removeLayer(refs.mapMarker); refs.mapMarker = null; updateGpsSaveBtn(); }
     updateGpsDots();
   });
 
@@ -1333,14 +1002,14 @@ function escXml(s) {
   editDateBtn.addEventListener('click', function() { dateOverlay.classList.add('show'); });
   editGpsBtn.addEventListener('click', function() {
     gpsOverlay.classList.add('show');
-    setTimeout(function() { mapEl.style.height = '280px'; initMap(); updateGpsSaveBtn(); }, 100);
+    setTimeout(function() { refs.mapEl.style.height = '280px'; initMap(); updateGpsSaveBtn(); }, 100);
   });
   dateCancelBtn.addEventListener('click', function() { dateOverlay.classList.remove('show'); });
   gpsCancelBtn.addEventListener('click', function() { gpsOverlay.classList.remove('show'); });
   dateSaveBtn.addEventListener('click', function() { applyDateToSelected(); dateOverlay.classList.remove('show'); });
   gpsSaveBtn.addEventListener('click', function() {
-    if (mapMarker) {
-      var latLng = mapMarker.getLatLng();
+    if (refs.mapMarker) {
+      var latLng = refs.mapMarker.getLatLng();
       setGpsForSelected(latLng.lat, latLng.lng);
     }
     gpsOverlay.classList.remove('show');
@@ -1349,15 +1018,15 @@ function escXml(s) {
 
   mapSearchBtn.addEventListener('click', function() {
     var q = mapSearchInput.value.trim();
-    if (!q || !map) return;
+    if (!q || !refs.map) return;
     fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(q))
       .then(function(r) { return r.json(); })
       .then(function(results) {
         if (!results.length) return;
         var lat = parseFloat(results[0].lat), lng = parseFloat(results[0].lon);
-        map.setView([lat, lng], 15);
-        if (mapMarker) mapMarker.setLatLng([lat, lng]);
-        else mapMarker = L.marker([lat, lng]).addTo(map);
+        refs.map.setView([lat, lng], 15);
+        if (refs.mapMarker) refs.mapMarker.setLatLng([lat, lng]);
+        else refs.mapMarker = L.marker([lat, lng]).addTo(refs.map);
         setGpsForSelected(lat, lng);
         updateGpsSaveBtn();
       })
@@ -1367,6 +1036,7 @@ function escXml(s) {
     if (e.key === 'Enter') mapSearchBtn.click();
   });
 
+  // Show gallery overlay with processed files, per-file save buttons, and ZIP download
   function showGallery(files, params, zip) {
     galleryTitle.textContent = t('files_ready', {n: files.length});
     galleryGrid.innerHTML = '';
@@ -1435,6 +1105,7 @@ function escXml(s) {
     };
   }
 
+  // Display a transient status message (success/error) above the file list
   function showStatus(msg, type) {
     statusMsg.textContent = msg; statusMsg.className = 'status-msg ' + type; statusMsg.style.display = 'block';
   }
@@ -1450,8 +1121,8 @@ function escXml(s) {
     gallery.classList.remove('show'); galleryGrid.innerHTML = '';
     dateOverlay.classList.remove('show'); gpsOverlay.classList.remove('show');
     gpsData = {}; selectedSet = {}; fileDates = {};
-    if (mapMarker) { map.removeLayer(mapMarker); mapMarker = null; }
-    mapInitialized = false;
+    if (refs.mapMarker) { refs.map.removeLayer(refs.mapMarker); refs.mapMarker = null; }
+    refs.mapInitialized = false;
     progressSec.classList.remove('show'); progBar.style.width = '0%';
     statusMsg.className = 'status-msg'; statusMsg.style.display = 'none';
     updateLensUI(); refreshSegments();
