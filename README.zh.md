@@ -91,6 +91,38 @@ npm run dev    # http://localhost:3333
 
 Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄）。Vercel 會自動執行 `npm run build`，serve `dist/`。
 
+## 發佈流程
+
+### 版本管理
+
+本專案採用 semver。Source of truth 係 `package.json` → `version`。版號喺 build time 透過 esbuild `--define` 注入，顯示喺 app 底部。
+
+### 步驟
+
+1. 所有開發喺 `dev` branch 進行。Push 去睇 Vercel preview。
+2. Ready 出街時：
+   ```sh
+   git checkout main
+   git merge dev
+   ```
+3. 更新 README `## 新功能` — 喺 release entries 上面加返 version heading。
+4. 執行 release script：
+   ```sh
+   npm run release
+   ```
+   會 bump patch version、commit、建立 git tag。
+5. Push 觸發 Vercel production deploy：
+   ```sh
+   git push origin main --tags
+   ```
+6. （可選）去 GitHub → Releases → 由新 tag 建立 release，貼上 changelog entries。
+
+### 版本類型
+
+- `npm run release` → **patch** (1.0.2 → 1.0.3)
+- `npm version minor` → **minor** (1.0.2 → 1.1.0)
+- `npm version major` → **major** (1.0.2 → 2.0.0)
+
 ## 起源
 
 起初只係寫咗個命令行工具俾自己同朋友用——我本身係菲林攝影入門者，咁啱又係做程式開發，純粹想有個方便嘅方法幫掃描檔加返相片資訊。後尾準備去旅行，驚沖掃舖喺旅行期間傳返啲掃描檔過嚟冇得整理，就索性整咗個網站出嚟，自己喺外地都處理得到。
@@ -116,7 +148,12 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 <details>
 <summary>撳開嚟睇</summary>
 
-**2026-06-12** — 預設日期改用檔案 modified time
+**1.0.2 (2026-06-14)** — README 重寫、版號顯示、發佈流程
+- 📝 README 改寫：敘事式開場、HK presets、serverless 說明
+- 🚀 App 底部顯示版號、Release Workflow 文件化
+- 📦 更新日誌改用 details 摺疊 + version heading
+
+**1.0.1 (2026-06-12)** — 預設日期改用檔案 modified time
 - 🕐 冇 EXIF 拍攝日期時，改用第一張相嘅 `lastModified` 做基準，每張 +1 分鐘（唔再係硬食今日 12:00）
 - 📍 GPS Save 制而家會 apply 地圖 marker 位置俾 selected files；冇 marker 時 disable
 - 🎨 用字更新：「Author」→「Artist」、「file」→「photo / 相 / 菲林」
@@ -160,7 +197,7 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 - 📄 網站根目錄放置 `ads.txt` 供廣告網絡驗證
 - 🔧 Build script 更新，自動複製 `ads.txt` 到 dist/
 
-**2026-06-11** — 相機-鏡頭關聯同儲存修正
+**1.0.0 (2026-06-11)** — 相機-鏡頭關聯同儲存修正
 - 📸 自訂鏡頭而家按相機儲存——每部相機只會顯示屬於佢嘅鏡頭
 - 💾 焦距同最大光圈會同鏡頭名稱一齊儲存
 - 🐛 修正：相機揀自訂時鏡頭資料冇儲存到 localStorage

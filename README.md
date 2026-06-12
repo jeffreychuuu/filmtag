@@ -91,6 +91,38 @@ npm run dev    # http://localhost:3333
 
 Push to GitHub → import in Vercel → Root Directory = `.` (repo root). Vercel auto-runs `npm run build`, serves `dist/`.
 
+## Release Workflow
+
+### Versioning
+
+This project follows semver. The source of truth is `package.json` → `version`. The version is injected at build time via esbuild `--define` and displayed in the app footer.
+
+### Step-by-step
+
+1. All development happens on the `dev` branch. Push to see Vercel preview.
+2. When ready to ship:
+   ```sh
+   git checkout main
+   git merge dev
+   ```
+3. Update `## What's New` in README — add a version heading above the entries being released.
+4. Run the release script:
+   ```sh
+   npm run release
+   ```
+   This bumps the patch version in `package.json`, commits, and creates a git tag.
+5. Push to trigger Vercel production deploy:
+   ```sh
+   git push origin main --tags
+   ```
+6. (Optional) Go to GitHub → Releases → create release from the new tag, paste the changelog entries.
+
+### Version bump types
+
+- `npm run release` → **patch** (1.0.2 → 1.0.3)
+- `npm version minor` → **minor** (1.0.2 → 1.1.0)
+- `npm version major` → **major** (1.0.2 → 2.0.0)
+
 ## Origin
 
 FilmTag started as a CLI tool for myself and a few friends — I'm a film photography beginner who happens to write code for a living, and I just wanted an easy way to tag my scans with proper metadata. Before a trip, I worried that a lab might send scans back while I was away, so I turned it into a web app I could use from anywhere.
@@ -116,7 +148,12 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 <details>
 <summary>Click to expand</summary>
 
-**2026-06-12** — Fallback date from file modified time
+**1.0.2 (2026-06-14)** — README rewrite, version injection, release workflow
+- 📝 README rewrite with narrative pitch, HK presets, serverless note
+- 🚀 In-app version display (footer), release workflow documented
+- 📦 Changelog collapsed under details tag with version headings
+
+**1.0.1 (2026-06-12)** — Fallback date from file modified time
 - 🕐 When no EXIF date is found, falls back to the first file's `lastModified` timestamp, +1 minute per photo (instead of hardcoded today 12:00)
 - 📍 GPS Save button now applies the map marker position to selected files; disabled when no marker is placed
 - 🎨 Terminology: "Author" → "Artist", "file" → "photo" in all UI text
@@ -160,7 +197,7 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 - 📄 `ads.txt` placed at site root for ad network verification
 - 🔧 Build script updated to copy `ads.txt` to dist/
 
-**2026-06-11** — Camera-Lens association & persistence
+**1.0.0 (2026-06-11)** — Camera-Lens association & persistence
 - 📸 Custom lenses are now saved per camera — each camera only shows its own saved lenses
 - 💾 Focal length & max aperture are saved alongside the lens name for custom entries
 - 🐛 Fixed: custom lens not saving to localStorage when camera is set to custom

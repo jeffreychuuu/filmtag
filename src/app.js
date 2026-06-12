@@ -3,6 +3,12 @@ import JSZip from 'jszip';
 import DATA from '../data.json';
 import { t, setLang, toggleLang, applyTranslations, lang } from './i18n.js';
 
+var APP_VERSION = typeof FILMTAG_VERSION !== 'undefined' ? FILMTAG_VERSION : 'dev';
+document.addEventListener('DOMContentLoaded', function() {
+  var el = document.getElementById('version');
+  if (el) el.textContent = 'v' + APP_VERSION;
+});
+
 function toDms(coord) {
   var abs = Math.abs(coord);
   var d = Math.floor(abs);
