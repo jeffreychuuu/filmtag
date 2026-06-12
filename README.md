@@ -57,7 +57,7 @@ The final result 👇
 
 ## Features
 
-- Upload JPEG/TIFF/DNG/PNG photos via drag & drop
+- Upload JPEG photos via drag & drop
 - Set camera, lens, film stock, ISO, lab, process, push/pull, scanner via dropdowns
 - Multiple date segments with individual start times
 - Review summary with file rename preview before processing
@@ -180,6 +180,11 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 
 <details>
 <summary>Click to expand</summary>
+
+**1.1.2 (2026-06-14)** — Restrict upload to JPEG only
+- 🖼️ Upload filter: only `.jpg` / `.jpeg` accepted; TIFF/DNG/PNG rejected with warning
+- 📝 File input `accept` attribute & UI text updated accordingly
+- 🔧 `handleFiles` now rejects non-JPEG files with status message
 
 **1.1.1 (2026-06-14)** — Codebase refactored into modules, Vitest + 57 tests
 - 🧩 `app.js` split from 1505→249 lines into 6 modules under `src/modules/`

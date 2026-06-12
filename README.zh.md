@@ -57,7 +57,7 @@ Upload 你嘅 scans，揀你嘅 gear 同菲林，set 拍攝日期——佢會喺
 
 ## 功能
 
-- 支援拖放上傳 JPEG/TIFF/DNG/PNG 相片
+- 支援拖放上傳 JPEG 相片
 - 透過下拉選單設定相機、鏡頭、菲林、ISO、沖掃工作室、沖洗方式、Push/Pull、掃描器
 - 支援多個日期分段，各自設定起始時間
 - 處理前可預覽檔案重新命名摘要
@@ -180,6 +180,11 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 
 <details>
 <summary>撳開嚟睇</summary>
+
+**1.1.2 (2026-06-14)** — 限制上傳只接受 JPEG
+- 🖼️ 上傳過濾：只接受 `.jpg` / `.jpeg`；TIFF/DNG/PNG 會被拒絕並顯示警告
+- 📝 File input `accept` 屬性 & UI 文字同步更新
+- 🔧 `handleFiles` 而家會 reject 非 JPEG 檔案並顯示 status message
 
 **1.1.1 (2026-06-14)** — 程式碼模組化、Vitest 57 個測試
 - 🧩 `app.js` 由 1505 行拆為 6 個 modules（而家 249 行）

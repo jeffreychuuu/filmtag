@@ -47,7 +47,7 @@ tpl.en = {
   // Sections
   "file_setup": "Film Setup",
   "upload_hint": "Click to select photos, or drag & drop here",
-  "upload_formats": "JPEG, TIFF, DNG, PNG (JPEG recommended \u2014 EXIF writes to JPEG only)",
+  "upload_formats": "JPEG only (.jpg / .jpeg)",
   "artist": "Artist",
   "artist_placeholder": "Enter custom artist name",
   "camera_lens": "Camera & Lens",
@@ -160,7 +160,7 @@ tpl.zh = {
   // Sections
   "file_setup": "菲林設定",
   "upload_hint": "點擊選擇相片，或拖拽到此處",
-  "upload_formats": "JPEG、TIFF、DNG、PNG（建議使用 JPEG — EXIF 僅寫入 JPEG）",
+  "upload_formats": "只接受 JPEG (.jpg / .jpeg)",
   "artist": "藝術家",
   "artist_placeholder": "輸入自定義藝術家名稱",
   "camera_lens": "相機 & 鏡頭",
