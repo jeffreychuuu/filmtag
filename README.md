@@ -84,14 +84,16 @@ The final result 👇
 
 ```
 src/
-  app.js      ← Entry point: state, event binding, file/date/process logic
-  i18n.js     ← English & Traditional Chinese translations
-  utils.js    ← Pure utility functions (toDms, injectXmp, esc, fmtSize, etc.)
-  gear.js     ← Gear dropdowns, custom options persistence, validation
-  gps.js      ← Leaflet map, reverse geocoding, location tagging
+  app.js            ← Entry: state, event binding, file/date/process logic
+  i18n.js           ← English & Traditional Chinese translations
+  lib/
+    utils.js        ← Pure utility functions (toDms, injectXmp, esc, fmtSize…)
+  modules/
+    gear.js         ← Gear dropdowns, custom options, validation
+    gps.js          ← Leaflet map, reverse geocoding, location
 public/
-  index.html  ← App shell with all UI markup
-data.json     ← Built-in presets (cameras, lenses, films, labs)
+  index.html        ← App shell with all UI markup
+data.json           ← Built-in presets (cameras, lenses, films, labs)
 ```
 
 ## Local Dev

@@ -1,4 +1,4 @@
-import { esc } from './utils.js';
+import { esc } from '../lib/utils.js';
 
 var refs;
 

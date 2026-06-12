@@ -2,9 +2,9 @@ import piexif from 'piexifjs';
 import JSZip from 'jszip';
 import DATA from '../data.json';
 import { t, setLang, toggleLang, applyTranslations, lang } from './i18n.js';
-import { toDms, strToUtf8Binary, toUcs2Binary, injectXmp, escXml, esc, fmtSize, dmsToDecimal, newFilmPrefix } from './utils.js';
-import { initGear, fillSelect, fillSelectWithCustom, saveCustomOpts, setupCustom, updateLensUI, collect, validate } from './gear.js';
-import { initGps, initMap, updateGpsDots, updateGpsSaveBtn, setGpsForSelected } from './gps.js';
+import { toDms, strToUtf8Binary, toUcs2Binary, injectXmp, escXml, esc, fmtSize, dmsToDecimal, newFilmPrefix } from './lib/utils.js';
+import { initGear, fillSelect, fillSelectWithCustom, saveCustomOpts, setupCustom, updateLensUI, collect, validate } from './modules/gear.js';
+import { initGps, initMap, updateGpsDots, updateGpsSaveBtn, setGpsForSelected } from './modules/gps.js';
 
 // Register custom EXIF tags used by exiftool -Instructions
 piexif.TAGS.Exif[0x828D] = { name: 'Instructions', type: 'Ascii' };

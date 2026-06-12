@@ -1,5 +1,5 @@
-import { t } from './i18n.js';
-import { esc } from './utils.js';
+import { t } from '../i18n.js';
+import { esc } from '../lib/utils.js';
 
 var CAMERAS, $, authorSel, authorCust, cameraSel, cameraCust, lensDrop, lensSel, lensCust;
 var filmSel, filmCust, labSel, labCust, ppSel, ppCust, scanSel, scanCust;
