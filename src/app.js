@@ -26,7 +26,14 @@ document.addEventListener('DOMContentLoaded', function() {
         overlay.classList.remove('show');
       });
       document.getElementById('disclaimer-disagree').addEventListener('click', function() {
-        overlay.classList.remove('show');
+        var content = overlay.querySelector('.overlay-content');
+        content.innerHTML = '<h3 style="margin-bottom:1rem;color:var(--red);">' +
+          (lang === 'zh' ? '無法使用' : 'Access Denied') +
+          '</h3><p style="line-height:1.7;">' +
+          (lang === 'zh'
+            ? '你選擇咗不同意。呢個工具需要你先同意使用條款先可以用到。如果你改變主意，請重新整理頁面然後撳「我明白並同意使用」。'
+            : 'You have chosen not to agree. This tool requires acknowledgment to function. If you change your mind, please refresh the page and click "I understand and agree to proceed".') +
+          '</p>';
       });
     }
   }
