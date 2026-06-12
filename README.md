@@ -84,7 +84,7 @@ The final result 👇
 
 ```
 src/
-  app.js            ← Entry (~314 lines): state init, event binding, module wiring
+  app.js            ← Entry (~249 lines): state init, event binding, module wiring
   i18n.js           ← English & Traditional Chinese translations
   lib/
     utils.js        ← Pure utility functions (toDms, injectXmp, esc, fmtSize…)
@@ -95,10 +95,22 @@ src/
     process.js      ← ZIP/Save processing with EXIF injection
     ui.js           ← File list, summary, thumbnails, selection, ranges
     upload.js       ← File upload & EXIF extraction
+  __tests__/        ← Vitest test suites (57 tests)
+    lib/utils.test.js
+    modules/{date,gear,ui}.test.js
 public/
   index.html        ← App shell with all UI markup
 data.json           ← Built-in presets (cameras, lenses, films, labs)
 ```
+
+### Testing
+
+```bash
+npm test              # Run all tests once
+npm run test:watch    # Watch mode for TDD
+```
+
+Tests use **Vitest** with **happy-dom**. Pure utility functions (utils.js) and state-dependent module logic (date, gear, ui) are covered. Run tests before committing to ensure nothing is broken.
 
 ## Local Dev
 
@@ -140,9 +152,9 @@ This project follows semver. The source of truth is `package.json` → `version`
 
 ### Version bump types
 
-- `npm run release` → **patch** (1.0.1 → 1.0.2)
-- `npm version minor` → **minor** (1.0.1 → 1.1.0)
-- `npm version major` → **major** (1.0.1 → 2.0.0)
+- `npm run release` → **patch** (1.1.1 → 1.1.2)
+- `npm version minor` → **minor** (1.1.1 → 1.2.0)
+- `npm version major` → **major** (1.1.1 → 2.0.0)
 
 ## Origin
 
