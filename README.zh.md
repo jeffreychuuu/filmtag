@@ -63,6 +63,11 @@
 
 ## 新功能
 
+**2026-06-12** — 預設日期改用檔案 modified time
+- 🕐 冇 EXIF 拍攝日期時，改用第一張相嘅 `lastModified` 做基準，每張 +1 分鐘（唔再係硬食今日 12:00）
+- 📍 GPS Save 制而家會 apply 地圖 marker 位置俾 selected files；冇 marker 時 disable
+- 🎨 用字更新：「Author」→「Artist」、「file」→「photo / 相 / 菲林」
+
 **2026-06-12** — Summary & Gallery 改為 modal overlay
 - 📋 Review Summary 而家係 modal overlay，有 Close/Save/Download 按鈕
 - 📸 處理完成後顯示 Gallery overlay —「Next Roll 🎞️」重置全部並 fade-out 捲回頁頂

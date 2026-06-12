@@ -468,9 +468,10 @@ function escXml(s) {
       var ds = fd.fileDate;
       return { date: ds.slice(0,4) + '/' + ds.slice(4,6) + '/' + ds.slice(6,8), time: String(fd.hr).padStart(2,'0') + ':' + String(fd.min).padStart(2,'0') };
     }
-    var now = new Date();
-    var d = now.getFullYear().toString() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
-    return { date: d.slice(0,4) + '/' + d.slice(4,6) + '/' + d.slice(6,8), time: '12:00' };
+    var baseTime = uploadedFiles[0].file.lastModified;
+    var d = new Date(baseTime + (idx - 1) * 60000);
+    var dd = String(d.getFullYear()) + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
+    return { date: dd.slice(0,4) + '/' + dd.slice(4,6) + '/' + dd.slice(6,8), time: String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') };
   }
 
   function renderFileList(skipThumbs) {
@@ -809,9 +810,10 @@ function escXml(s) {
   function getFileDate(i) {
     var fd = fileDates[i];
     if (fd) return fd;
-    var now = new Date();
-    var d = now.getFullYear().toString() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
-    return { fileDate: d, exifDate: d.slice(0,4) + ':' + d.slice(4,6) + ':' + d.slice(6,8), hr: (12 + Math.floor(i / 60)) % 24, min: i % 60 };
+    var baseTime = uploadedFiles[0].file.lastModified;
+    var d = new Date(baseTime + i * 60000);
+    var dd = String(d.getFullYear()) + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
+    return { fileDate: dd, exifDate: dd.slice(0,4) + ':' + dd.slice(4,6) + ':' + dd.slice(6,8), hr: d.getHours(), min: d.getMinutes() };
   }
 
   function newFilmPrefix(film) {
@@ -1195,6 +1197,10 @@ function escXml(s) {
     }
   }
 
+  function updateGpsSaveBtn() {
+    gpsSaveBtn.disabled = !mapMarker;
+  }
+
   function setGpsForSelected(lat, lng) {
     var keys = Object.keys(selectedSet);
     if (!keys.length) return;
@@ -1278,7 +1284,7 @@ function escXml(s) {
       var lat = e.latlng.lat, lng = e.latlng.lng;
       if (mapMarker) mapMarker.setLatLng([lat, lng]);
       else mapMarker = L.marker([lat, lng]).addTo(map);
-      setGpsForSelected(lat, lng);
+      setGpsForSelected(lat, lng); updateGpsSaveBtn();
     });
   }
 
@@ -1288,7 +1294,7 @@ function escXml(s) {
   clearLocBtn.addEventListener('click', function() {
     var keys = Object.keys(selectedSet);
     for (var k = 0; k < keys.length; k++) delete gpsData[keys[k]];
-    if (mapMarker) { map.removeLayer(mapMarker); mapMarker = null; }
+    if (mapMarker) { map.removeLayer(mapMarker); mapMarker = null; updateGpsSaveBtn(); }
     updateGpsDots();
   });
 
@@ -1304,12 +1310,18 @@ function escXml(s) {
   editDateBtn.addEventListener('click', function() { dateOverlay.classList.add('show'); });
   editGpsBtn.addEventListener('click', function() {
     gpsOverlay.classList.add('show');
-    setTimeout(function() { mapEl.style.height = '280px'; initMap(); }, 100);
+    setTimeout(function() { mapEl.style.height = '280px'; initMap(); updateGpsSaveBtn(); }, 100);
   });
   dateCancelBtn.addEventListener('click', function() { dateOverlay.classList.remove('show'); });
   gpsCancelBtn.addEventListener('click', function() { gpsOverlay.classList.remove('show'); });
   dateSaveBtn.addEventListener('click', function() { applyDateToSelected(); dateOverlay.classList.remove('show'); });
-  gpsSaveBtn.addEventListener('click', function() { gpsOverlay.classList.remove('show'); });
+  gpsSaveBtn.addEventListener('click', function() {
+    if (mapMarker) {
+      var latLng = mapMarker.getLatLng();
+      setGpsForSelected(latLng.lat, latLng.lng);
+    }
+    gpsOverlay.classList.remove('show');
+  });
   gpsOverlay.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
 
   mapSearchBtn.addEventListener('click', function() {
@@ -1324,6 +1336,7 @@ function escXml(s) {
         if (mapMarker) mapMarker.setLatLng([lat, lng]);
         else mapMarker = L.marker([lat, lng]).addTo(map);
         setGpsForSelected(lat, lng);
+        updateGpsSaveBtn();
       })
       .catch(function() {});
   });

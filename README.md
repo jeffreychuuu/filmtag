@@ -63,6 +63,11 @@ The final result 👇
 
 ## What's New
 
+**2026-06-12** — Fallback date from file modified time
+- 🕐 When no EXIF date is found, falls back to the first file's `lastModified` timestamp, +1 minute per photo (instead of hardcoded today 12:00)
+- 📍 GPS Save button now applies the map marker position to selected files; disabled when no marker is placed
+- 🎨 Terminology: "Author" → "Artist", "file" → "photo" in all UI text
+
 **2026-06-12** — Summary & gallery as modal overlays
 - 📋 Review Summary is now a modal overlay with Close/Save/Download buttons
 - 📸 Gallery overlay after processing — "Next Roll 🎞️" resets and scrolls to top with fade-out animation
