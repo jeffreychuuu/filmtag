@@ -84,13 +84,17 @@ The final result 👇
 
 ```
 src/
-  app.js            ← Entry: state, event binding, file/date/process logic
+  app.js            ← Entry (~314 lines): state init, event binding, module wiring
   i18n.js           ← English & Traditional Chinese translations
   lib/
     utils.js        ← Pure utility functions (toDms, injectXmp, esc, fmtSize…)
   modules/
+    date.js         ← Date assignment, filename generation
     gear.js         ← Gear dropdowns, custom options, validation
     gps.js          ← Leaflet map, reverse geocoding, location
+    process.js      ← ZIP/Save processing with EXIF injection
+    ui.js           ← File list, summary, thumbnails, selection, ranges
+    upload.js       ← File upload & EXIF extraction
 public/
   index.html        ← App shell with all UI markup
 data.json           ← Built-in presets (cameras, lenses, films, labs)

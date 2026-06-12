@@ -35,7 +35,7 @@ export function setGpsForSelected(lat, lng) {
 }
 
 // Queue a reverse geocode request for lat/lng, deduplicated and cached
-function reverseGeocode(lat, lng, indices) {
+export function reverseGeocode(lat, lng, indices) {
   var key = lat.toFixed(5) + ',' + lng.toFixed(5);
   if (refs.geocodeCache[key]) {
     var addr = refs.geocodeCache[key];

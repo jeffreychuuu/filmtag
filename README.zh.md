@@ -84,13 +84,17 @@ Upload 你嘅 scans，揀你嘅 gear 同菲林，set 拍攝日期——佢會喺
 
 ```
 src/
-  app.js            ← 主程式：狀態管理、事件綁定、檔案/日期/處理邏輯
+  app.js            ← 主程式 (~314 行)：狀態初始化、事件綁定、模組接線
   i18n.js           ← 英文 & 繁體中文翻譯
   lib/
     utils.js        ← 純工具函數（toDms、injectXmp、esc、fmtSize…）
   modules/
+    date.js         ← 日期設定、檔名生成
     gear.js         ← Gear 下拉選單、自訂選項、資料驗證
     gps.js          ← Leaflet 地圖、逆向地理編碼、位置
+    process.js      ← ZIP/儲存處理、EXIF 注入
+    ui.js           ← 檔案列表、摘要、縮圖、選擇、範圍
+    upload.js       ← 檔案上傳 & EXIF 提取
 public/
   index.html        ← App 外殼，所有 UI 標記
 data.json           ← 內建預設（相機、鏡頭、菲林、沖掃工作室）
