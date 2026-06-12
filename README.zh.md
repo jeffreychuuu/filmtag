@@ -140,9 +140,9 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 
 ### 版本類型
 
-- `npm run release` → **patch** (1.1.0 → 1.1.1)
-- `npm version minor` → **minor** (1.1.0 → 1.2.0)
-- `npm version major` → **major** (1.1.0 → 2.0.0)
+- `npm run release` → **patch** (1.0.1 → 1.0.2)
+- `npm version minor` → **minor** (1.0.1 → 1.1.0)
+- `npm version major` → **major** (1.0.1 → 2.0.0)
 
 ## 起源
 
@@ -169,7 +169,7 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 <details>
 <summary>撳開嚟睇</summary>
 
-**1.1.0 (2026-06-14)** — README 重寫、版號顯示、發佈流程
+**1.0.1 (2026-06-14)** — README 重寫、版號顯示、發佈流程
 - 📝 README 改寫：敘事式開場、HK presets、serverless 說明
 - 🚀 App 底部顯示版號、Release Workflow 文件化
 - 📦 更新日誌改用 details 摺疊 + version heading

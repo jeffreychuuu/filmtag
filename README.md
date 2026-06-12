@@ -140,9 +140,9 @@ This project follows semver. The source of truth is `package.json` → `version`
 
 ### Version bump types
 
-- `npm run release` → **patch** (1.1.0 → 1.1.1)
-- `npm version minor` → **minor** (1.1.0 → 1.2.0)
-- `npm version major` → **major** (1.1.0 → 2.0.0)
+- `npm run release` → **patch** (1.0.1 → 1.0.2)
+- `npm version minor` → **minor** (1.0.1 → 1.1.0)
+- `npm version major` → **major** (1.0.1 → 2.0.0)
 
 ## Origin
 
@@ -169,7 +169,7 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 <details>
 <summary>Click to expand</summary>
 
-**1.1.0 (2026-06-14)** — README rewrite, version injection, release workflow
+**1.0.1 (2026-06-14)** — README rewrite, version injection, release workflow
 - 📝 README rewrite with narrative pitch, HK presets, serverless note
 - 🚀 In-app version display (footer), release workflow documented
 - 📦 Changelog collapsed under details tag with version headings
