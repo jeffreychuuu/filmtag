@@ -9,6 +9,23 @@ document.addEventListener('DOMContentLoaded', function() {
   if (el) el.textContent = 'v' + APP_VERSION;
 });
 
+// Disclaimer acknowledgment
+(function() {
+  if (!localStorage.getItem('filmtag-disclaimer-acknowledged')) {
+    var overlay = document.getElementById('disclaimer-overlay');
+    if (overlay) {
+      overlay.classList.add('show');
+      document.getElementById('disclaimer-agree').addEventListener('click', function() {
+        localStorage.setItem('filmtag-disclaimer-acknowledged', '1');
+        overlay.classList.remove('show');
+      });
+      document.getElementById('disclaimer-disagree').addEventListener('click', function() {
+        overlay.classList.remove('show');
+      });
+    }
+  }
+})();
+
 function toDms(coord) {
   var abs = Math.abs(coord);
   var d = Math.floor(abs);

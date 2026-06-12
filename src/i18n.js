@@ -142,6 +142,12 @@ tpl.en = {
 
   "extracting_exif": "Uploading {n} photos…",
   "next_roll": "Next Roll 🎞️",
+
+  // Disclaimer acknowledgment
+  "disclaimer_title": "Before You Use This Tool",
+  "disclaimer_acknowledge": "This tool is built with the assistance of AI. If you are concerned about potential security risks or do not trust AI-assisted tools, please do not use this tool.",
+  "disclaimer_agree": "I understand and agree to proceed",
+  "disclaimer_disagree": "I do not agree",
 };
 
 tpl.zh = {
@@ -249,6 +255,12 @@ tpl.zh = {
 
   "extracting_exif": "正在上傳 {n} 張相…",
   "next_roll": "下一卷菲林 🎞️",
+
+  // Disclaimer acknowledgment
+  "disclaimer_title": "使用前須知",
+  "disclaimer_acknowledge": "呢個工具係由 AI 輔助開發。如果你擔心潛在嘅安全風險或者唔信任 AI 協助製造嘅工具，請唔好使用呢個工具。",
+  "disclaimer_agree": "我明白並同意使用",
+  "disclaimer_disagree": "我不同意",
 };
 
 export { t, setLang, toggleLang, applyTranslations, lang };
