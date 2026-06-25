@@ -40,8 +40,8 @@
     { "name": "Kodak Ektacolor Pro 160", "iso": "160" },
     { "name": "Kodak Ektacolor Pro 400", "iso": "400" },
     { "name": "Kodak Ektacolor Pro 800", "iso": "800" },
-    { "name": "Fujicolor C200", "iso": "200" },
-    { "name": "Fujicolor Superia Premium 400", "iso": "400" },
+    { "name": "Fujifilm C200", "iso": "200" },
+    { "name": "Fujifilm Superia Premium 400", "iso": "400" },
     { "name": "Lucky C200", "iso": "200" },
     { "name": "Crystal 250D AHU - 5207", "iso": "250" },
     { "name": "Crystal 250D AHU - 5219", "iso": "500" },
@@ -55,15 +55,15 @@
     { "name": "CAMDI Lost in Tokyo 500", "iso": "500" }
   ],
   "labs": [
+    "Fiona",
+    "Lucky 樂凱",
     "DOT-WELL Photo Workshop",
     "Megatoni Production",
     "TrueFace Pro Lab 金鈿(真面目)",
     "Photo Garden 金藝",
     "HK Camera",
     "Showa",
-    "Colorluxe Express 彩圖麗",
-    "Lucky 樂凱",
-    "Fiona"
+    "Colorluxe Express 彩圖麗"
   ],
   "processes": [
     "C-41",
