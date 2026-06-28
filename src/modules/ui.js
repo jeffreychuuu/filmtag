@@ -301,7 +301,7 @@ function moveItem(fromIdx, toIdx) {
 function moveItemToEnd(fromIdx) {
   var n = S.uploadedFiles.length;
   if (fromIdx >= n - 1) return;
-  moveItem(fromIdx, n - 1);
+  moveItem(fromIdx, n);
 }
 
 var _dragFrom = -1;
