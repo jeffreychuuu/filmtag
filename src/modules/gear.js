@@ -2,7 +2,7 @@ import { t } from '../i18n.js';
 import { esc } from '../lib/utils.js';
 
 var CAMERAS, $, artistSel, artistCust, cameraSel, cameraCust, lensDrop, lensSel, lensCust;
-var filmSel, filmCust, labSel, labCust, ppSel, ppCust, scanSel, scanCust;
+var filmSel, filmCust, labSel, labCust, ppSel, ppCust, scanSel, scanCust, processSel, processCust;
 var selectedSet, gpsData;
 
 export function initGear(refs) {
@@ -15,6 +15,7 @@ export function initGear(refs) {
   labSel = refs.labSel; labCust = refs.labCust;
   ppSel = refs.ppSel; ppCust = refs.ppCust;
   scanSel = refs.scanSel; scanCust = refs.scanCust;
+  processSel = refs.processSel; processCust = refs.processCust;
   selectedSet = refs.selectedSet;
   gpsData = refs.gpsData;
 }
@@ -77,7 +78,8 @@ export function saveCustomOpts() {
     {sel: filmSel, inp: $('film-name-custom'), key: 'filmName'},
     {sel: labSel, inp: $('lab-custom-input'), key: 'lab'},
     {sel: scanSel, inp: $('scanner-custom-input'), key: 'scanner'},
-    {sel: ppSel, inp: $('pushpull-custom-input'), key: 'pushPull'}
+    {sel: ppSel, inp: $('pushpull-custom-input'), key: 'pushPull'},
+    {sel: processSel, inp: $('process-custom-input'), key: 'process'}
   ];
   for (var i = 0; i < fields.length; i++) {
     if (fields[i].sel.value === '__custom__' && fields[i].inp.value.trim()) {
@@ -197,7 +199,7 @@ function filmInfo() {
 export function collect() {
   return {
     artist: getVal(artistSel, $('artist-custom-input')), camera: camInfo(), lens: lensInfo(),
-    film: filmInfo(), lab: getVal(labSel, $('lab-custom-input')), process: selText($('process-select')),
+    film: filmInfo(), lab: getVal(labSel, $('lab-custom-input')),     process: getVal(processSel, $('process-custom-input')),
     pushpull: getVal(ppSel, $('pushpull-custom-input')), scanner: getVal(scanSel, $('scanner-custom-input'))
   };
 }

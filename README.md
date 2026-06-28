@@ -181,6 +181,10 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 <details>
 <summary>Click to expand</summary>
 
+**1.2.0 (2026-06-28)** — Developing Process free-text support
+- ✏️ Developing Process dropdown now supports custom free-text input — type any process like C-41, ECN-2, E-6
+- 💾 Custom process entries are saved to localStorage for future sessions
+
 **1.1.3 (2026-06-14)** — Fix add range + Clear GPS button
 - 🐛 Fixed: "Add Range" button not working after module refactor
 - ✏️ "Clear Selected GPS" renamed to "Clear" and moved below map

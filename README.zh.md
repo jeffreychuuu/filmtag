@@ -181,6 +181,10 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 <details>
 <summary>撳開嚟睇</summary>
 
+**1.2.0 (2026-06-28)** — 沖洗方式支援自訂輸入
+- ✏️ 沖洗方式而家支援自訂輸入 — 可以自由輸入任何沖洗方式（C-41、ECN-2、E-6 等）
+- 💾 自訂嘅沖洗方式會自動儲存到瀏覽器，下次開返會見到
+
 **1.1.3 (2026-06-14)** — 修正 Add Range + Clear GPS 按鈕
 - 🐛 修正：模組重構後「Add Range」按鈕失靈
 - ✏️ 「Clear Selected GPS」改為「清除」並搬移到地圖下面

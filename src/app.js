@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var artistSel = $('artist-select'), artistCust = $('artist-custom'), cameraSel = $('camera-select'), cameraCust = $('camera-custom');
   var lensDrop = $('lens-dropdown-group'), lensSel = $('lens-select'), lensCust = $('lens-custom');
   var filmSel = $('film-select'), filmCust = $('film-custom'), labSel = $('lab-select'), labCust = $('lab-custom');
-  var ppSel = $('pushpull-select'), ppCust = $('pushpull-custom'), scanSel = $('scanner-select'), scanCust = $('scanner-custom');
+  var ppSel = $('pushpull-select'), ppCust = $('pushpull-custom'), scanSel = $('scanner-select'), scanCust = $('scanner-custom'), processSel = $('process-select'), processCust = $('process-custom');
   var singleDateInp = $('single-date-input'), singleTimeInp = $('single-time-input');
   var fileInp = $('file-input'), uploadWrap = $('upload-wrap');
   var fileListEl = $('file-list'), reviewBtn = $('review-btn');
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
   S.artistSel = artistSel; S.artistCust = artistCust; S.cameraSel = cameraSel; S.cameraCust = cameraCust;
   S.lensDrop = lensDrop; S.lensSel = lensSel; S.lensCust = lensCust;
   S.filmSel = filmSel; S.filmCust = filmCust; S.labSel = labSel; S.labCust = labCust;
-  S.ppSel = ppSel; S.ppCust = ppCust; S.scanSel = scanSel; S.scanCust = scanCust;
+  S.ppSel = ppSel; S.ppCust = ppCust; S.scanSel = scanSel; S.scanCust = scanCust; S.processSel = processSel; S.processCust = processCust;
   S.singleDateInp = singleDateInp; S.singleTimeInp = singleTimeInp;
   S.fileInp = fileInp; S.uploadWrap = uploadWrap;
   S.fileListEl = fileListEl; S.reviewBtn = reviewBtn;
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
   fillSelectWithCustom(labSel, DATA.labs, 'lab');
   fillSelectWithCustom(scanSel, DATA.scanners, 'scanner');
   fillSelectWithCustom(ppSel, DATA.pushpulls, 'pushPull');
-  fillSelect($('process-select'), DATA.processes);
+  fillSelectWithCustom(processSel, DATA.processes, 'process');
   (function() {
     filmSel.innerHTML = '';
     for (var i = 0; i < DATA.films.length; i++) {
@@ -139,6 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
   setupCustom(labSel, labCust);
   setupCustom(ppSel, ppCust);
   setupCustom(scanSel, scanCust);
+  setupCustom(processSel, processCust);
   setupCustom(filmSel, filmCust);
   cameraSel.addEventListener('change', updateLensUI);
   lensSel.addEventListener('change', function() {
