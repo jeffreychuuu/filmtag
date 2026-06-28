@@ -186,6 +186,7 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 - 💾 Custom process entries are saved to localStorage for future sessions
 - 🎞️ "Next Roll" button now appears after ZIP download too — start fresh without reloading manually
 - 🔼 Reorder uploaded files with ▲/▼ buttons — control sequence numbering and timestamp order
+- 🤚 Drag & drop to reorder — just grab and drag files to any position
 
 **1.1.3 (2026-06-14)** — Fix add range + Clear GPS button
 - 🐛 Fixed: "Add Range" button not working after module refactor

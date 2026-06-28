@@ -186,6 +186,7 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 - 💾 自訂嘅沖洗方式會自動儲存到瀏覽器，下次開返會見到
 - 🎞️ Download ZIP 完成後都會有「Next Roll 🎞️」制 — 唔使 reload 就可以開新一卷
 - 🔼 Upload 完嘅檔案可以㩒 ▲/▼ 重新排序 — 控制 sequence number 同 timestamp 嘅次序
+- 🤚 亦可以直接用 Drag & drop 拖到任何位置
 
 **1.1.3 (2026-06-14)** — 修正 Add Range + Clear GPS 按鈕
 - 🐛 修正：模組重構後「Add Range」按鈕失靈
