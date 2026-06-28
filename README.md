@@ -181,9 +181,10 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 <details>
 <summary>Click to expand</summary>
 
-**1.2.0 (2026-06-28)** — Developing Process free-text support
+**1.2.0 (2026-06-28)** — Developing Process free-text + Next Roll for ZIP
 - ✏️ Developing Process dropdown now supports custom free-text input — type any process like C-41, ECN-2, E-6
 - 💾 Custom process entries are saved to localStorage for future sessions
+- 🎞️ "Next Roll" button now appears after ZIP download too — start fresh without reloading manually
 
 **1.1.3 (2026-06-14)** — Fix add range + Clear GPS button
 - 🐛 Fixed: "Add Range" button not working after module refactor

@@ -181,9 +181,10 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 <details>
 <summary>撳開嚟睇</summary>
 
-**1.2.0 (2026-06-28)** — 沖洗方式支援自訂輸入
+**1.2.0 (2026-06-28)** — 沖洗方式自訂輸入 + ZIP 下載後 Next Roll
 - ✏️ 沖洗方式而家支援自訂輸入 — 可以自由輸入任何沖洗方式（C-41、ECN-2、E-6 等）
 - 💾 自訂嘅沖洗方式會自動儲存到瀏覽器，下次開返會見到
+- 🎞️ Download ZIP 完成後都會有「Next Roll 🎞️」制 — 唔使 reload 就可以開新一卷
 
 **1.1.3 (2026-06-14)** — 修正 Add Range + Clear GPS 按鈕
 - 🐛 修正：模組重構後「Add Range」按鈕失靈

@@ -32,7 +32,8 @@ export function startZipProcess() {
         showStatus(t('processed_success', {n: total}), 'success');
         S.reviewBtn.disabled = false;
         S.saveCustomOpts();
-        setTimeout(function() { S.progressSec.classList.remove('show'); S.progBar.style.width = '0%'; }, 3000);
+        var nextBtn = S._('progress-next-btn');
+        if (nextBtn) nextBtn.style.display = 'inline-block';
       });
     }
   }
@@ -252,6 +253,8 @@ export function showGallery(files, params, zip) {
       S.galleryGrid.appendChild(item);
     })(files[i]);
   }
+  var nextBtn = S._('progress-next-btn');
+  if (nextBtn) nextBtn.style.display = 'none';
   S.gallery.classList.add('show');
   S.galleryZipBtn.onclick = function() {
     zip.generateAsync({ type: 'blob' }).then(function(blob) {
