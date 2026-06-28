@@ -298,11 +298,6 @@ function moveItem(fromIdx, toIdx) {
   S.renderFileList();
 }
 
-function moveItemToEnd(fromIdx) {
-  var n = S.uploadedFiles.length;
-  if (fromIdx >= n - 1) return;
-  moveItem(fromIdx, n);
-}
 
 var _dragFrom = -1;
 
@@ -349,7 +344,8 @@ function fileDrop(e) {
     item.classList.remove('drag-over');
     moveItem(_dragFrom, toIdx);
   } else if (S.fileListEl.contains(e.target)) {
-    moveItemToEnd(_dragFrom);
+    var to = S.pageSize === 0 ? S.uploadedFiles.length : Math.min(S.currentPage * S.pageSize, S.uploadedFiles.length);
+    moveItem(_dragFrom, to);
   }
 }
 
