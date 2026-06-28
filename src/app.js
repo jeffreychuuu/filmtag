@@ -5,7 +5,7 @@ import { t, setLang, toggleLang, applyTranslations, lang } from './i18n.js';
 import { toDms, strToUtf8Binary, toUcs2Binary, injectXmp, escXml, esc, fmtSize, dmsToDecimal, newFilmPrefix } from './lib/utils.js';
 import { initGear, fillSelect, fillSelectWithCustom, saveCustomOpts, setupCustom, updateLensUI, collect, validate } from './modules/gear.js';
 import { initGps, initMap, updateGpsDots, updateGpsSaveBtn, setGpsForSelected, reverseGeocode } from './modules/gps.js';
-import { init as initUi, renderFileList, goToPage, changePageSize, goToSummaryPage, changeSummaryPageSize, clearAll, removeOne, getTotalPages, buildSummaryHtml, generateSummaryThumbnails, rebuildSummaryBody, buildOptions, syncRange, buildSelectedFromRanges } from './modules/ui.js';
+import { init as initUi, renderFileList, goToPage, changePageSize, goToSummaryPage, changeSummaryPageSize, clearAll, removeOne, moveUp, moveDown, getTotalPages, buildSummaryHtml, generateSummaryThumbnails, rebuildSummaryBody, buildOptions, syncRange, buildSelectedFromRanges } from './modules/ui.js';
 import { init as initDate, applyDateToSelected, refreshSegments, computeDateForFile, getFileDate, newFName } from './modules/date.js';
 import { init as initUpload, handleFiles } from './modules/upload.js';
 import { init as initProcess, startZipProcess, startSaveProcess, showGallery, showStatus } from './modules/process.js';
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var artistSel = $('artist-select'), artistCust = $('artist-custom'), cameraSel = $('camera-select'), cameraCust = $('camera-custom');
   var lensDrop = $('lens-dropdown-group'), lensSel = $('lens-select'), lensCust = $('lens-custom');
   var filmSel = $('film-select'), filmCust = $('film-custom'), labSel = $('lab-select'), labCust = $('lab-custom');
-  var ppSel = $('pushpull-select'), ppCust = $('pushpull-custom'), scanSel = $('scanner-select'), scanCust = $('scanner-custom');
+  var ppSel = $('pushpull-select'), ppCust = $('pushpull-custom'), scanSel = $('scanner-select'), scanCust = $('scanner-custom'), processSel = $('process-select'), processCust = $('process-custom');
   var singleDateInp = $('single-date-input'), singleTimeInp = $('single-time-input');
   var fileInp = $('file-input'), uploadWrap = $('upload-wrap');
   var fileListEl = $('file-list'), reviewBtn = $('review-btn');
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
   S.artistSel = artistSel; S.artistCust = artistCust; S.cameraSel = cameraSel; S.cameraCust = cameraCust;
   S.lensDrop = lensDrop; S.lensSel = lensSel; S.lensCust = lensCust;
   S.filmSel = filmSel; S.filmCust = filmCust; S.labSel = labSel; S.labCust = labCust;
-  S.ppSel = ppSel; S.ppCust = ppCust; S.scanSel = scanSel; S.scanCust = scanCust;
+  S.ppSel = ppSel; S.ppCust = ppCust; S.scanSel = scanSel; S.scanCust = scanCust; S.processSel = processSel; S.processCust = processCust;
   S.singleDateInp = singleDateInp; S.singleTimeInp = singleTimeInp;
   S.fileInp = fileInp; S.uploadWrap = uploadWrap;
   S.fileListEl = fileListEl; S.reviewBtn = reviewBtn;
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
   S.saveCustomOpts = saveCustomOpts;
   S.startZipProcess = startZipProcess; S.startSaveProcess = startSaveProcess;
   S.showStatus = showStatus; S.initMap = initMap;
-  window.clearAll = clearAll; window.removeOne = removeOne;
+  window.clearAll = clearAll; window.removeOne = removeOne; window.moveUp = moveUp; window.moveDown = moveDown;
   window.goToPage = goToPage; window.changePageSize = changePageSize;
   window.goToSummaryPage = goToSummaryPage; window.changeSummaryPageSize = changeSummaryPageSize;
 
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
   fillSelectWithCustom(labSel, DATA.labs, 'lab');
   fillSelectWithCustom(scanSel, DATA.scanners, 'scanner');
   fillSelectWithCustom(ppSel, DATA.pushpulls, 'pushPull');
-  fillSelect($('process-select'), DATA.processes);
+  fillSelectWithCustom(processSel, DATA.processes, 'process');
   (function() {
     filmSel.innerHTML = '';
     for (var i = 0; i < DATA.films.length; i++) {
@@ -139,6 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
   setupCustom(labSel, labCust);
   setupCustom(ppSel, ppCust);
   setupCustom(scanSel, scanCust);
+  setupCustom(processSel, processCust);
   setupCustom(filmSel, filmCust);
   cameraSel.addEventListener('change', updateLensUI);
   lensSel.addEventListener('change', function() {
@@ -239,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function() {
     gallery.classList.remove('show'); galleryGrid.innerHTML = '';
     dateOverlay.classList.remove('show'); gpsOverlay.classList.remove('show');
     if (S.mapMarker) { S.map.removeLayer(S.mapMarker); S.mapMarker = null; }
-    S.mapInitialized = false; progressSec.classList.remove('show'); progBar.style.width = '0%';
+    S.mapInitialized = false; progressSec.classList.remove('show'); progBar.style.width = '0%'; $('progress-next-btn').style.display = 'none'; $('progress-spinner').style.display = 'block'; $('progress-done').style.display = 'none';
     statusMsg.className = 'status-msg'; statusMsg.style.display = 'none';
     updateLensUI(); refreshSegments();
   });
@@ -267,6 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
     dateOverlay.classList.remove('show'); gpsOverlay.classList.remove('show');
     refreshSegments(); S.renderFileList();
   });
+  $('progress-next-btn').addEventListener('click', function() { progressSec.classList.remove('show'); progBar.style.width = '0%'; $('progress-next-btn').style.display = 'none'; $('progress-spinner').style.display = 'block'; $('progress-done').style.display = 'none'; location.reload(); });
   $('easter-egg-btn').addEventListener('click', function() { $('egg-overlay').classList.add('show'); });
   $('egg-close').addEventListener('click', function() { $('egg-overlay').classList.remove('show'); });
   $('egg-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });

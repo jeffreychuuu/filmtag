@@ -68,6 +68,8 @@ export function renderFileList(skipThumbs) {
       '<div class="fsize">' + fmtSize(f.file.size) + '</div>' +
       '<span class="file-gps-dot">' + dot + '</span>' +
       dateDot +
+      '<button class="move-btn move-up" onclick="moveUp(' + i + ')"' + (i === 0 ? ' disabled' : '') + '>▲</button>' +
+      '<button class="move-btn move-down" onclick="moveDown(' + i + ')"' + (i === S.uploadedFiles.length - 1 ? ' disabled' : '') + '>▼</button>' +
       '<button class="remove-btn" onclick="removeOne(' + i + ')">\u2715</button>' +
       '</div>';
   }
@@ -191,7 +193,7 @@ function bindFileItemClicks() {
 }
 
 function fileItemClick(e) {
-  if (e.target.closest('.remove-btn')) return;
+  if (e.target.closest('.remove-btn') || e.target.closest('.move-btn')) return;
   var item = e.currentTarget;
   var i = parseInt(item.getAttribute('data-idx'), 10);
   if (S.selectedSet[i]) { delete S.selectedSet[i]; item.classList.remove('selected'); }
@@ -224,6 +226,44 @@ export function removeOne(i) {
   S.refreshSegments();
   renderRanges();
 }
+
+function reorderItem(i, dir) {
+  var j = i + dir;
+  if (j < 0 || j >= S.uploadedFiles.length) return;
+  var tmp = S.uploadedFiles[i];
+  S.uploadedFiles[i] = S.uploadedFiles[j];
+  S.uploadedFiles[j] = tmp;
+  function swap(dict) {
+    var vi = dict[i], vj = dict[j];
+    if (vi !== undefined && vj !== undefined) { dict[i] = vj; dict[j] = vi; }
+    else if (vi !== undefined) { dict[j] = vi; delete dict[i]; }
+    else if (vj !== undefined) { dict[i] = vj; delete dict[j]; }
+  }
+  swap(S.gpsData);
+  swap(S.selectedSet);
+  swap(S.thumbnailCache);
+  S.fileDates = rekeyDict(S.fileDates, i, j);
+  S.clearedDates = rekeyDict(S.clearedDates, i, j);
+  S.refreshSegments();
+  renderRanges();
+  S.renderFileList();
+}
+
+function rekeyDict(dict, a, b) {
+  var nd = {};
+  for (var k in dict) {
+    if (dict.hasOwnProperty(k)) {
+      var kk = parseInt(k, 10);
+      if (kk === a) nd[b] = dict[k];
+      else if (kk === b) nd[a] = dict[k];
+      else nd[kk] = dict[k];
+    }
+  }
+  return nd;
+}
+
+export function moveUp(i) { reorderItem(i, -1); }
+export function moveDown(i) { reorderItem(i, 1); }
 
 export function buildSelectedFromRanges() {
   var set = {}, max = S.uploadedFiles.length;
