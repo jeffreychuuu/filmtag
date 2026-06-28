@@ -240,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function() {
     gallery.classList.remove('show'); galleryGrid.innerHTML = '';
     dateOverlay.classList.remove('show'); gpsOverlay.classList.remove('show');
     if (S.mapMarker) { S.map.removeLayer(S.mapMarker); S.mapMarker = null; }
-    S.mapInitialized = false; progressSec.classList.remove('show'); progBar.style.width = '0%'; $('progress-next-btn').style.display = 'none';
+    S.mapInitialized = false; progressSec.classList.remove('show'); progBar.style.width = '0%'; $('progress-next-btn').style.display = 'none'; $('progress-spinner').style.display = 'block'; $('progress-done').style.display = 'none';
     statusMsg.className = 'status-msg'; statusMsg.style.display = 'none';
     updateLensUI(); refreshSegments();
   });
@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
     dateOverlay.classList.remove('show'); gpsOverlay.classList.remove('show');
     refreshSegments(); S.renderFileList();
   });
-  $('progress-next-btn').addEventListener('click', function() { progressSec.classList.remove('show'); progBar.style.width = '0%'; $('progress-next-btn').style.display = 'none'; location.reload(); });
+  $('progress-next-btn').addEventListener('click', function() { progressSec.classList.remove('show'); progBar.style.width = '0%'; $('progress-next-btn').style.display = 'none'; $('progress-spinner').style.display = 'block'; $('progress-done').style.display = 'none'; location.reload(); });
   $('easter-egg-btn').addEventListener('click', function() { $('egg-overlay').classList.add('show'); });
   $('egg-close').addEventListener('click', function() { $('egg-overlay').classList.remove('show'); });
   $('egg-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });

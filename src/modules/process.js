@@ -32,6 +32,8 @@ export function startZipProcess() {
         showStatus(t('processed_success', {n: total}), 'success');
         S.reviewBtn.disabled = false;
         S.saveCustomOpts();
+        var spin = S._('progress-spinner'), done = S._('progress-done');
+        if (spin) spin.style.display = 'none'; if (done) done.style.display = 'flex';
         var nextBtn = S._('progress-next-btn');
         if (nextBtn) nextBtn.style.display = 'inline-block';
       });
@@ -127,7 +129,8 @@ export function startSaveProcess() {
     }
     if (active === 0 && completed === total) {
       S.progText.textContent = t('done_processed', {n: total});
-      S.progressSec.classList.remove('show');
+      var spin = S._('progress-spinner'), done = S._('progress-done');
+      if (spin) spin.style.display = 'none'; if (done) done.style.display = 'flex';
       S.reviewBtn.disabled = false;
       S.saveCustomOpts();
       showGallery(S.processedFiles, p, zip);
