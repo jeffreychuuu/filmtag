@@ -61,7 +61,7 @@ export function renderFileList(skipThumbs) {
     var dot = hasGps ? '\uD83D\uDCCD' + addrTxt : '<img src="no_gps.png" class="no-gps-icon">';
     var dateInfo = S.computeDateForFile(i + 1);
     var dateDot = dateInfo ? '<span class="date-dot">\uD83D\uDCC5 ' + dateInfo.date + ' ' + dateInfo.time + '</span>' : '<img src="no_date.png" class="no-date-icon">';
-    h += '<div class="file-item' + sel + '" data-idx="' + i + '">' +
+    h += '<div class="file-item' + sel + '" data-idx="' + i + '" draggable="true">' +
       '<canvas class="file-thumb" data-idx="' + i + '" width="40" height="40"></canvas>' +
       '<div class="fidx">#' + String(i + 1).padStart(2, '0') + '</div>' +
       '<div class="fname">' + esc(f.file.name) + '</div>' +
@@ -73,6 +73,7 @@ export function renderFileList(skipThumbs) {
       '<button class="remove-btn" onclick="removeOne(' + i + ')">\u2715</button>' +
       '</div>';
   }
+  h += '<div class="file-list-dropzone"></div>';
   var tp = getTotalPages();
   h += '<div class="pagination">' +
     '<button class="btn btn-sm btn-secondary pagination-btn" onclick="goToPage(' + (S.currentPage - 1) + ')"' + (S.currentPage <= 1 ? ' disabled' : '') + '>\u25C0</button>' +
@@ -93,6 +94,7 @@ export function renderFileList(skipThumbs) {
     });
   }
   bindFileItemClicks();
+  bindDragDrop();
   S.initMap();
   renderRanges();
   S.selectAllBtn.textContent = Object.keys(S.selectedSet).length > 0 ? t('unselect_all') : t('select_all');
@@ -264,6 +266,110 @@ function rekeyDict(dict, a, b) {
 
 export function moveUp(i) { reorderItem(i, -1); }
 export function moveDown(i) { reorderItem(i, 1); }
+
+function moveItem(fromIdx, toIdx) {
+  if (fromIdx === toIdx) return;
+  var item = S.uploadedFiles.splice(fromIdx, 1)[0];
+  var adjTo = fromIdx < toIdx ? toIdx - 1 : toIdx;
+  S.uploadedFiles.splice(adjTo, 0, item);
+  function rebuildDict(dict) {
+    var nd = {};
+    for (var k in dict) {
+      if (!dict.hasOwnProperty(k)) continue;
+      var oi = parseInt(k, 10);
+      if (fromIdx < toIdx) {
+        if (oi === fromIdx) nd[adjTo] = dict[k];
+        else if (oi > fromIdx && oi <= toIdx - 1) nd[oi - 1] = dict[k];
+        else nd[oi] = dict[k];
+      } else {
+        if (oi === fromIdx) nd[adjTo] = dict[k];
+        else if (oi >= toIdx && oi < fromIdx) nd[oi + 1] = dict[k];
+        else nd[oi] = dict[k];
+      }
+    }
+    return nd;
+  }
+  S.gpsData = rebuildDict(S.gpsData);
+  S.selectedSet = rebuildDict(S.selectedSet);
+  S.thumbnailCache = rebuildDict(S.thumbnailCache);
+  S.fileDates = rebuildDict(S.fileDates);
+  S.clearedDates = rebuildDict(S.clearedDates);
+  S.refreshSegments();
+  renderRanges();
+  S.renderFileList();
+}
+
+
+var _dragFrom = -1;
+
+function fileDragStart(e) {
+  var item = e.target.closest('.file-item');
+  if (!item || e.target.closest('.move-btn') || e.target.closest('.remove-btn')) { e.preventDefault(); return; }
+  _dragFrom = parseInt(item.getAttribute('data-idx'), 10);
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', String(_dragFrom));
+  item.classList.add('dragging');
+}
+
+function fileDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  var item = findFileItem(e.target);
+  var dz = S.fileListEl.querySelector('.file-list-dropzone');
+  if (dz) dz.classList.toggle('show', !item && S.fileListEl.contains(e.target));
+}
+
+function findFileItem(el) {
+  while (el && !el.classList.contains('file-item')) el = el.parentElement;
+  return el;
+}
+
+function fileDragEnter(e) {
+  var item = findFileItem(e.target);
+  if (!item || item.classList.contains('dragging')) return;
+  item.classList.add('drag-over');
+}
+
+function fileDragLeave(e) {
+  var item = findFileItem(e.target);
+  if (!item) return;
+  item.classList.remove('drag-over');
+}
+
+function fileDrop(e) {
+  e.preventDefault();
+  var dz = S.fileListEl.querySelector('.file-list-dropzone');
+  if (dz) dz.classList.remove('show');
+  var item = findFileItem(e.target);
+  var toIdx = item ? parseInt(item.getAttribute('data-idx'), 10) : -1;
+  if (isNaN(_dragFrom) || _dragFrom < 0) return;
+  if (toIdx >= 0) {
+    item.classList.remove('drag-over');
+    moveItem(_dragFrom, toIdx);
+  } else if (S.fileListEl.contains(e.target)) {
+    var to = S.pageSize === 0 ? S.uploadedFiles.length : Math.min(S.currentPage * S.pageSize, S.uploadedFiles.length);
+    moveItem(_dragFrom, to);
+  }
+}
+
+function fileDragEnd(e) {
+  document.querySelectorAll('.file-item.dragging, .file-item.drag-over').forEach(function(el) {
+    el.classList.remove('dragging', 'drag-over');
+  });
+  var dz = S.fileListEl.querySelector('.file-list-dropzone');
+  if (dz) dz.classList.remove('show');
+  _dragFrom = -1;
+}
+
+function bindDragDrop() {
+  var list = S.fileListEl;
+  list.addEventListener('dragstart', fileDragStart);
+  list.addEventListener('dragover', fileDragOver);
+  list.addEventListener('dragenter', fileDragEnter);
+  list.addEventListener('dragleave', fileDragLeave);
+  list.addEventListener('drop', fileDrop);
+  list.addEventListener('dragend', fileDragEnd);
+}
 
 export function buildSelectedFromRanges() {
   var set = {}, max = S.uploadedFiles.length;
