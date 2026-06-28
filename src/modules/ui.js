@@ -73,6 +73,7 @@ export function renderFileList(skipThumbs) {
       '<button class="remove-btn" onclick="removeOne(' + i + ')">\u2715</button>' +
       '</div>';
   }
+  h += '<div class="file-list-dropzone"></div>';
   var tp = getTotalPages();
   h += '<div class="pagination">' +
     '<button class="btn btn-sm btn-secondary pagination-btn" onclick="goToPage(' + (S.currentPage - 1) + ')"' + (S.currentPage <= 1 ? ' disabled' : '') + '>\u25C0</button>' +
@@ -314,7 +315,8 @@ function fileDragOver(e) {
   e.preventDefault();
   e.dataTransfer.dropEffect = 'move';
   var item = findFileItem(e.target);
-  S.fileListEl.classList.toggle('drag-bottom', !item && S.fileListEl.contains(e.target));
+  var dz = S.fileListEl.querySelector('.file-list-dropzone');
+  if (dz) dz.classList.toggle('show', !item && S.fileListEl.contains(e.target));
 }
 
 function findFileItem(el) {
@@ -336,7 +338,8 @@ function fileDragLeave(e) {
 
 function fileDrop(e) {
   e.preventDefault();
-  S.fileListEl.classList.remove('drag-bottom');
+  var dz = S.fileListEl.querySelector('.file-list-dropzone');
+  if (dz) dz.classList.remove('show');
   var item = findFileItem(e.target);
   var toIdx = item ? parseInt(item.getAttribute('data-idx'), 10) : -1;
   if (isNaN(_dragFrom) || _dragFrom < 0) return;
@@ -353,7 +356,8 @@ function fileDragEnd(e) {
   document.querySelectorAll('.file-item.dragging, .file-item.drag-over').forEach(function(el) {
     el.classList.remove('dragging', 'drag-over');
   });
-  S.fileListEl.classList.remove('drag-bottom');
+  var dz = S.fileListEl.querySelector('.file-list-dropzone');
+  if (dz) dz.classList.remove('show');
   _dragFrom = -1;
 }
 
