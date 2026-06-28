@@ -5,7 +5,7 @@ import { t, setLang, toggleLang, applyTranslations, lang } from './i18n.js';
 import { toDms, strToUtf8Binary, toUcs2Binary, injectXmp, escXml, esc, fmtSize, dmsToDecimal, newFilmPrefix } from './lib/utils.js';
 import { initGear, fillSelect, fillSelectWithCustom, saveCustomOpts, setupCustom, updateLensUI, collect, validate } from './modules/gear.js';
 import { initGps, initMap, updateGpsDots, updateGpsSaveBtn, setGpsForSelected, reverseGeocode } from './modules/gps.js';
-import { init as initUi, renderFileList, goToPage, changePageSize, goToSummaryPage, changeSummaryPageSize, clearAll, removeOne, getTotalPages, buildSummaryHtml, generateSummaryThumbnails, rebuildSummaryBody, buildOptions, syncRange, buildSelectedFromRanges } from './modules/ui.js';
+import { init as initUi, renderFileList, goToPage, changePageSize, goToSummaryPage, changeSummaryPageSize, clearAll, removeOne, moveUp, moveDown, getTotalPages, buildSummaryHtml, generateSummaryThumbnails, rebuildSummaryBody, buildOptions, syncRange, buildSelectedFromRanges } from './modules/ui.js';
 import { init as initDate, applyDateToSelected, refreshSegments, computeDateForFile, getFileDate, newFName } from './modules/date.js';
 import { init as initUpload, handleFiles } from './modules/upload.js';
 import { init as initProcess, startZipProcess, startSaveProcess, showGallery, showStatus } from './modules/process.js';
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
   S.saveCustomOpts = saveCustomOpts;
   S.startZipProcess = startZipProcess; S.startSaveProcess = startSaveProcess;
   S.showStatus = showStatus; S.initMap = initMap;
-  window.clearAll = clearAll; window.removeOne = removeOne;
+  window.clearAll = clearAll; window.removeOne = removeOne; window.moveUp = moveUp; window.moveDown = moveDown;
   window.goToPage = goToPage; window.changePageSize = changePageSize;
   window.goToSummaryPage = goToSummaryPage; window.changeSummaryPageSize = changeSummaryPageSize;
 

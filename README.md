@@ -181,10 +181,11 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 <details>
 <summary>Click to expand</summary>
 
-**1.2.0 (2026-06-28)** — Developing Process free-text + Next Roll for ZIP
+**1.2.0 (2026-06-28)** — Developing Process free-text + Next Roll for ZIP + file reordering
 - ✏️ Developing Process dropdown now supports custom free-text input — type any process like C-41, ECN-2, E-6
 - 💾 Custom process entries are saved to localStorage for future sessions
 - 🎞️ "Next Roll" button now appears after ZIP download too — start fresh without reloading manually
+- 🔼 Reorder uploaded files with ▲/▼ buttons — control sequence numbering and timestamp order
 
 **1.1.3 (2026-06-14)** — Fix add range + Clear GPS button
 - 🐛 Fixed: "Add Range" button not working after module refactor
