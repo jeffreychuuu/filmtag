@@ -109,6 +109,7 @@
     .file-item[draggable="true"] { cursor: grab; }
     .file-item.dragging { opacity: 0.3; }
     .file-item.drag-over { border-top: 2px solid var(--accent); }
+    .file-list.drag-bottom { border-bottom: 2px solid var(--accent); padding-bottom: 0.5rem; }
     .file-item .fidx {
       width: 36px; height: 36px; background: #111; border-radius: 4px; flex-shrink: 0;
       display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #555;
@@ -155,9 +156,10 @@
       .g-name { display: none; }
       .file-item { overflow: hidden; gap: 0.2rem; min-width: 0; }
       .file-item .fidx { width: 24px; height: 24px; font-size: 0.55rem; flex-shrink: 0; }
-      .file-item .file-thumb { width: 28px; height: 28px; flex-shrink: 0; }
-      .file-item .remove-btn { font-size: 0.8rem; padding: 0; flex-shrink: 0; }
-      .move-btn { font-size: 0.5rem; padding: 0; }
+    .file-item .file-thumb { width: 28px; height: 28px; flex-shrink: 0; }
+    .file-item .remove-btn { font-size: 0.8rem; padding: 0; flex-shrink: 0; }
+    .move-btn { font-size: 0.5rem; padding: 0; }
+    .file-list.drag-bottom { border-bottom: 2px solid var(--accent); }
       .file-item .file-gps-dot {
         flex: 1 1 40%; min-width: 55px; max-width: 140px;
         overflow: hidden; font-size: 0.45rem; line-height: 1.2;

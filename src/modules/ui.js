@@ -298,6 +298,12 @@ function moveItem(fromIdx, toIdx) {
   S.renderFileList();
 }
 
+function moveItemToEnd(fromIdx) {
+  var n = S.uploadedFiles.length;
+  if (fromIdx >= n - 1) return;
+  moveItem(fromIdx, n - 1);
+}
+
 var _dragFrom = -1;
 
 function fileDragStart(e) {
@@ -312,6 +318,8 @@ function fileDragStart(e) {
 function fileDragOver(e) {
   e.preventDefault();
   e.dataTransfer.dropEffect = 'move';
+  var item = findFileItem(e.target);
+  S.fileListEl.classList.toggle('drag-bottom', !item && S.fileListEl.contains(e.target));
 }
 
 function findFileItem(el) {
@@ -333,18 +341,23 @@ function fileDragLeave(e) {
 
 function fileDrop(e) {
   e.preventDefault();
+  S.fileListEl.classList.remove('drag-bottom');
   var item = findFileItem(e.target);
-  if (!item) return;
-  item.classList.remove('drag-over');
-  var toIdx = parseInt(item.getAttribute('data-idx'), 10);
-  if (isNaN(_dragFrom) || isNaN(toIdx)) return;
-  moveItem(_dragFrom, toIdx);
+  var toIdx = item ? parseInt(item.getAttribute('data-idx'), 10) : -1;
+  if (isNaN(_dragFrom) || _dragFrom < 0) return;
+  if (toIdx >= 0) {
+    item.classList.remove('drag-over');
+    moveItem(_dragFrom, toIdx);
+  } else if (S.fileListEl.contains(e.target)) {
+    moveItemToEnd(_dragFrom);
+  }
 }
 
 function fileDragEnd(e) {
   document.querySelectorAll('.file-item.dragging, .file-item.drag-over').forEach(function(el) {
     el.classList.remove('dragging', 'drag-over');
   });
+  S.fileListEl.classList.remove('drag-bottom');
   _dragFrom = -1;
 }
 
