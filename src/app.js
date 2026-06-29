@@ -334,10 +334,16 @@ document.addEventListener('DOMContentLoaded', function() {
   $('feedback-cancel').addEventListener('click', function() { $('feedback-overlay').classList.remove('show'); });
   $('feedback-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
   function toggleFeedbackSubmit() {
-    $('feedback-submit').disabled = !$('feedback-title').value.trim() || !$('feedback-desc').value.trim();
+    var t = $('feedback-title').value.trim();
+    var d = $('feedback-desc').value.trim();
+    var e = $('feedback-email').value.trim();
+    var validEmail = !e || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+    $('feedback-email-error').style.display = e && !validEmail ? 'block' : 'none';
+    $('feedback-submit').disabled = !t || !d || !validEmail;
   }
   $('feedback-title').addEventListener('input', toggleFeedbackSubmit);
   $('feedback-desc').addEventListener('input', toggleFeedbackSubmit);
+  $('feedback-email').addEventListener('input', toggleFeedbackSubmit);
   $('feedback-submit').addEventListener('click', function() {
     fetch('/api/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
       type: $('feedback-type').value, title: $('feedback-title').value.trim(), desc: $('feedback-desc').value.trim(), email: $('feedback-email').value.trim()

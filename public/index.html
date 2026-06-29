@@ -650,7 +650,8 @@
     </select>
     <input type="text" id="feedback-title" data-i18n-placeholder="feedback_title_ph" placeholder="Title" style="margin-bottom:0.75rem;">
     <textarea id="feedback-desc" data-i18n-placeholder="feedback_desc_ph" placeholder="Describe your feedback..." rows="4" style="margin-bottom:0.75rem;"></textarea>
-    <input type="email" id="feedback-email" data-i18n-placeholder="feedback_email_ph" placeholder="Email (optional)" style="margin-bottom:1rem;">
+    <input type="email" id="feedback-email" data-i18n-placeholder="feedback_email_ph" placeholder="Email (optional)" style="margin-bottom:0.25rem;">
+    <p id="feedback-email-error" style="color:var(--red);font-size:0.75rem;margin:0 0 0.75rem;display:none;" data-i18n="feedback_email_invalid">Invalid email format</p>
     <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
       <button class="btn btn-secondary" id="feedback-cancel" data-i18n="cancel">Cancel</button>
       <button class="btn btn-primary" id="feedback-submit" disabled data-i18n="feedback_submit">Submit</button>
