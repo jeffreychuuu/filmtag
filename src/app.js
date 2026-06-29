@@ -16,6 +16,14 @@ var APP_VERSION = typeof FILMTAG_VERSION !== 'undefined' ? FILMTAG_VERSION : 'de
 document.addEventListener('DOMContentLoaded', function() {
   var el = document.getElementById('version');
   if (el) el.textContent = 'v' + APP_VERSION;
+  var _vc = 0, _vt;
+  if (el) el.addEventListener('click', function(e) {
+    e.preventDefault();
+    _vc++;
+    if (_vt) clearTimeout(_vt);
+    _vt = setTimeout(function() { _vc = 0; }, 2000);
+    if (_vc >= 5) { _vc = 0; document.getElementById('admin-overlay').classList.add('show'); }
+  });
 });
 
 (function() {
@@ -294,6 +302,71 @@ document.addEventListener('DOMContentLoaded', function() {
   $('egg-close').addEventListener('click', function() { $('egg-overlay').classList.remove('show'); });
   $('egg-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
   $('help-float-btn').addEventListener('click', showTutorial);
+  $('feedback-float-btn').addEventListener('click', function() {
+    $('feedback-title').value = ''; $('feedback-desc').value = ''; $('feedback-email').value = '';
+    $('feedback-submit').disabled = true;
+    $('feedback-overlay').classList.add('show');
+  });
+  $('feedback-cancel').addEventListener('click', function() { $('feedback-overlay').classList.remove('show'); });
+  $('feedback-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
+  function toggleFeedbackSubmit() {
+    $('feedback-submit').disabled = !$('feedback-title').value.trim() || !$('feedback-desc').value.trim();
+  }
+  $('feedback-title').addEventListener('input', toggleFeedbackSubmit);
+  $('feedback-desc').addEventListener('input', toggleFeedbackSubmit);
+  $('feedback-submit').addEventListener('click', function() {
+    fetch('/api/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+      type: $('feedback-type').value, title: $('feedback-title').value.trim(), desc: $('feedback-desc').value.trim(), email: $('feedback-email').value.trim()
+    }) }).then(function(r) { return r.json(); }).then(function(d) {
+      if (d.ok) {
+        $('feedback-title').value = ''; $('feedback-desc').value = ''; $('feedback-email').value = '';
+        $('feedback-overlay').classList.remove('show');
+        $('feedback-success-overlay').classList.add('show');
+      } else { S.showStatus(t('feedback_error'), 'error'); }
+    }).catch(function() { S.showStatus(t('feedback_error'), 'error'); });
+  });
+  $('feedback-success-close').addEventListener('click', function() { $('feedback-success-overlay').classList.remove('show'); });
+  $('feedback-success-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
+  $('admin-close').addEventListener('click', function() { $('admin-overlay').classList.remove('show'); $('admin-panel').style.display = 'none'; $('admin-login').style.display = 'block'; });
+  $('admin-unlock-btn').addEventListener('click', function() {
+    var key = $('admin-key-input').value.trim();
+    if (!key) return;
+    fetch('/api/feedback?key=' + encodeURIComponent(key), { cache: 'no-cache' }).then(function(r) {
+      if (r.status === 401) { S.showStatus('Invalid key', 'error'); return null; }
+      return r.json();
+    }).then(function(items) {
+      if (!items) return;
+      $('admin-login').style.display = 'none';
+      var h = '';
+      for (var i = items.length - 1; i >= 0; i--) {
+        var it = items[i];
+        h += '<div class="admin-feedback-item" style="padding:0.75rem;border-bottom:1px solid var(--border);font-size:0.8rem;" data-id="' + esc(it.id) + '">' +
+          '<div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.3rem;">' +
+          '<span>' + (it.type === 'bug' ? '🐛' : '💡') + '</span>' +
+          '<strong>' + esc(it.title) + '</strong>' +
+          '<span style="margin-left:auto;color:var(--text-secondary);font-size:0.7rem;">' + new Date(it.ts).toLocaleDateString() + '</span>' +
+          '</div>' +
+          '<p style="color:#aaa;margin:0 0 0.3rem 1.2rem;">' + esc(it.desc) + '</p>' +
+          (it.email ? '<p style="color:var(--text-secondary);margin:0 0 0 1.2rem;font-size:0.7rem;">' + esc(it.email) + '</p>' : '') +
+          '<button class="btn btn-sm btn-danger admin-del-btn" data-id="' + esc(it.id) + '" style="margin-top:0.3rem;font-size:0.7rem;">🗑️ Delete</button>' +
+          '</div>';
+      }
+      $('admin-panel').innerHTML = h || '<p style="color:var(--text-secondary);">No feedback yet.</p>';
+      $('admin-panel').style.display = 'block';
+      $('admin-panel')._adminKey = key;
+    }).catch(function() { S.showStatus('Failed to load feedback', 'error'); });
+  });
+  $('admin-panel').addEventListener('click', function(e) {
+    var btn = e.target.closest('.admin-del-btn');
+    if (!btn) return;
+    var id = btn.getAttribute('data-id');
+    var key = $('admin-panel')._adminKey;
+    if (!confirm('Delete this feedback?')) return;
+    fetch('/api/feedback?key=' + encodeURIComponent(key) + '&id=' + encodeURIComponent(id), { method: 'DELETE', cache: 'no-cache' }).then(function(r) { return r.json(); }).then(function(d) {
+      if (d.ok) { var item = e.target.closest('.admin-feedback-item'); if (item) item.remove(); }
+      else { S.showStatus('Delete failed', 'error'); }
+    }).catch(function() { S.showStatus('Delete failed', 'error'); });
+  });
   $('tutorial-close').addEventListener('click', function() { $('tutorial-overlay').classList.remove('show'); });
   $('tutorial-got-it').addEventListener('click', function() { localStorage.setItem('filmtag-tutorial-seen', '1'); $('tutorial-overlay').classList.remove('show'); });
   $('tutorial-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });

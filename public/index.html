@@ -46,7 +46,8 @@
 
     .form-row { display: flex; flex-direction: column; gap: 0.75rem; }
     label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; display: block; margin-bottom: 0.3rem; }
-    select, input[type="text"], input[type="number"], input[type="date"], input[type="time"] {
+    select, input[type="text"], input[type="number"], input[type="date"], input[type="time"],
+    textarea, input[type="email"], input[type="password"] {
       width: 100%; padding: 0.6rem 0.75rem; background: var(--surface2);
       border: 1px solid var(--border); border-radius: 6px; color: var(--text);
       font-size: 0.875rem; font-family: inherit; transition: border-color var(--transition);
@@ -57,7 +58,8 @@
       background-repeat: no-repeat; background-position: right 0.75rem center;
       padding-right: 2rem; cursor: pointer;
     }
-    select:focus, input:focus { outline: none; border-color: var(--accent); }
+    select:focus, input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 80px; }
     input[type="date"], input[type="time"] { color-scheme: dark; }
 
     .custom-input { display: none; margin-top: 0.5rem; }
@@ -265,7 +267,7 @@
     .social-links a:hover { color: var(--accent); }
 
     .lang-float-btn {
-      position: fixed; bottom: 68px; right: 16px;
+      position: fixed; bottom: 224px; right: 16px;
       width: 44px; height: 44px; border-radius: 50%;
       background: var(--surface2); border: 1px solid var(--border);
       font-size: 0.55rem; font-weight: 600; cursor: pointer; z-index: 999;
@@ -273,11 +275,17 @@
       opacity: 0.4; transition: opacity 0.2s; color: #888;
     }
     .lang-float-btn:hover { opacity: 1; color: var(--accent); border-color: var(--accent); }
-    .help-float-btn { bottom: 120px; }
+    .help-float-btn { bottom: 172px; }
     .help-float-btn,
     .help-float-btn:active,
     .help-float-btn:visited { position: fixed; right: 16px; width: 44px; height: 44px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); font-size: 1rem; cursor: pointer; z-index: 999; display: flex; align-items: center; justify-content: center; opacity: 0.4; transition: opacity 0.2s; color: #888; text-decoration: none; }
     .help-float-btn:hover { opacity: 1; color: var(--accent); border-color: var(--accent); }
+    .feedback-float-btn { bottom: 120px; }
+    .feedback-float-btn,
+    .feedback-float-btn:active,
+    .feedback-float-btn:visited { position: fixed; right: 16px; width: 44px; height: 44px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); font-size: 1rem; cursor: pointer; z-index: 999; display: flex; align-items: center; justify-content: center; opacity: 0.4; transition: opacity 0.2s; color: #888; text-decoration: none; }
+    .feedback-float-btn:hover { opacity: 1; color: var(--accent); border-color: var(--accent); }
+    .easter-egg-btn { bottom: 68px; }
 
     .file-item {
       display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0;
@@ -538,10 +546,11 @@
   </div>
 </div>
 
-<footer><span id="version"></span> · Made by Jeffrey Chu (99% Agentic AI, 1% 🐈 Supervision &amp; 🥃)</footer>
+<footer><span id="version" style="user-select:none;-webkit-user-select:none;cursor:pointer;"></span> · Made by Jeffrey Chu (99% Agentic AI, 1% 🐈 Supervision &amp; 🥃)</footer>
 
 <div class="lang-float-btn" id="lang-float-btn">🇭🇰</div>
 <div class="help-float-btn" id="help-float-btn">❓</div>
+<div class="feedback-float-btn" id="feedback-float-btn">💬</div>
 <div class="easter-egg-btn" id="easter-egg-btn">🐈</div>
 
 <div class="egg-overlay" id="egg-overlay">
@@ -627,6 +636,49 @@
     </div>
     <div style="display:flex;gap:0.75rem;justify-content:center;margin-top:1rem;">
       <button class="btn btn-primary" id="tutorial-got-it">🎉 Got it!</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="feedback-overlay">
+  <div class="overlay-content" style="max-width:480px;">
+    <h3 style="margin-bottom:1rem;">💬 <span data-i18n="feedback_title">Share Your Feedback</span></h3>
+    <label style="font-size:0.8rem;color:var(--text-secondary);display:block;margin-bottom:0.3rem;" data-i18n="feedback_type">Type</label>
+    <select id="feedback-type" style="margin-bottom:0.75rem;">
+      <option value="bug">🐛 <span data-i18n="feedback_bug">Bug Report</span></option>
+      <option value="suggestion">💡 <span data-i18n="feedback_suggestion">Suggestion</span></option>
+    </select>
+    <input type="text" id="feedback-title" data-i18n-placeholder="feedback_title_ph" placeholder="Title" style="margin-bottom:0.75rem;">
+    <textarea id="feedback-desc" data-i18n-placeholder="feedback_desc_ph" placeholder="Describe your feedback..." rows="4" style="margin-bottom:0.75rem;"></textarea>
+    <input type="email" id="feedback-email" data-i18n-placeholder="feedback_email_ph" placeholder="Email (optional)" style="margin-bottom:1rem;">
+    <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+      <button class="btn btn-secondary" id="feedback-cancel" data-i18n="cancel">Cancel</button>
+      <button class="btn btn-primary" id="feedback-submit" disabled data-i18n="feedback_submit">Submit</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="feedback-success-overlay">
+  <div class="overlay-content" style="text-align:center;max-width:400px;">
+    <div style="font-size:3rem;margin-bottom:1rem;">✅</div>
+    <h3 style="margin-bottom:0.5rem;" data-i18n="feedback_success_title">Thank You!</h3>
+    <p style="color:var(--text-secondary);margin-bottom:1.5rem;" data-i18n="feedback_success_msg">Your feedback has been submitted successfully.</p>
+    <button class="btn btn-primary" id="feedback-success-close" data-i18n="ok">OK</button>
+  </div>
+</div>
+
+<div class="overlay" id="admin-overlay">
+  <div class="overlay-content" style="max-width:600px;">
+    <h3 style="margin-bottom:1rem;" id="admin-title">🔐 Admin</h3>
+    <div id="admin-login">
+      <input type="password" id="admin-key-input" placeholder="Enter admin key" style="margin-bottom:0.75rem;">
+      <button class="btn btn-primary" id="admin-unlock-btn">Unlock</button>
+    </div>
+    <div id="admin-panel" style="display:none;">
+      <div id="admin-feedback-list"></div>
+    </div>
+    <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1rem;">
+      <button class="btn btn-secondary" id="admin-close">Close</button>
     </div>
   </div>
 </div>
