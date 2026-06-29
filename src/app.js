@@ -298,5 +298,6 @@ function showTutorial() {
     html += '<div class="tutorial-step"><div class="ts-icon">' + s.icon + '</div><div><div class="ts-title">' + (isZh ? s.tZh : s.t) + '</div><div class="ts-desc">' + (isZh ? s.dZh : s.d) + '</div></div></div>';
   }
   document.getElementById('tutorial-body').innerHTML = html;
+  document.getElementById('tutorial-got-it').textContent = isZh ? '\uD83C\uDF89 \u660E\u767D\u4E86\uFF01' : '\uD83C\uDF89 Got it!';
   document.getElementById('tutorial-overlay').classList.add('show');
 }
