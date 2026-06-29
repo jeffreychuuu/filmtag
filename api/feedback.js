@@ -33,7 +33,7 @@ export default async function handler(req, res) {
     if (!title || !desc) return res.status(400).json({ error: 'title and desc required' });
     var id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     await kv.rpush(k('feedback_list'), JSON.stringify({ id: id, type: type || 'suggestion', title: title, desc: desc, email: email, ts: new Date().toISOString() }));
-    return res.json({ ok: true });
+    return res.json({ ok: true, debug: { env: env, key: k('feedback_list'), method: 'POST' } });
   }
 
   if (req.method === 'DELETE') {
