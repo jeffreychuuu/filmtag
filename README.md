@@ -183,7 +183,7 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 
 **1.3.0 (2026-06-28)** — Session restore · Tutorial · Sort · Drag & drop polish
 - 🔄 All settings (gear, film, lab, process, scanner, checkbox) are now saved and restored on next page load — pick up where you left off
-- 📖 Interactive tutorial on first visit with ❓ help button to revisit anytime — covers upload, gear, reorder, date, GPS, review, EXIF details, and Google Photos ordering
+- 📖 Interactive tutorial on first visit with ❓ help button to revisit anytime — covers upload, gear, reorder, date, GPS, review, EXIF details, Google Photos ordering, and privacy (all data stays in localStorage, nothing sent to server)
 - 🔤 One-click sort A→Z / Z→A in the file list header
 - 🤚 Drag & drop is now the only reorder method (▲/▼ buttons removed)
 - ✅ Tick icon replaces spinner when processing is done
