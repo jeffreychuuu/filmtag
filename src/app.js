@@ -166,8 +166,10 @@ document.addEventListener('DOMContentLoaded', function() {
     for (var j = 0; j < max; j++) { if (S.selectedSet[j]) otherSet[j + 1] = true; }
     var row = document.createElement('div');
     row.className = 'range-row';
-    row.innerHTML = 'Start: <select class="range-start">' + buildOptions(max, def, otherSet) + '</select> End: <select class="range-end">' + buildOptions(max, def, otherSet) + '</select> <button class="btn btn-sm btn-danger remove-range-btn">✕</button>';
-    row.querySelector('.remove-range-btn').addEventListener('click', function() { this.parentElement.remove(); syncRange(); });
+    var leftPct = ((def - 1) / max) * 100;
+    var widthPct = (1 / max) * 100;
+    row.innerHTML = '<div class="range-bar"><div class="range-bar-fill" style="left:' + leftPct + '%;width:' + widthPct + '%;"></div></div><div class="range-controls"><select class="range-start">' + buildOptions(max, def, otherSet) + '</select><span class="range-sep">—</span><select class="range-end">' + buildOptions(max, def, otherSet) + '</select> <button class="btn btn-sm btn-danger remove-range-btn">✕</button></div>';
+    row.querySelector('.remove-range-btn').addEventListener('click', function() { this.closest('.range-row').remove(); syncRange(); });
     row.querySelector('.range-start').addEventListener('change', function() {
       var endSel = this.parentElement.querySelector('.range-end');
       if (parseInt(endSel.value, 10) < parseInt(this.value, 10)) endSel.value = this.value;
