@@ -14,8 +14,15 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     if (req.query.key !== process.env.FEEDBACK_ADMIN_KEY) return res.status(401).json({ error: 'unauthorized' });
-    var data = await kv.lrange(k('feedback_list'), 0, -1);
-    var items = data.map(function(s) {
+    var newKey = k('feedback_list');
+    var newData = await kv.lrange(newKey, 0, -1);
+    var oldData = suffix ? await kv.lrange('feedback_list', 0, -1).catch(function() { return []; }) : [];
+    var all = suffix ? newData.concat(oldData) : newData;
+    if (suffix && oldData.length) {
+      for (var i = 0; i < all.length; i++) await kv.rpush(k('feedback_list'), all[i]);
+      await kv.del('feedback_list');
+    }
+    var items = all.map(function(s) {
       try { return JSON.parse(s); } catch (e) { return null; }
     }).filter(Boolean);
     return res.json(items);
@@ -33,10 +40,14 @@ export default async function handler(req, res) {
     if (req.query.key !== process.env.FEEDBACK_ADMIN_KEY) return res.status(401).json({ error: 'unauthorized' });
     var idToDel = req.query.id;
     if (!idToDel) return res.status(400).json({ error: 'id required' });
-    var data = await kv.lrange(k('feedback_list'), 0, -1);
-    var filtered = data.map(function(s) { try { return JSON.parse(s); } catch (e) { return null; } }).filter(function(item) { return item && item.id !== idToDel; });
-    await kv.del(k('feedback_list'));
-    for (var i = 0; i < filtered.length; i++) await kv.rpush(k('feedback_list'), JSON.stringify(filtered[i]));
+    var newKey = k('feedback_list');
+    var newData = await kv.lrange(newKey, 0, -1);
+    var oldData = suffix ? await kv.lrange('feedback_list', 0, -1).catch(function() { return []; }) : [];
+    var all = suffix ? newData.concat(oldData) : newData;
+    var filtered = all.map(function(s) { try { return JSON.parse(s); } catch (e) { return null; } }).filter(function(item) { return item && item.id !== idToDel; });
+    await kv.del(newKey);
+    if (suffix) await kv.del('feedback_list').catch(function() {});
+    for (var i = 0; i < filtered.length; i++) await kv.rpush(newKey, JSON.stringify(filtered[i]));
     return res.json({ ok: true });
   }
 
