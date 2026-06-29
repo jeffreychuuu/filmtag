@@ -183,7 +183,6 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 
 **1.4.0 (2026-06-29)** — 意見回饋系統 · 免責聲明 overlay · 教學 About 重組
 - 💬 浮動意見回饋按鈕，支援 Bug Report / Suggestion 表格 — 提交至 Upstash KV
-- 🔐 隱藏 Admin Panel（click version 5 次） — 瀏覽及刪除所有 feedback
 - ⚠️ 首次使用 overlay 而家需要 tick 2 個 checkbox（AI 工具確認 + 非商業用途同意）先可以繼續
 - 📖 Origin 搬咗去教學 About tab 嘅第一步
 - 🎯 浮動按鈕重新排序：🇭🇰 Language → ❓ Help → 💬 Feedback → 🐈 Easter egg

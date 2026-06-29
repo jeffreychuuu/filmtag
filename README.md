@@ -183,7 +183,6 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 
 **1.4.0 (2026-06-29)** — Feedback system · Disclaimer overlay · Tutorial About reorg
 - 💬 Floating feedback button with Bug Report / Suggestion form — submitted to Upstash KV
-- 🔐 Hidden admin panel (click version 5×) — view & delete all feedback entries
 - ⚠️ First-visit overlay now requires 2 checkboxes (AI tool acknowledgment + non-commercial agreement) before proceeding
 - 📖 Origin moved to tutorial About tab as first step
 - 🎯 Floating buttons reorganized: 🇭🇰 Language → ❓ Help → 💬 Feedback → 🐈 Easter egg
