@@ -181,11 +181,14 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 <details>
 <summary>撳開嚟睇</summary>
 
-**1.3.0 (2026-06-28)** — 上次設定自動還原 + 教學 + 排序
+**1.3.0 (2026-06-28)** — 上次設定自動還原 · 教學 · 排序 · Drag & drop 完善
 - 🔄 所有設定（gear、菲林、lab、沖洗方式、scanner、簽名）而家會喺下次開頁面時自動還原 — 唔使再逐個揀過
-- 📖 詳細教學 — 8 個步驟覆蓋上傳、gear 設定、排序、日期、GPS、檢閱、EXIF 詳細同 Google Photos 排序原理
+- 📖 第一次用嗰陣會自動 show 教學，之後可以㩒 ❓ button 隨時睇返 — 覆蓋上傳、gear、排序、日期、GPS、檢閱、EXIF 詳細同 Google Photos 排序原理
 - 🔤 一鍵排序 A→Z / Z→A
 - 🤚 Drag & drop 係唯一排序方法（▲/▼ button 已移除）
+- ✅ 完成處理時 spinner 會變 tick icon
+- 📄 拖到分頁最底會插入該頁最後位置，唔係全卷最尾
+- 🛠️ 還原設定時優先 match dropdown 選項，唔係直接 set __custom__
 
 **1.2.0 (2026-06-28)** — 沖洗方式自訂輸入 + ZIP 下載後 Next Roll + 檔案排序
 - ✏️ 沖洗方式而家支援自訂輸入 — 可以自由輸入任何沖洗方式（C-41、ECN-2、E-6 等）
