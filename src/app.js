@@ -16,6 +16,13 @@ var APP_VERSION = typeof FILMTAG_VERSION !== 'undefined' ? FILMTAG_VERSION : 'de
 document.addEventListener('DOMContentLoaded', function() {
   var el = document.getElementById('version');
   if (el) el.textContent = 'v' + APP_VERSION;
+  var _vc = 0, _vt;
+  if (el) el.addEventListener('click', function() {
+    _vc++;
+    if (_vt) clearTimeout(_vt);
+    _vt = setTimeout(function() { _vc = 0; }, 2000);
+    if (_vc >= 5) { _vc = 0; $('admin-overlay').classList.add('show'); }
+  });
 });
 
 (function() {
@@ -294,6 +301,50 @@ document.addEventListener('DOMContentLoaded', function() {
   $('egg-close').addEventListener('click', function() { $('egg-overlay').classList.remove('show'); });
   $('egg-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
   $('help-float-btn').addEventListener('click', showTutorial);
+  $('feedback-float-btn').addEventListener('click', function() { $('feedback-overlay').classList.add('show'); });
+  $('feedback-cancel').addEventListener('click', function() { $('feedback-overlay').classList.remove('show'); });
+  $('feedback-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
+  $('feedback-submit').addEventListener('click', function() {
+    var title = $('feedback-title').value.trim();
+    var desc = $('feedback-desc').value.trim();
+    if (!title || !desc) { S.showStatus(t('feedback_error'), 'error'); return; }
+    fetch('/api/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+      type: $('feedback-type').value, title: title, desc: desc, email: $('feedback-email').value.trim()
+    }) }).then(function(r) { return r.json(); }).then(function(d) {
+      if (d.ok) {
+        $('feedback-title').value = ''; $('feedback-desc').value = ''; $('feedback-email').value = '';
+        $('feedback-overlay').classList.remove('show');
+        S.showStatus(t('feedback_success'), 'success');
+      } else { S.showStatus(t('feedback_error'), 'error'); }
+    }).catch(function() { S.showStatus(t('feedback_error'), 'error'); });
+  });
+  $('admin-close').addEventListener('click', function() { $('admin-overlay').classList.remove('show'); $('admin-panel').style.display = 'none'; $('admin-login').style.display = 'block'; });
+  $('admin-unlock-btn').addEventListener('click', function() {
+    var key = $('admin-key-input').value.trim();
+    if (!key) return;
+    fetch('/api/feedback?key=' + encodeURIComponent(key)).then(function(r) {
+      if (r.status === 401) { S.showStatus('Invalid key', 'error'); return null; }
+      return r.json();
+    }).then(function(items) {
+      if (!items) return;
+      $('admin-login').style.display = 'none';
+      var h = '';
+      for (var i = items.length - 1; i >= 0; i--) {
+        var it = items[i];
+        h += '<div style="padding:0.75rem;border-bottom:1px solid var(--border);font-size:0.8rem;">' +
+          '<div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.3rem;">' +
+          '<span>' + (it.type === 'bug' ? '🐛' : '💡') + '</span>' +
+          '<strong>' + esc(it.title) + '</strong>' +
+          '<span style="margin-left:auto;color:var(--text-secondary);font-size:0.7rem;">' + new Date(it.ts).toLocaleDateString() + '</span>' +
+          '</div>' +
+          '<p style="color:#aaa;margin:0 0 0.3rem 1.2rem;">' + esc(it.desc) + '</p>' +
+          (it.email ? '<p style="color:var(--text-secondary);margin:0 0 0 1.2rem;font-size:0.7rem;">' + esc(it.email) + '</p>' : '') +
+          '</div>';
+      }
+      $('admin-panel').innerHTML = h || '<p style="color:var(--text-secondary);">No feedback yet.</p>';
+      $('admin-panel').style.display = 'block';
+    }).catch(function() { S.showStatus('Failed to load feedback', 'error'); });
+  });
   $('tutorial-close').addEventListener('click', function() { $('tutorial-overlay').classList.remove('show'); });
   $('tutorial-got-it').addEventListener('click', function() { localStorage.setItem('filmtag-tutorial-seen', '1'); $('tutorial-overlay').classList.remove('show'); });
   $('tutorial-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
@@ -306,8 +357,7 @@ function showTutorial() {
     { icon: '⚙️', t: 'Built-in Presets', tZh: '內建設定', d: 'The default equipment options (cameras, lenses, films, labs) are my personal presets. You can type anything custom — your entries are saved to your browser (localStorage) and show up next time.', dZh: '預設嘅設備選項（相機、鏡頭、菲林、沖掃）係我平時用開嘅設定。你可以隨意自訂任何選項，你嘅自訂資料會儲存喺你嘅瀏覽器 (localStorage)，下次會自動出現。' },
     { icon: '🔒', t: 'Your Privacy', tZh: '你的私隱', d: 'Everything stays in your browser (localStorage). Your custom options, last-used settings, and photos — none of it is ever sent to any server. Even I cannot see your photos or settings.', dZh: '所有資料只會留喺你嘅瀏覽器 (localStorage)。你嘅自訂選項、上次嘅設定、同埋你啲相 — 全部唔會送去任何伺服器。連我（開發者）都睇唔到你嘅任何設定同相片。' },
     { icon: '🏷️', t: 'What EXIF Gets Written', tZh: '會寫入什麼 EXIF', d: 'Camera make/model · Lens name & specs · ISO · Focal length · Aperture · Shutter speed · Date & time · GPS coordinates & address · Artist · Copyright · Image description. XMP metadata is also injected: Label, Creator, Credit, DateCreated.', dZh: '相機品牌/型號 · 鏡頭名稱/規格 · ISO · 焦距 · 光圈 · 快門 · 攝影日期時間 · GPS 座標/地址 · 攝影師 · 版權 · 圖片說明。同時也會寫入 XMP 標籤：Label、Creator、Credit、DateCreated。', img: 'img/gphoto_web.png' },
-    { icon: '🔍', t: 'Google Photos Ordering', tZh: 'Google Photos 排序', d: 'Google Photos sorts by the EXIF DateTimeOriginal tag. After processing, every photo has its correct shooting time written into EXIF. Your entire roll appears in the right order in Google Photos, Apple Photos, and any app that reads EXIF dates — no more messy ordering.', dZh: 'Google Photos 是依據 EXIF 裡的 DateTimeOriginal 來排序的。處理後，每張相都有正確的拍攝時間。整卷菲林在 Google Photos、Apple Photos 和所有支援 EXIF 的應用程式裡都會以正確的順序顯示，唔會再排到亂嗮。' },
-    { icon: '📖', t: 'Origin', tZh: '起源', d: "FilmTag started as a CLI tool for myself and a few friends — I'm a film photography beginner who happens to write code for a living, and I just wanted an easy way to tag my scans with proper metadata. Before a trip, I worried that a lab might send scans back while I was away, so I turned it into a web app I could use from anywhere.", dZh: '起初只係寫咗個命令行工具俾自己同朋友用——我本身係菲林攝影入門者，咁啱又係做程式開發，純粹想有個方便嘅方法幫掃描檔加返相片資訊。後尾準備去旅行，驚沖掃舖喺旅行期間傳返啲掃描檔過嚟冇得整理，就索性整咗個網站出嚟，自己喺外地都處理得到。' }
+    { icon: '🔍', t: 'Google Photos Ordering', tZh: 'Google Photos 排序', d: 'Google Photos sorts by the EXIF DateTimeOriginal tag. After processing, every photo has its correct shooting time written into EXIF. Your entire roll appears in the right order in Google Photos, Apple Photos, and any app that reads EXIF dates — no more messy ordering.', dZh: 'Google Photos 是依據 EXIF 裡的 DateTimeOriginal 來排序的。處理後，每張相都有正確的拍攝時間。整卷菲林在 Google Photos、Apple Photos 和所有支援 EXIF 的應用程式裡都會以正確的順序顯示，唔會再排到亂嗮。' }
   ];
   var guideSteps = [
     { icon: '📤', t: 'Upload Photos', tZh: '上傳相片', d: 'Click the upload area or drag & drop your JPEG files. Thumbnails and EXIF data are extracted automatically.', dZh: '點擊上傳區域或是直接 drag & drop JPEG 檔案，縮圖和 EXIF 資料會自動提取。' },

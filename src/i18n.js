@@ -151,6 +151,18 @@ tpl.en = {
   "disclaimer_cb_noncommercial": "I agree this tool is for non-commercial use only",
   "disclaimer_agree": "I understand and agree to proceed",
   "disclaimer_disagree": "I do not agree",
+
+  // Feedback
+  "feedback_title": "Share Your Feedback",
+  "feedback_type": "Type",
+  "feedback_bug": "Bug Report",
+  "feedback_suggestion": "Suggestion",
+  "feedback_title_ph": "Title",
+  "feedback_desc_ph": "Describe your feedback...",
+  "feedback_email_ph": "Email (optional, for follow-up)",
+  "feedback_submit": "Submit",
+  "feedback_success": "Thank you! Your feedback has been submitted.",
+  "feedback_error": "Failed to submit feedback. Please try again.",
 };
 
 tpl.zh = {
@@ -267,6 +279,18 @@ tpl.zh = {
   "disclaimer_cb_noncommercial": "我同意呢個工具只供非商業用途使用",
   "disclaimer_agree": "我明白並同意使用",
   "disclaimer_disagree": "我不同意",
+
+  // Feedback
+  "feedback_title": "分享你嘅意見",
+  "feedback_type": "類別",
+  "feedback_bug": "錯誤回報",
+  "feedback_suggestion": "功能建議",
+  "feedback_title_ph": "標題",
+  "feedback_desc_ph": "詳細描述你嘅意見…",
+  "feedback_email_ph": "電郵（選擇性，方便跟進）",
+  "feedback_submit": "提交",
+  "feedback_success": "多謝你嘅意見！已成功提交。",
+  "feedback_error": "提交失敗，請再試一次。",
 };
 
 export { t, setLang, toggleLang, applyTranslations, lang };
