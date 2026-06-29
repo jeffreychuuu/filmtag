@@ -107,17 +107,12 @@ export function saveCustomOpts() {
 export function saveLastSession() {
   function fv(sel, inp) { return sel.value === '__custom__' ? inp.value.trim() : selText(sel); }
   var session = {
-    artist: fv(artistSel, $('artist-custom-input')), artistCustom: artistSel.value === '__custom__',
-    camera: fv(cameraSel, $('camera-model-custom')), cameraCustom: cameraSel.value === '__custom__',
-    cameraMake: $('camera-make-custom').value.trim(),
-    lensName: fv(lensSel, $('lens-name-custom')), lensCustom: cameraSel.value === '__custom__' || lensSel.value === '__custom__',
-    lensFocal: $('lens-focal').value.trim(), lensAperture: $('lens-aperture').value.trim(),
-    film: fv(filmSel, $('film-name-custom')), filmCustom: filmSel.value === '__custom__',
-    filmIso: $('film-iso-custom').value.trim(),
-    lab: fv(labSel, $('lab-custom-input')), labCustom: labSel.value === '__custom__',
-    process: fv(processSel, $('process-custom-input')), processCustom: processSel.value === '__custom__',
-    pushpull: fv(ppSel, $('pushpull-custom-input')), pushpullCustom: ppSel.value === '__custom__',
-    scanner: fv(scanSel, $('scanner-custom-input')), scannerCustom: scanSel.value === '__custom__',
+    artist: fv(artistSel, $('artist-custom-input')),
+    camera: fv(cameraSel, $('camera-model-custom')), cameraMake: $('camera-make-custom').value.trim(),
+    lensName: fv(lensSel, $('lens-name-custom')), lensFocal: $('lens-focal').value.trim(), lensAperture: $('lens-aperture').value.trim(),
+    film: fv(filmSel, $('film-name-custom')), filmIso: $('film-iso-custom').value.trim(),
+    lab: fv(labSel, $('lab-custom-input')), process: fv(processSel, $('process-custom-input')),
+    pushpull: fv(ppSel, $('pushpull-custom-input')), scanner: fv(scanSel, $('scanner-custom-input')),
     publicDesc: $('public-checkbox').checked
   };
   localStorage.setItem('filmtag-last-session', JSON.stringify(session));
@@ -132,26 +127,10 @@ export function restoreLastSession() {
     return false;
   }
   function setCust(sel, inp, val) { if (!val) return; sel.value = '__custom__'; sel.dispatchEvent(new Event('change')); inp.value = val; }
-  if (data.camera) {
-    if (data.cameraCustom) { setCust(cameraSel, $('camera-model-custom'), data.camera); if (data.cameraMake) $('camera-make-custom').value = data.cameraMake; }
-    else selByText(cameraSel, data.camera);
-  }
-  if (data.lensName) {
-    if (data.lensCustom) { setCust(lensSel, $('lens-name-custom'), data.lensName); if (data.lensFocal) $('lens-focal').value = data.lensFocal; if (data.lensAperture) $('lens-aperture').value = data.lensAperture; }
-    else if (!selByText(lensSel, data.lensName)) { setCust(lensSel, $('lens-name-custom'), data.lensName); if (data.lensFocal) $('lens-focal').value = data.lensFocal; if (data.lensAperture) $('lens-aperture').value = data.lensAperture; }
-  }
-  var fields = [
-    {sel: artistSel, inp: $('artist-custom-input'), val: data.artist, cust: data.artistCustom},
-    {sel: labSel, inp: $('lab-custom-input'), val: data.lab, cust: data.labCustom},
-    {sel: processSel, inp: $('process-custom-input'), val: data.process, cust: data.processCustom},
-    {sel: ppSel, inp: $('pushpull-custom-input'), val: data.pushpull, cust: data.pushpullCustom},
-    {sel: scanSel, inp: $('scanner-custom-input'), val: data.scanner, cust: data.scannerCustom}
-  ];
-  for (var i = 0; i < fields.length; i++) { if (fields[i].cust) setCust(fields[i].sel, fields[i].inp, fields[i].val); else selByText(fields[i].sel, fields[i].val); }
-  if (data.film) {
-    if (data.filmCustom) { setCust(filmSel, $('film-name-custom'), data.film); if (data.filmIso) $('film-iso-custom').value = data.filmIso; }
-    else selByText(filmSel, data.film);
-  }
+  if (data.camera && !selByText(cameraSel, data.camera)) { setCust(cameraSel, $('camera-model-custom'), data.camera); if (data.cameraMake) $('camera-make-custom').value = data.cameraMake; }
+  if (data.lensName && !selByText(lensSel, data.lensName)) { setCust(lensSel, $('lens-name-custom'), data.lensName); if (data.lensFocal) $('lens-focal').value = data.lensFocal; if (data.lensAperture) $('lens-aperture').value = data.lensAperture; }
+  [{sel:artistSel,inp:$('artist-custom-input'),val:data.artist},{sel:labSel,inp:$('lab-custom-input'),val:data.lab},{sel:processSel,inp:$('process-custom-input'),val:data.process},{sel:ppSel,inp:$('pushpull-custom-input'),val:data.pushpull},{sel:scanSel,inp:$('scanner-custom-input'),val:data.scanner}].forEach(function(f) { if (f.val && !selByText(f.sel, f.val)) setCust(f.sel, f.inp, f.val); });
+  if (data.film && !selByText(filmSel, data.film)) { setCust(filmSel, $('film-name-custom'), data.film); if (data.filmIso) $('film-iso-custom').value = data.filmIso; }
   if (data.publicDesc !== undefined) $('public-checkbox').checked = data.publicDesc;
 }
 
