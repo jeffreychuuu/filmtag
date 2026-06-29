@@ -104,6 +104,36 @@ export function saveCustomOpts() {
   localStorage.setItem('filmtag-custom-opts', JSON.stringify(data));
 }
 
+export function saveLastSession() {
+  function fv(sel, inp) { return sel.value === '__custom__' ? inp.value.trim() : selText(sel); }
+  var session = {
+    artist: fv(artistSel, $('artist-custom-input')),
+    camera: fv(cameraSel, $('camera-model-custom')), cameraMake: $('camera-make-custom').value.trim(),
+    lensName: fv(lensSel, $('lens-name-custom')), lensFocal: $('lens-focal').value.trim(), lensAperture: $('lens-aperture').value.trim(),
+    film: fv(filmSel, $('film-name-custom')), filmIso: $('film-iso-custom').value.trim(),
+    lab: fv(labSel, $('lab-custom-input')), process: fv(processSel, $('process-custom-input')),
+    pushpull: fv(ppSel, $('pushpull-custom-input')), scanner: fv(scanSel, $('scanner-custom-input')),
+    publicDesc: $('public-checkbox').checked
+  };
+  localStorage.setItem('filmtag-last-session', JSON.stringify(session));
+}
+
+export function restoreLastSession() {
+  var data;
+  try { data = JSON.parse(localStorage.getItem('filmtag-last-session')); } catch(_) {}
+  if (!data) return;
+  function selByText(sel, text) {
+    for (var i = 0; i < sel.options.length; i++) { if (sel.options[i].textContent === text) { sel.selectedIndex = i; sel.dispatchEvent(new Event('change')); return true; } }
+    return false;
+  }
+  function setCust(sel, inp, val) { if (!val) return; sel.value = '__custom__'; sel.dispatchEvent(new Event('change')); inp.value = val; }
+  if (data.camera && !selByText(cameraSel, data.camera)) { setCust(cameraSel, $('camera-model-custom'), data.camera); if (data.cameraMake) $('camera-make-custom').value = data.cameraMake; }
+  if (data.lensName && !selByText(lensSel, data.lensName)) { setCust(lensSel, $('lens-name-custom'), data.lensName); if (data.lensFocal) $('lens-focal').value = data.lensFocal; if (data.lensAperture) $('lens-aperture').value = data.lensAperture; }
+  [{sel:artistSel,inp:$('artist-custom-input'),val:data.artist},{sel:labSel,inp:$('lab-custom-input'),val:data.lab},{sel:processSel,inp:$('process-custom-input'),val:data.process},{sel:ppSel,inp:$('pushpull-custom-input'),val:data.pushpull},{sel:scanSel,inp:$('scanner-custom-input'),val:data.scanner}].forEach(function(f) { if (f.val && !selByText(f.sel, f.val)) setCust(f.sel, f.inp, f.val); });
+  if (data.film && !selByText(filmSel, data.film)) { setCust(filmSel, $('film-name-custom'), data.film); if (data.filmIso) $('film-iso-custom').value = data.filmIso; }
+  if (data.publicDesc !== undefined) $('public-checkbox').checked = data.publicDesc;
+}
+
 // Show/hide custom input field when __custom__ is selected in a dropdown
 export function setupCustom(sel, cust) {
   function toggle() { cust.classList.toggle('show', sel.value === '__custom__'); }

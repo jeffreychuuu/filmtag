@@ -32,6 +32,7 @@ export function startZipProcess() {
         showStatus(t('processed_success', {n: total}), 'success');
         S.reviewBtn.disabled = false;
         S.saveCustomOpts();
+        S.saveLastSession();
         var spin = S._('progress-spinner'), done = S._('progress-done');
         if (spin) spin.style.display = 'none'; if (done) done.style.display = 'flex';
         var nextBtn = S._('progress-next-btn');
@@ -133,6 +134,7 @@ export function startSaveProcess() {
       if (spin) spin.style.display = 'none'; if (done) done.style.display = 'flex';
       S.reviewBtn.disabled = false;
       S.saveCustomOpts();
+      S.saveLastSession();
       showGallery(S.processedFiles, p, zip);
     }
   }
