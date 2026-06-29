@@ -5,7 +5,7 @@ import { t, setLang, toggleLang, applyTranslations, lang } from './i18n.js';
 import { toDms, strToUtf8Binary, toUcs2Binary, injectXmp, escXml, esc, fmtSize, dmsToDecimal, newFilmPrefix } from './lib/utils.js';
 import { initGear, fillSelect, fillSelectWithCustom, saveCustomOpts, setupCustom, updateLensUI, collect, validate, saveLastSession, restoreLastSession } from './modules/gear.js';
 import { initGps, initMap, updateGpsDots, updateGpsSaveBtn, setGpsForSelected, reverseGeocode } from './modules/gps.js';
-import { init as initUi, renderFileList, goToPage, changePageSize, goToSummaryPage, changeSummaryPageSize, clearAll, removeOne, sortFiles, getTotalPages, buildSummaryHtml, generateSummaryThumbnails, rebuildSummaryBody, buildOptions, syncRange, buildSelectedFromRanges } from './modules/ui.js';
+import { init as initUi, renderFileList, goToPage, changePageSize, goToSummaryPage, changeSummaryPageSize, clearAll, removeOne, sortFiles, toggleSort, getTotalPages, buildSummaryHtml, generateSummaryThumbnails, rebuildSummaryBody, buildOptions, syncRange, buildSelectedFromRanges } from './modules/ui.js';
 import { init as initDate, applyDateToSelected, refreshSegments, computeDateForFile, getFileDate, newFName } from './modules/date.js';
 import { init as initUpload, handleFiles } from './modules/upload.js';
 import { init as initProcess, startZipProcess, startSaveProcess, showGallery, showStatus } from './modules/process.js';
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
   S.uploadedFiles = []; S.fileDates = {}; S.clearedDates = {}; S.thumbnailCache = {};
   S.gpsData = {}; S.selectedSet = {}; S.geocodeCache = {}; S.geocodeQueue = [];
   S.isIPhone = /iPhone|iPad/.test(navigator.userAgent);
-  S.currentPage = 1; S.pageSize = 5; S.prefetchTimer = null;
+  S.currentPage = 1; S.pageSize = 5; S.prefetchTimer = null; S.sortAsc = true;
   S.summaryPage = 1; S.summaryPageSize = 5; S.processedFiles = [];
   S.geocodeBusy = false; S.map = null; S.mapMarker = null; S.mapInitialized = false;
   S.reverseGeocode = reverseGeocode;
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
   S.saveCustomOpts = saveCustomOpts; S.saveLastSession = saveLastSession;
   S.startZipProcess = startZipProcess; S.startSaveProcess = startSaveProcess;
   S.showStatus = showStatus; S.initMap = initMap;
-  window.clearAll = clearAll; window.removeOne = removeOne; window.sortFiles = sortFiles;
+  window.clearAll = clearAll; window.removeOne = removeOne; window.sortFiles = sortFiles; window.toggleSort = toggleSort;
   window.goToPage = goToPage; window.changePageSize = changePageSize;
   window.goToSummaryPage = goToSummaryPage; window.changeSummaryPageSize = changeSummaryPageSize;
 
@@ -294,7 +294,7 @@ function showTutorial() {
   var guideSteps = [
     { icon: '📤', t: 'Upload Photos', tZh: '上傳相片', d: 'Click the upload area or drag & drop your JPEG files. Thumbnails and EXIF data are extracted automatically.', dZh: '點擊上傳區域或是直接 drag & drop JPEG 檔案，縮圖和 EXIF 資料會自動提取。' },
     { icon: '📍', t: 'Set GPS Location', tZh: '設定 GPS 位置', d: 'Select files, click "Set GPS Location", then search or drop a pin on the map. Coordinates and address are written into EXIF.', dZh: '選擇檔案，點擊「設定 GPS 位置」，然後搜尋地址或點擊地圖落針。座標和地址會寫入 EXIF。' },
-    { icon: '🤚', t: 'Sort & Reorder', tZh: '排序與重新排列', d: 'Use the ▲Z / ▼Z buttons for quick A→Z or Z→A sort. Or drag & drop files anywhere. Order matters: it controls the sequence number in filenames (_01, _02…) and the +1 minute timestamp increment.', dZh: '用 ▲Z / ▼Z 按鈕快速排序 A→Z 或 Z→A。也可以直接拖動檔案到任何位置。排列順序會控制檔案名的序列號 (_01、_02…) 和每張相的時間戳分配。' },
+    { icon: '🤚', t: 'Sort & Reorder', tZh: '排序與重新排列', d: 'Use the ↑ A→Z / ↓ Z→A button to toggle sort order. Or drag & drop files anywhere. Order matters: it controls the sequence number in filenames (_01, _02…) and the +1 minute timestamp increment.', dZh: '用 ↑ A→Z / ↓ Z→A 按鈕切換排序方向。也可以直接拖動檔案到任何位置。排列順序會控制檔案名的序列號 (_01、_02…) 和每張相的時間戳分配。' },
     { icon: '📷', t: 'Set Your Equipment', tZh: '設定你的設備', d: 'Choose Camera, Lens, Film Stock, Lab, Developing Process, Push/Pull, and Scanner from the dropdowns. Custom entries are saved to your browser (localStorage) and show up next time.', dZh: '從下拉選單選擇相機、鏡頭、菲林、沖掃、沖洗方式、Push/Pull、掃描器。自訂輸入會儲存喺你嘅瀏覽器 (localStorage)，下次會自動出現。' },
     { icon: '📅', t: 'Set Date & Time', tZh: '設定攝影日期時間', d: 'Select one or more files, click "Set Date & Time". Each file automatically gets +1 minute added. You can set up multiple time segments — even on the same day — so photos from different rolls or shooting sessions stay in the right order.', dZh: '選擇一個或多個檔案，點擊「設定日期時間」。每張相會自動加 +1 分鐘。你可以設定多個時間段，就算同一日唔同時間影嘅相都可以分開處理。' },
     { icon: '📋', t: 'Review & Process', tZh: '檢閱與處理', d: 'Click "Review Summary" to check all settings and preview new filenames. Then choose "Download ZIP" (downloads all files at once) or "Save to Album" (save individually on iOS).', dZh: '點擊「Review Summary」檢查所有設定和新檔案名。然後選擇「下載 ZIP」（一次下載全部檔案）或「儲存到相簿」（iOS 個別儲存）。' }

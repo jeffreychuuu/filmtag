@@ -50,7 +50,7 @@ export function renderFileList(skipThumbs) {
   var hasS = Object.keys(S.selectedSet).length > 0;
   S.fileActions.style.display = hasS ? 'flex' : 'none';
   var h = '<div class="file-list-header"><span>' + t('file_count', {n: S.uploadedFiles.length}) + '</span><div>' +
-    '<button class="sort-btn" onclick="sortFiles(true)" title="Sort A→Z">▲Z</button><button class="sort-btn" onclick="sortFiles(false)" title="Sort Z→A">▼Z</button> ' +
+    '<button class="sort-btn" onclick="toggleSort()">' + (S.sortAsc ? '\u2191 A\u2192Z' : '\u2193 Z\u2192A') + '</button> ' +
     '<button class="btn btn-sm btn-danger" onclick="clearAll()">' + t('clear_all') + '</button></div></div>';
   var start = S.pageSize === 0 ? 0 : (S.currentPage - 1) * S.pageSize;
   var end = S.pageSize === 0 ? S.uploadedFiles.length : Math.min(start + S.pageSize, S.uploadedFiles.length);
@@ -262,6 +262,11 @@ export function sortFiles(asc) {
   S.refreshSegments();
   renderRanges();
   S.renderFileList();
+}
+
+export function toggleSort() {
+  S.sortAsc = !S.sortAsc;
+  sortFiles(S.sortAsc);
 }
 
 function moveItem(fromIdx, toIdx) {
