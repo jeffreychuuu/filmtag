@@ -19,9 +19,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 (function() {
-  fetch('https://api.countapi.xyz/get/filmtag/views').then(function(r) { return r.json(); }).then(function(d) { var el = document.getElementById('view-count'); if (el) el.textContent = d.value.toLocaleString(); }).catch(function() {});
-  fetch('https://api.countapi.xyz/get/filmtag/photos').then(function(r) { return r.json(); }).then(function(d) { var el = document.getElementById('photo-count'); if (el) el.textContent = d.value.toLocaleString(); }).catch(function() {});
-  fetch('https://api.countapi.xyz/hit/filmtag/views').catch(function() {});
+  fetch('/api/count').then(function(r) { return r.json(); }).then(function(d) {
+    var v = document.getElementById('view-count');
+    if (v) v.textContent = (d.views || 0).toLocaleString();
+    var p = document.getElementById('photo-count');
+    if (p) p.textContent = (d.photos || 0).toLocaleString();
+  }).catch(function() {});
+  fetch('/api/count', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'views', amount: 1 }) }).catch(function() {});
 })();
 
 (function() {

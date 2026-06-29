@@ -6,10 +6,10 @@ import { toDms, toUcs2Binary, injectXmp } from '../lib/utils.js';
 var S;
 
 function updatePhotoCount(n) {
-  fetch('https://api.countapi.xyz/update/filmtag/photos?amount=' + n).then(function(r) { return r.json(); }).then(function(d) {
-    if (!d || d.value == null) return;
+  fetch('/api/count', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'photos', amount: n }) }).then(function(r) { return r.json(); }).then(function(d) {
+    if (!d || d.count == null) return;
     var el = document.getElementById('photo-count');
-    if (el) el.textContent = d.value.toLocaleString();
+    if (el) el.textContent = d.count.toLocaleString();
   }).catch(function() {});
 }
 
