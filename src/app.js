@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
     _vc++;
     if (_vt) clearTimeout(_vt);
     _vt = setTimeout(function() { _vc = 0; }, 2000);
-    if (_vc >= 5) { _vc = 0; $('admin-overlay').classList.add('show'); }
+    if (_vc >= 5) { _vc = 0; document.getElementById('admin-overlay').classList.add('show'); }
   });
 });
 
