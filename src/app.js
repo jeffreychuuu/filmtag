@@ -302,16 +302,22 @@ document.addEventListener('DOMContentLoaded', function() {
   $('egg-close').addEventListener('click', function() { $('egg-overlay').classList.remove('show'); });
   $('egg-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
   $('help-float-btn').addEventListener('click', showTutorial);
-  $('feedback-float-btn').addEventListener('click', function() { $('feedback-overlay').classList.add('show'); });
+  $('feedback-float-btn').addEventListener('click', function() {
+    $('feedback-title').value = ''; $('feedback-desc').value = ''; $('feedback-email').value = '';
+    $('feedback-submit').disabled = true;
+    $('feedback-overlay').classList.add('show');
+  });
   $('feedback-cancel').addEventListener('click', function() { $('feedback-overlay').classList.remove('show'); });
   $('feedback-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
+  function toggleFeedbackSubmit() {
+    $('feedback-submit').disabled = !$('feedback-title').value.trim() || !$('feedback-desc').value.trim();
+  }
+  $('feedback-title').addEventListener('input', toggleFeedbackSubmit);
+  $('feedback-desc').addEventListener('input', toggleFeedbackSubmit);
   $('feedback-submit').addEventListener('click', function() {
-    var title = $('feedback-title').value.trim();
-    var desc = $('feedback-desc').value.trim();
-    if (!title || !desc) { S.showStatus(t('feedback_error'), 'error'); return; }
     fetch('/api/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
-      type: $('feedback-type').value, title: title, desc: desc, email: $('feedback-email').value.trim()
-    })     }).then(function(r) { return r.json(); }).then(function(d) {
+      type: $('feedback-type').value, title: $('feedback-title').value.trim(), desc: $('feedback-desc').value.trim(), email: $('feedback-email').value.trim()
+    }) }).then(function(r) { return r.json(); }).then(function(d) {
       if (d.ok) {
         $('feedback-title').value = ''; $('feedback-desc').value = ''; $('feedback-email').value = '';
         $('feedback-overlay').classList.remove('show');
