@@ -408,8 +408,29 @@ document.addEventListener('DOMContentLoaded', function() {
     var key = localStorage.getItem('filmtag-admin-key');
     if (!confirm('Delete this feedback?')) return;
     fetch('/api/feedback?key=' + encodeURIComponent(key) + '&id=' + encodeURIComponent(id), { method: 'DELETE', cache: 'no-cache' }).then(function(r) { return r.json(); }).then(function(d) {
-      if (d.ok) { var item = e.target.closest('.admin-feedback-item'); if (item) item.remove(); }
-      else { S.showStatus('Delete failed', 'error'); }
+      if (!d.ok) { S.showStatus('Delete failed', 'error'); return; }
+      $('admin-loading').style.display = 'block';
+      $('admin-feedback-list').innerHTML = '';
+      fetch('/api/feedback?key=' + encodeURIComponent(key), { cache: 'no-cache' }).then(function(r) { return r.json(); }).then(function(data) {
+        $('admin-loading').style.display = 'none';
+        var items = data && data.items ? data.items : data;
+        if (!items || !items.length) { $('admin-feedback-list').innerHTML = '<p style="color:var(--text-secondary);">No feedback yet.</p>'; return; }
+        var h = '';
+        for (var i = items.length - 1; i >= 0; i--) {
+          var it = items[i];
+          h += '<div class="admin-feedback-item" style="padding:0.75rem;border-bottom:1px solid var(--border);font-size:0.8rem;" data-id="' + esc(it.id) + '">' +
+            '<div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.3rem;">' +
+            '<span>' + (it.type === 'bug' ? '🐛' : '💡') + '</span>' +
+            '<strong>' + esc(it.title) + '</strong>' +
+            '<span style="margin-left:auto;color:var(--text-secondary);font-size:0.7rem;">' + new Date(it.ts).toLocaleDateString() + '</span>' +
+            '</div>' +
+            '<p style="color:#aaa;margin:0 0 0.3rem 1.2rem;">' + esc(it.desc) + '</p>' +
+            (it.email ? '<p style="color:var(--text-secondary);margin:0 0 0 1.2rem;font-size:0.7rem;">' + esc(it.email) + '</p>' : '') +
+            '<button class="btn btn-sm btn-danger admin-del-btn" data-id="' + esc(it.id) + '" style="margin-top:0.3rem;font-size:0.7rem;">🗑️ Delete</button>' +
+            '</div>';
+        }
+        $('admin-feedback-list').innerHTML = h;
+      }).catch(function() { $('admin-loading').style.display = 'none'; $('admin-feedback-list').innerHTML = '<p style="color:var(--text-secondary);">No feedback yet.</p>'; });
     }).catch(function() { S.showStatus('Delete failed', 'error'); });
   });
   $('tutorial-close').addEventListener('click', function() { $('tutorial-overlay').classList.remove('show'); });
