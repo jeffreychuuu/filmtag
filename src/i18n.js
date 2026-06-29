@@ -147,6 +147,8 @@ tpl.en = {
   // Disclaimer acknowledgment
   "disclaimer_title": "Before You Use This Tool",
   "disclaimer_acknowledge": "This tool is built with the assistance of AI. If you are concerned about potential security risks or do not trust AI-assisted tools, please do not use this tool.",
+  "disclaimer_cb_ai": "I understand this tool was built with AI assistance and I accept the implications",
+  "disclaimer_cb_noncommercial": "I agree this tool is for non-commercial use only",
   "disclaimer_agree": "I understand and agree to proceed",
   "disclaimer_disagree": "I do not agree",
 };
@@ -261,6 +263,8 @@ tpl.zh = {
   // Disclaimer acknowledgment
   "disclaimer_title": "使用前須知",
   "disclaimer_acknowledge": "呢個工具係由 AI 輔助開發。如果你擔心潛在嘅安全風險或者唔信任 AI 協助製造嘅工具，請唔好使用呢個工具。",
+  "disclaimer_cb_ai": "我明白呢個工具由 AI 輔助開發，並接受相關風險",
+  "disclaimer_cb_noncommercial": "我同意呢個工具只供非商業用途使用",
   "disclaimer_agree": "我明白並同意使用",
   "disclaimer_disagree": "我不同意",
 };

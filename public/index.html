@@ -395,17 +395,6 @@
     </div>
   </header>
 
-  <div class="section origin-section">
-    <div class="section-collapse-header" data-target="origin-body">
-      <span class="section-number">✦</span>
-      <span data-i18n="origin">Origin</span>
-      <span class="collapse-icon">▾</span>
-    </div>
-    <div class="section-body collapsed" id="origin-body">
-      <p data-i18n="origin_text">FilmTag started as a CLI tool for myself and a few friends — I'm a film photography beginner who happens to write code for a living, and I just wanted an easy way to tag my scans with proper metadata. Before a trip, I worried that a lab might send scans back while I was away, so I turned it into a web app I could use from anywhere.</p>
-    </div>
-  </div>
-
   <div class="section">
     <div class="section-header"><span class="section-number">1</span> <span data-i18n="file_setup">File Setup</span></div>
     <div class="upload-wrap" id="upload-wrap">
@@ -529,17 +518,6 @@
     </div>
   </div>
 
-  <div class="section disclaimer-section">
-    <div class="section-collapse-header" data-target="disclaimer-body">
-      <span class="section-number">⚠</span>
-      <span data-i18n="disclaimer">Disclaimer</span>
-      <span class="collapse-icon">▾</span>
-    </div>
-    <div class="section-body collapsed" id="disclaimer-body">
-      <p data-i18n="disclaimer_text">This tool is shared freely with the film photography community. Commercial use or profiteering is strictly prohibited. Unauthorised commercial use will be subject to legal action.</p>
-    </div>
-  </div>
-
   <div class="status-msg" id="status-msg"></div>
 
   <div class="actions">
@@ -657,8 +635,18 @@
   <div class="overlay-content" style="text-align:center;max-width:520px;">
     <h3 data-i18n="disclaimer_title" style="margin-bottom:1rem;">Before You Use This Tool</h3>
     <p data-i18n="disclaimer_acknowledge" style="line-height:1.7;margin-bottom:1.5rem;text-align:left;font-size:0.9rem;color:var(--text-secondary);"></p>
+    <div style="text-align:left;margin-bottom:1.25rem;">
+      <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.75rem;">
+        <input type="checkbox" id="disclaimer-cb-ai" style="width:auto;accent-color:var(--accent);">
+        <span data-i18n="disclaimer_cb_ai">I understand this tool was built with AI assistance and I accept the implications</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.85rem;color:var(--text-secondary);">
+        <input type="checkbox" id="disclaimer-cb-noncommercial" style="width:auto;accent-color:var(--accent);">
+        <span data-i18n="disclaimer_cb_noncommercial">I agree this tool is for non-commercial use only</span>
+      </label>
+    </div>
     <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
-      <button class="btn btn-primary" id="disclaimer-agree" data-i18n="disclaimer_agree">I understand and agree to proceed</button>
+      <button class="btn btn-primary" id="disclaimer-agree" disabled data-i18n="disclaimer_agree">I understand and agree to proceed</button>
       <button class="btn btn-secondary" id="disclaimer-disagree" data-i18n="disclaimer_disagree">I do not agree</button>
     </div>
   </div>
