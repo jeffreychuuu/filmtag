@@ -389,6 +389,7 @@ export function buildSelectedFromRanges() {
 
 function renderRanges() {
   S.rangeRowsEl.innerHTML = '';
+  S.addRangeBtn.disabled = !S.uploadedFiles.length || Object.keys(S.selectedSet).length >= S.uploadedFiles.length;
   if (!S.uploadedFiles.length) return;
   var max = S.uploadedFiles.length;
   var keys = Object.keys(S.selectedSet).map(Number).sort(function(a, b) { return a - b; });
