@@ -177,9 +177,16 @@ This tool is shared freely with the film photography community. Commercial use o
 This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You may freely use, modify, and share it for noncommercial purposes. Commercial use or profiteering is strictly prohibited. See the `LICENSE` file for details.
 
 ## What's New
-
+ 
 <details>
 <summary>Click to expand</summary>
+
+**1.4.0 (2026-06-29)** — Feedback system · Disclaimer overlay · Tutorial About reorg
+- 💬 Floating feedback button with Bug Report / Suggestion form — submitted to Upstash KV
+- 🔐 Hidden admin panel (click version 5×) — view & delete all feedback entries
+- ⚠️ First-visit overlay now requires 2 checkboxes (AI tool acknowledgment + non-commercial agreement) before proceeding
+- 📖 Origin moved to tutorial About tab as first step
+- 🎯 Floating buttons reorganized: 🇭🇰 Language → ❓ Help → 💬 Feedback → 🐈 Easter egg
 
 **1.3.0 (2026-06-29)** — Session restore · Tutorial · Sort toggle · Range UX · View counter
 - 🔄 All settings (gear, film, lab, process, scanner, checkbox) are now saved and restored on next page load — pick up where you left off
