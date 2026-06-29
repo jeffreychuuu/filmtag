@@ -331,7 +331,7 @@ document.addEventListener('DOMContentLoaded', function() {
   $('admin-unlock-btn').addEventListener('click', function() {
     var key = $('admin-key-input').value.trim();
     if (!key) return;
-    fetch('/api/feedback?key=' + encodeURIComponent(key)).then(function(r) {
+    fetch('/api/feedback?key=' + encodeURIComponent(key), { cache: 'no-cache' }).then(function(r) {
       if (r.status === 401) { S.showStatus('Invalid key', 'error'); return null; }
       return r.json();
     }).then(function(items) {
@@ -340,7 +340,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var h = '';
       for (var i = items.length - 1; i >= 0; i--) {
         var it = items[i];
-        h += '<div style="padding:0.75rem;border-bottom:1px solid var(--border);font-size:0.8rem;">' +
+        h += '<div class="admin-feedback-item" style="padding:0.75rem;border-bottom:1px solid var(--border);font-size:0.8rem;" data-id="' + esc(it.id) + '">' +
           '<div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.3rem;">' +
           '<span>' + (it.type === 'bug' ? '🐛' : '💡') + '</span>' +
           '<strong>' + esc(it.title) + '</strong>' +
@@ -348,11 +348,24 @@ document.addEventListener('DOMContentLoaded', function() {
           '</div>' +
           '<p style="color:#aaa;margin:0 0 0.3rem 1.2rem;">' + esc(it.desc) + '</p>' +
           (it.email ? '<p style="color:var(--text-secondary);margin:0 0 0 1.2rem;font-size:0.7rem;">' + esc(it.email) + '</p>' : '') +
+          '<button class="btn btn-sm btn-danger admin-del-btn" data-id="' + esc(it.id) + '" style="margin-top:0.3rem;font-size:0.7rem;">🗑️ Delete</button>' +
           '</div>';
       }
       $('admin-panel').innerHTML = h || '<p style="color:var(--text-secondary);">No feedback yet.</p>';
       $('admin-panel').style.display = 'block';
+      $('admin-panel')._adminKey = key;
     }).catch(function() { S.showStatus('Failed to load feedback', 'error'); });
+  });
+  $('admin-panel').addEventListener('click', function(e) {
+    var btn = e.target.closest('.admin-del-btn');
+    if (!btn) return;
+    var id = btn.getAttribute('data-id');
+    var key = $('admin-panel')._adminKey;
+    if (!confirm('Delete this feedback?')) return;
+    fetch('/api/feedback?key=' + encodeURIComponent(key) + '&id=' + encodeURIComponent(id), { method: 'DELETE', cache: 'no-cache' }).then(function(r) { return r.json(); }).then(function(d) {
+      if (d.ok) { var item = e.target.closest('.admin-feedback-item'); if (item) item.remove(); }
+      else { S.showStatus('Delete failed', 'error'); }
+    }).catch(function() { S.showStatus('Delete failed', 'error'); });
   });
   $('tutorial-close').addEventListener('click', function() { $('tutorial-overlay').classList.remove('show'); });
   $('tutorial-got-it').addEventListener('click', function() { localStorage.setItem('filmtag-tutorial-seen', '1'); $('tutorial-overlay').classList.remove('show'); });
