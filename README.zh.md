@@ -181,8 +181,11 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 <details>
 <summary>撳開嚟睇</summary>
 
-**1.3.0 (2026-06-28)** — 上次設定自動還原
+**1.3.0 (2026-06-28)** — 上次設定自動還原 + 教學 + 排序
 - 🔄 所有設定（gear、菲林、lab、沖洗方式、scanner、簽名）而家會喺下次開頁面時自動還原 — 唔使再逐個揀過
+- 📖 第一次用嗰陣會 show 教學 popup，之後可以㩒 ❓ button 隨時睇返
+- 🔤 一鍵排序 A→Z / Z→A
+- 🤚 Drag & drop 係唯一排序方法（▲/▼ button 已移除）
 
 **1.2.0 (2026-06-28)** — 沖洗方式自訂輸入 + ZIP 下載後 Next Roll + 檔案排序
 - ✏️ 沖洗方式而家支援自訂輸入 — 可以自由輸入任何沖洗方式（C-41、ECN-2、E-6 等）

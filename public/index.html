@@ -119,10 +119,14 @@
     .file-item .fsize { color: var(--text-secondary); font-size: 0.7rem; flex-shrink: 0; }
     .file-item .remove-btn { background: none; border: none; color: #666; cursor: pointer; font-size: 1rem; padding: 0 0.2rem; flex-shrink: 0; }
     .file-item .remove-btn:hover { color: var(--red); }
-    .move-btn { background: none; border: none; color: #555; cursor: pointer; font-size: 0.6rem; padding: 0 0.15rem; flex-shrink: 0; line-height: 1; }
-    .move-btn:hover { color: var(--accent); }
-    .move-btn:disabled { color: #333; cursor: default; }
-    .move-btn:disabled:hover { color: #333; }
+    .sort-btn { background: none; border: none; color: #666; cursor: pointer; font-size: 0.8rem; padding: 0.2rem 0.4rem; border-radius: 4px; flex-shrink: 0; }
+    .sort-btn:hover { color: var(--accent); }
+    .overlay-content--tutorial { max-width: 600px; }
+    .tutorial-step { display: flex; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+    .tutorial-step:last-child { border-bottom: none; }
+    .tutorial-step .ts-icon { font-size: 1.5rem; flex-shrink: 0; width: 2rem; text-align: center; }
+    .tutorial-step .ts-title { font-size: 0.85rem; color: var(--text); font-weight: 600; margin-bottom: 0.25rem; }
+    .tutorial-step .ts-desc { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.5; }
 
     .progress-bar-wrap { width: 100%; height: 6px; background: #111; border-radius: 3px; margin-top: 1rem; overflow: hidden; }
     .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; width: 0%; transition: width 0.3s ease; }
@@ -159,7 +163,6 @@
       .file-item .fidx { width: 24px; height: 24px; font-size: 0.55rem; flex-shrink: 0; }
     .file-item .file-thumb { width: 28px; height: 28px; flex-shrink: 0; }
     .file-item .remove-btn { font-size: 0.8rem; padding: 0; flex-shrink: 0; }
-    .move-btn { font-size: 0.5rem; padding: 0; }
     .file-list-dropzone.show { border-bottom: 2px solid var(--accent); }
       .file-item .file-gps-dot {
         flex: 1 1 40%; min-width: 55px; max-width: 140px;
@@ -261,6 +264,11 @@
       opacity: 0.4; transition: opacity 0.2s; color: #888;
     }
     .lang-float-btn:hover { opacity: 1; color: var(--accent); border-color: var(--accent); }
+    .help-float-btn { bottom: 120px; }
+    .help-float-btn,
+    .help-float-btn:active,
+    .help-float-btn:visited { position: fixed; right: 16px; width: 44px; height: 44px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); font-size: 1rem; cursor: pointer; z-index: 999; display: flex; align-items: center; justify-content: center; opacity: 0.4; transition: opacity 0.2s; color: #888; text-decoration: none; }
+    .help-float-btn:hover { opacity: 1; color: var(--accent); border-color: var(--accent); }
 
     .file-item {
       display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0;
@@ -542,7 +550,7 @@
 <footer><span id="version"></span> · Made by Jeffrey Chu (99% Agentic AI, 1% 🐈 Supervision &amp; 🥃)</footer>
 
 <div class="lang-float-btn" id="lang-float-btn">🇭🇰</div>
-
+<div class="help-float-btn" id="help-float-btn">❓</div>
 <div class="easter-egg-btn" id="easter-egg-btn">🐈</div>
 
 <div class="egg-overlay" id="egg-overlay">
@@ -611,6 +619,17 @@
     <div style="display:flex;gap:0.75rem;justify-content:center;margin-top:1rem;flex-wrap:wrap;">
       <button class="btn btn-sm btn-secondary" id="gallery-zip-btn" data-i18n="download_all_zip">Download All as ZIP</button>
       <button class="btn btn-primary" id="gallery-new-btn" data-i18n="next_roll">Next Roll 🎞️</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="tutorial-overlay">
+  <div class="overlay-content overlay-content--tutorial">
+    <button class="overlay-close" id="tutorial-close">✕</button>
+    <h3 style="margin-bottom:1rem;text-align:center;" id="tutorial-title">📖 How to Use FilmTag</h3>
+    <div id="tutorial-body"></div>
+    <div style="display:flex;gap:0.75rem;justify-content:center;margin-top:1rem;">
+      <button class="btn btn-primary" id="tutorial-got-it" data-i18n="got_it">Got it!</button>
     </div>
   </div>
 </div>
