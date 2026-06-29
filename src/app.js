@@ -345,9 +345,14 @@ document.addEventListener('DOMContentLoaded', function() {
         return null;
       }
       return r.json();
-    }).then(function(items) {
+    }).then(function(data) {
       $('admin-loading').style.display = 'none';
-      if (!items) return;
+      if (!data) return;
+      var items = data.items || data;
+      if (!items || !items.length) {
+        $('admin-feedback-list').innerHTML = '<p style="color:var(--text-secondary);">No feedback yet.</p>';
+        return;
+      }
       localStorage.setItem('filmtag-admin-key', key);
       var h = '';
       for (var i = items.length - 1; i >= 0; i--) {

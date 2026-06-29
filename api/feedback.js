@@ -25,7 +25,7 @@ export default async function handler(req, res) {
     var items = all.map(function(s) {
       try { return JSON.parse(s); } catch (e) { return null; }
     }).filter(Boolean);
-    return res.json(items);
+    return res.json({ items: items, debug: { env: env, key: k('feedback_list'), count: items.length, newCount: newData.length, oldCount: oldData.length } });
   }
 
   if (req.method === 'POST') {
