@@ -301,12 +301,22 @@ function showTutorial() {
     var html = '';
     for (var i = 0; i < steps.length; i++) {
       var s = steps[i];
-      html += '<div class="tutorial-step"><div class="ts-icon">' + s.icon + '</div><div><div class="ts-title">' + (isZh ? s.tZh : s.t) + '</div><div class="ts-desc">' + (isZh ? s.dZh : s.d) + '</div>' + (s.img ? '<img src="' + s.img + '" class="tutorial-img">' : '') + '</div></div>';
+      html += '<div class="tutorial-step"><div class="ts-icon">' + s.icon + '</div><div><div class="ts-title">' + (isZh ? s.tZh : s.t) + '</div><div class="ts-desc">' + (isZh ? s.dZh : s.d) + '</div>' + (s.img ? '<button class="btn btn-sm btn-secondary tutorial-img-btn">📷 ' + (isZh ? '睇例子' : 'Show example') + '</button><img src="' + s.img + '" class="tutorial-img" style="display:none;">' : '') + '</div></div>';
     }
     return html;
   }
   document.getElementById('tutorial-about').innerHTML = renderSteps(aboutSteps);
   document.getElementById('tutorial-guide').innerHTML = renderSteps(guideSteps);
+  document.getElementById('tutorial-about').addEventListener('click', function(e) {
+    if (e.target.classList.contains('tutorial-img-btn')) {
+      var img = e.target.nextElementSibling;
+      if (img && img.tagName === 'IMG') {
+        var hidden = img.style.display === 'none';
+        img.style.display = hidden ? 'block' : 'none';
+        e.target.textContent = hidden ? (isZh ? '📷 收起例子' : '📷 Hide example') : (isZh ? '📷 睇例子' : '📷 Show example');
+      }
+    }
+  });
   document.getElementById('tutorial-got-it').textContent = isZh ? '🎉 明白了！' : '🎉 Got it!';
   var tabBtns = document.querySelectorAll('.tutorial-tab');
   if (tabBtns.length >= 2) {
