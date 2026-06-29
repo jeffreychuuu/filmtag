@@ -22,9 +22,7 @@ export default async function handler(req, res) {
       for (var i = 0; i < all.length; i++) await kv.rpush(k('feedback_list'), all[i]);
       await kv.del('feedback_list');
     }
-    var items = all.map(function(s) {
-      try { return JSON.parse(s); } catch (e) { return null; }
-    }).filter(Boolean);
+    var items = all.filter(Boolean);
     return res.json(items);
   }
 
@@ -32,7 +30,7 @@ export default async function handler(req, res) {
     var type = req.body.type, title = req.body.title, desc = req.body.desc, email = req.body.email || '';
     if (!title || !desc) return res.status(400).json({ error: 'title and desc required' });
     var id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-    await kv.rpush(k('feedback_list'), JSON.stringify({ id: id, type: type || 'suggestion', title: title, desc: desc, email: email, ts: new Date().toISOString() }));
+    await kv.rpush(k('feedback_list'), { id: id, type: type || 'suggestion', title: title, desc: desc, email: email, ts: new Date().toISOString() });
     return res.json({ ok: true });
   }
 
@@ -44,10 +42,10 @@ export default async function handler(req, res) {
     var newData = await kv.lrange(newKey, 0, -1);
     var oldData = suffix ? await kv.lrange('feedback_list', 0, -1).catch(function() { return []; }) : [];
     var all = suffix ? newData.concat(oldData) : newData;
-    var filtered = all.map(function(s) { try { return JSON.parse(s); } catch (e) { return null; } }).filter(function(item) { return item && item.id !== idToDel; });
+    var filtered = all.filter(function(item) { return item && item.id !== idToDel; });
     await kv.del(newKey);
     if (suffix) await kv.del('feedback_list').catch(function() {});
-    for (var i = 0; i < filtered.length; i++) await kv.rpush(newKey, JSON.stringify(filtered[i]));
+    for (var i = 0; i < filtered.length; i++) await kv.rpush(newKey, filtered[i]);
     return res.json({ ok: true });
   }
 

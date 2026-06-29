@@ -177,9 +177,15 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 本專案採用 **PolyForm Noncommercial License 1.0.0** 許可證。你可以自由非商業用途地使用、修改及分享，但嚴禁任何商業或謀利用途。詳情請參閱 `LICENSE` 檔案。
 
 ## 新功能
-
+ 
 <details>
 <summary>撳開嚟睇</summary>
+
+**1.4.0 (2026-06-29)** — 意見回饋系統 · 免責聲明 overlay · 教學 About 重組
+- 💬 浮動意見回饋按鈕，支援 Bug Report / Suggestion 表格 — 提交至 Upstash KV
+- ⚠️ 首次使用 overlay 而家需要 tick 2 個 checkbox（AI 工具確認 + 非商業用途同意）先可以繼續
+- 📖 Origin 搬咗去教學 About tab 嘅第一步
+- 🎯 浮動按鈕重新排序：🇭🇰 Language → ❓ Help → 💬 Feedback → 🐈 Easter egg
 
 **1.3.0 (2026-06-29)** — 上次設定自動還原 · 教學 · 排序切換 · Range UX · 瀏覽計數
 - 🔄 所有設定（gear、菲林、lab、沖洗方式、scanner、簽名）而家會喺下次開頁面時自動還原 — 唔使再逐個揀過
