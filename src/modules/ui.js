@@ -49,8 +49,9 @@ export function renderFileList(skipThumbs) {
   S.selectToolbar.style.display = 'flex';
   var hasS = Object.keys(S.selectedSet).length > 0;
   S.fileActions.style.display = hasS ? 'flex' : 'none';
-  var h = '<div class="file-list-header"><span>' + t('file_count', {n: S.uploadedFiles.length}) + '</span>' +
-    '<button class="btn btn-sm btn-danger" onclick="clearAll()">' + t('clear_all') + '</button></div>';
+  var h = '<div class="file-list-header"><span>' + t('file_count', {n: S.uploadedFiles.length}) + '</span><div>' +
+    '<button class="sort-btn" onclick="sortFiles(true)" title="Sort A→Z">▲Z</button><button class="sort-btn" onclick="sortFiles(false)" title="Sort Z→A">▼Z</button> ' +
+    '<button class="btn btn-sm btn-danger" onclick="clearAll()">' + t('clear_all') + '</button></div></div>';
   var start = S.pageSize === 0 ? 0 : (S.currentPage - 1) * S.pageSize;
   var end = S.pageSize === 0 ? S.uploadedFiles.length : Math.min(start + S.pageSize, S.uploadedFiles.length);
   for (var i = start; i < end; i++) {
@@ -68,8 +69,6 @@ export function renderFileList(skipThumbs) {
       '<div class="fsize">' + fmtSize(f.file.size) + '</div>' +
       '<span class="file-gps-dot">' + dot + '</span>' +
       dateDot +
-      '<button class="move-btn move-up" onclick="moveUp(' + i + ')"' + (i === 0 ? ' disabled' : '') + '>▲</button>' +
-      '<button class="move-btn move-down" onclick="moveDown(' + i + ')"' + (i === S.uploadedFiles.length - 1 ? ' disabled' : '') + '>▼</button>' +
       '<button class="remove-btn" onclick="removeOne(' + i + ')">\u2715</button>' +
       '</div>';
   }
@@ -195,7 +194,7 @@ function bindFileItemClicks() {
 }
 
 function fileItemClick(e) {
-  if (e.target.closest('.remove-btn') || e.target.closest('.move-btn')) return;
+  if (e.target.closest('.remove-btn')) return;
   var item = e.currentTarget;
   var i = parseInt(item.getAttribute('data-idx'), 10);
   if (S.selectedSet[i]) { delete S.selectedSet[i]; item.classList.remove('selected'); }
@@ -229,28 +228,6 @@ export function removeOne(i) {
   renderRanges();
 }
 
-function reorderItem(i, dir) {
-  var j = i + dir;
-  if (j < 0 || j >= S.uploadedFiles.length) return;
-  var tmp = S.uploadedFiles[i];
-  S.uploadedFiles[i] = S.uploadedFiles[j];
-  S.uploadedFiles[j] = tmp;
-  function swap(dict) {
-    var vi = dict[i], vj = dict[j];
-    if (vi !== undefined && vj !== undefined) { dict[i] = vj; dict[j] = vi; }
-    else if (vi !== undefined) { dict[j] = vi; delete dict[i]; }
-    else if (vj !== undefined) { dict[i] = vj; delete dict[j]; }
-  }
-  swap(S.gpsData);
-  swap(S.selectedSet);
-  swap(S.thumbnailCache);
-  S.fileDates = rekeyDict(S.fileDates, i, j);
-  S.clearedDates = rekeyDict(S.clearedDates, i, j);
-  S.refreshSegments();
-  renderRanges();
-  S.renderFileList();
-}
-
 function rekeyDict(dict, a, b) {
   var nd = {};
   for (var k in dict) {
@@ -264,8 +241,28 @@ function rekeyDict(dict, a, b) {
   return nd;
 }
 
-export function moveUp(i) { reorderItem(i, -1); }
-export function moveDown(i) { reorderItem(i, 1); }
+export function sortFiles(asc) {
+  var indices = S.uploadedFiles.map(function(f, i) { return i; });
+  indices.sort(function(a, b) {
+    return asc ? S.uploadedFiles[a].file.name.localeCompare(S.uploadedFiles[b].file.name) : S.uploadedFiles[b].file.name.localeCompare(S.uploadedFiles[a].file.name);
+  });
+  var newFiles = [], newGps = {}, newSel = {}, newCache = {}, newFileDates = {}, newClearedDates = {};
+  for (var ni = 0; ni < indices.length; ni++) {
+    var oi = indices[ni];
+    newFiles.push(S.uploadedFiles[oi]);
+    if (S.gpsData[oi]) newGps[ni] = S.gpsData[oi];
+    if (S.selectedSet[oi]) newSel[ni] = true;
+    if (S.thumbnailCache[oi]) newCache[ni] = S.thumbnailCache[oi];
+    if (S.fileDates[oi]) newFileDates[ni] = S.fileDates[oi];
+    if (S.clearedDates[oi]) newClearedDates[ni] = S.clearedDates[oi];
+  }
+  S.uploadedFiles = newFiles;
+  S.gpsData = newGps; S.selectedSet = newSel; S.thumbnailCache = newCache;
+  S.fileDates = newFileDates; S.clearedDates = newClearedDates;
+  S.refreshSegments();
+  renderRanges();
+  S.renderFileList();
+}
 
 function moveItem(fromIdx, toIdx) {
   if (fromIdx === toIdx) return;
@@ -304,7 +301,7 @@ var _dragFrom = -1;
 
 function fileDragStart(e) {
   var item = e.target.closest('.file-item');
-  if (!item || e.target.closest('.move-btn') || e.target.closest('.remove-btn')) { e.preventDefault(); return; }
+  if (!item || e.target.closest('.remove-btn')) { e.preventDefault(); return; }
   _dragFrom = parseInt(item.getAttribute('data-idx'), 10);
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', String(_dragFrom));

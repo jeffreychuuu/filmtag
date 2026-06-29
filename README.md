@@ -181,8 +181,14 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 <details>
 <summary>Click to expand</summary>
 
-**1.3.0 (2026-06-28)** — Last session auto-restore
+**1.3.0 (2026-06-28)** — Session restore · Tutorial · Sort · Drag & drop polish
 - 🔄 All settings (gear, film, lab, process, scanner, checkbox) are now saved and restored on next page load — pick up where you left off
+- 📖 Interactive tutorial on first visit with ❓ help button to revisit anytime — covers upload, gear, reorder, date, GPS, review, EXIF details, Google Photos ordering, and privacy (all data stays in localStorage, nothing sent to server)
+- 🔤 One-click sort A→Z / Z→A in the file list header
+- 🤚 Drag & drop is now the only reorder method (▲/▼ buttons removed)
+- ✅ Tick icon replaces spinner when processing is done
+- 📄 Drag to page bottom drops at the end of the current page, not the end of the roll
+- 🛠️ Session restore now tries to match saved values as dropdown options first (instead of always setting __custom__)
 
 **1.2.0 (2026-06-28)** — Developing Process free-text + Next Roll for ZIP + file reordering
 - ✏️ Developing Process dropdown now supports custom free-text input — type any process like C-41, ECN-2, E-6
