@@ -22,7 +22,31 @@ document.addEventListener('DOMContentLoaded', function() {
     _vc++;
     if (_vt) clearTimeout(_vt);
     _vt = setTimeout(function() { _vc = 0; }, 2000);
-    if (_vc >= 5) { _vc = 0; document.getElementById('admin-overlay').classList.add('show'); }
+    if (_vc >= 5) { 
+      _vc = 0; 
+      var ao = document.getElementById('admin-overlay');
+      if (ao) {
+        var savedKey = localStorage.getItem('filmtag-admin-key');
+        if (savedKey) {
+          document.getElementById('admin-login').style.display = 'none';
+          document.getElementById('admin-panel').style.display = 'block';
+          document.getElementById('admin-loading').style.display = 'block';
+          document.getElementById('admin-feedback-list').innerHTML = '';
+          fetch('/api/feedback?key=' + encodeURIComponent(savedKey), { cache: 'no-cache' }).then(function(r) { return r.json(); }).then(function(data) {
+            document.getElementById('admin-loading').style.display = 'none';
+            var items = data && data.items ? data.items : data;
+            if (!items || !items.length) { document.getElementById('admin-feedback-list').innerHTML = '<p style="color:var(--text-secondary);">No feedback yet.</p>'; return; }
+            var h = '';
+            for (var i = items.length - 1; i >= 0; i--) {
+              var it = items[i];
+              h += '<div class="admin-feedback-item" style="padding:0.75rem;border-bottom:1px solid var(--border);font-size:0.8rem;" data-id="' + esc(it.id) + '"><div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.3rem;"><span>' + (it.type === 'bug' ? '🐛' : '💡') + '</span><strong>' + esc(it.title) + '</strong><span style="margin-left:auto;color:var(--text-secondary);font-size:0.7rem;">' + new Date(it.ts).toLocaleDateString() + '</span></div><p style="color:#aaa;margin:0 0 0.3rem 1.2rem;">' + esc(it.desc) + '</p>' + (it.email ? '<p style="color:var(--text-secondary);margin:0 0 0 1.2rem;font-size:0.7rem;">' + esc(it.email) + '</p>' : '') + '<button class="btn btn-sm btn-danger admin-del-btn" data-id="' + esc(it.id) + '" style="margin-top:0.3rem;font-size:0.7rem;">🗑️ Delete</button></div>';
+            }
+            document.getElementById('admin-feedback-list').innerHTML = h || '<p style="color:var(--text-secondary);">No feedback yet.</p>';
+          }).catch(function() { document.getElementById('admin-loading').style.display = 'none'; document.getElementById('admin-feedback-list').innerHTML = '<p style="color:var(--text-secondary);">No feedback yet.</p>'; });
+        }
+        ao.classList.add('show');
+      }
+    }
   });
 });
 
