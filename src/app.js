@@ -311,14 +311,16 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!title || !desc) { S.showStatus(t('feedback_error'), 'error'); return; }
     fetch('/api/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
       type: $('feedback-type').value, title: title, desc: desc, email: $('feedback-email').value.trim()
-    }) }).then(function(r) { return r.json(); }).then(function(d) {
+    })     }).then(function(r) { return r.json(); }).then(function(d) {
       if (d.ok) {
         $('feedback-title').value = ''; $('feedback-desc').value = ''; $('feedback-email').value = '';
         $('feedback-overlay').classList.remove('show');
-        S.showStatus(t('feedback_success'), 'success');
+        $('feedback-success-overlay').classList.add('show');
       } else { S.showStatus(t('feedback_error'), 'error'); }
     }).catch(function() { S.showStatus(t('feedback_error'), 'error'); });
   });
+  $('feedback-success-close').addEventListener('click', function() { $('feedback-success-overlay').classList.remove('show'); });
+  $('feedback-success-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
   $('admin-close').addEventListener('click', function() { $('admin-overlay').classList.remove('show'); $('admin-panel').style.display = 'none'; $('admin-login').style.display = 'block'; });
   $('admin-unlock-btn').addEventListener('click', function() {
     var key = $('admin-key-input').value.trim();

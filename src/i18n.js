@@ -163,6 +163,11 @@ tpl.en = {
   "feedback_submit": "Submit",
   "feedback_success": "Thank you! Your feedback has been submitted.",
   "feedback_error": "Failed to submit feedback. Please try again.",
+
+  // Feedback success
+  "feedback_success_title": "Thank You!",
+  "feedback_success_msg": "Your feedback has been submitted successfully.",
+  "ok": "OK",
 };
 
 tpl.zh = {
@@ -291,6 +296,11 @@ tpl.zh = {
   "feedback_submit": "提交",
   "feedback_success": "多謝你嘅意見！已成功提交。",
   "feedback_error": "提交失敗，請再試一次。",
+
+  // Feedback success
+  "feedback_success_title": "多謝你！",
+  "feedback_success_msg": "你嘅意見已成功提交。",
+  "ok": "好的",
 };
 
 export { t, setLang, toggleLang, applyTranslations, lang };
