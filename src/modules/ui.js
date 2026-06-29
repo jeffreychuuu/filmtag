@@ -50,7 +50,7 @@ export function renderFileList(skipThumbs) {
   var hasS = Object.keys(S.selectedSet).length > 0;
   S.fileActions.style.display = hasS ? 'flex' : 'none';
   var h = '<div class="file-list-header"><span>' + t('file_count', {n: S.uploadedFiles.length}) + '</span><div>' +
-    '<button class="sort-btn" onclick="sortFiles(true)" title="Sort A→Z">▲Z</button><button class="sort-btn" onclick="sortFiles(false)" title="Sort Z→A">▼Z</button> ' +
+    '<button class="sort-btn" onclick="toggleSort()">' + (S.sortAsc ? '\u25BC A\u2192Z' : '\u25B2 Z\u2192A') + '</button> ' +
     '<button class="btn btn-sm btn-danger" onclick="clearAll()">' + t('clear_all') + '</button></div></div>';
   var start = S.pageSize === 0 ? 0 : (S.currentPage - 1) * S.pageSize;
   var end = S.pageSize === 0 ? S.uploadedFiles.length : Math.min(start + S.pageSize, S.uploadedFiles.length);
@@ -264,6 +264,11 @@ export function sortFiles(asc) {
   S.renderFileList();
 }
 
+export function toggleSort() {
+  S.sortAsc = !S.sortAsc;
+  sortFiles(S.sortAsc);
+}
+
 function moveItem(fromIdx, toIdx) {
   if (fromIdx === toIdx) return;
   var item = S.uploadedFiles.splice(fromIdx, 1)[0];
@@ -384,6 +389,7 @@ export function buildSelectedFromRanges() {
 
 function renderRanges() {
   S.rangeRowsEl.innerHTML = '';
+  S.addRangeBtn.disabled = !S.uploadedFiles.length || Object.keys(S.selectedSet).length >= S.uploadedFiles.length;
   if (!S.uploadedFiles.length) return;
   var max = S.uploadedFiles.length;
   var keys = Object.keys(S.selectedSet).map(Number).sort(function(a, b) { return a - b; });
@@ -402,8 +408,11 @@ function renderRanges() {
     for (var i = ranges[r][0]; i <= ranges[r][1]; i++) rangeSet[i] = true;
     var otherSet = {};
     for (var j = 0; j < max; j++) { if (S.selectedSet[j] && !rangeSet[j + 1]) otherSet[j + 1] = true; }
-    row.innerHTML = 'Start: <select class="range-start">' + buildOptions(max, ranges[r][0], otherSet) + '</select> End: <select class="range-end">' + buildOptions(max, ranges[r][1], otherSet) + '</select> <button class="btn btn-sm btn-danger remove-range-btn">\u2715</button>';
-    row.querySelector('.remove-range-btn').addEventListener('click', function() { this.parentElement.remove(); syncRange(); });
+    var removeBtnHtml = ranges.length > 1 ? ' <button class="btn btn-sm btn-danger remove-range-btn">\u2715</button>' : '';
+    row.innerHTML = 'Start: <select class="range-start">' + buildOptions(max, ranges[r][0], otherSet) + '</select> End: <select class="range-end">' + buildOptions(max, ranges[r][1], otherSet) + '</select>' + removeBtnHtml;
+    if (ranges.length > 1) {
+      row.querySelector('.remove-range-btn').addEventListener('click', function() { this.parentElement.remove(); syncRange(); });
+    }
     row.querySelector('.range-start').addEventListener('change', function() {
       var endSel = this.parentElement.querySelector('.range-end');
       if (parseInt(endSel.value, 10) < parseInt(this.value, 10)) endSel.value = this.value;

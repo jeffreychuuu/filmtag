@@ -21,7 +21,8 @@ beforeEach(function() {
     map: null,
     renderFileList: function() {},
     refreshSegments: function() {},
-    rangeRowsEl: { innerHTML: '', querySelectorAll: function() { return []; }, appendChild: function() {} }
+    rangeRowsEl: { innerHTML: '', querySelectorAll: function() { return []; }, appendChild: function() {} },
+    addRangeBtn: { disabled: false }
   };
   init(S);
 });
