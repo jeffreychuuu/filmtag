@@ -93,6 +93,7 @@ tpl.en = {
   "total_uploaded": "Total: {n} photo(s) uploaded",
   "file_count": "{n} photo(s)",
   "clear_all": "Remove all photos",
+  "upload_non_jpeg_warn": "{n} non-JPEG file(s) skipped. Only JPEG files are supported.",
   "unknown": "Unknown",
 
   // Validation
@@ -206,6 +207,7 @@ tpl.zh = {
   "total_uploaded": "已上傳：{n} 張相",
   "file_count": "{n} 張相",
   "clear_all": "移除全部相片",
+  "upload_non_jpeg_warn": "已略過 {n} 個非 JPEG 檔案。只支援 JPEG 格式。",
   "unknown": "未知",
 
   // Validation

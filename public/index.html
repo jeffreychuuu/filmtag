@@ -93,6 +93,8 @@
     .upload-zone .upload-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
     .upload-zone p { color: var(--text-secondary); font-size: 0.85rem; }
     .upload-zone .supported { font-size: 0.72rem; color: #666; margin-top: 0.35rem; }
+    .upload-status-msg { font-size: 0.78rem; padding: 0.5rem 0.75rem; border-radius: 4px; display: none; }
+    .upload-status-msg.error { display: block; background: #2a0e0e; color: var(--red); }
 
     .file-list { margin-top: 1rem; }
     .file-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
@@ -410,6 +412,7 @@
         <p class="supported" data-i18n="upload_formats">JPEG only (.jpg / .jpeg)</p>
       </div>
     </div>
+    <div id="upload-status" class="upload-status-msg"></div>
     <div class="file-list" id="file-list"></div>
     <div class="select-toolbar" id="select-toolbar" style="display:none;">
       <div class="range-rows" id="range-rows"></div>

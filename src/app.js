@@ -242,6 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (S.mapMarker) { S.map.removeLayer(S.mapMarker); S.mapMarker = null; }
     S.mapInitialized = false; progressSec.classList.remove('show'); progBar.style.width = '0%'; $('progress-next-btn').style.display = 'none'; $('progress-spinner').style.display = 'block'; $('progress-done').style.display = 'none';
     statusMsg.className = 'status-msg'; statusMsg.style.display = 'none';
+    var us = document.getElementById('upload-status'); if (us) { us.textContent = ''; us.className = 'upload-status-msg'; }
     updateLensUI(); refreshSegments();
   });
 
