@@ -3,7 +3,7 @@ import JSZip from 'jszip';
 import DATA from '../data.json';
 import { t, setLang, toggleLang, applyTranslations, lang } from './i18n.js';
 import { toDms, strToUtf8Binary, toUcs2Binary, injectXmp, escXml, esc, fmtSize, dmsToDecimal, newFilmPrefix } from './lib/utils.js';
-import { initGear, fillSelect, fillSelectWithCustom, saveCustomOpts, setupCustom, updateLensUI, collect, validate } from './modules/gear.js';
+import { initGear, fillSelect, fillSelectWithCustom, saveCustomOpts, setupCustom, updateLensUI, collect, validate, saveLastSession, restoreLastSession } from './modules/gear.js';
 import { initGps, initMap, updateGpsDots, updateGpsSaveBtn, setGpsForSelected, reverseGeocode } from './modules/gps.js';
 import { init as initUi, renderFileList, goToPage, changePageSize, goToSummaryPage, changeSummaryPageSize, clearAll, removeOne, moveUp, moveDown, getTotalPages, buildSummaryHtml, generateSummaryThumbnails, rebuildSummaryBody, buildOptions, syncRange, buildSelectedFromRanges } from './modules/ui.js';
 import { init as initDate, applyDateToSelected, refreshSegments, computeDateForFile, getFileDate, newFName } from './modules/date.js';
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
   S.getFileDate = getFileDate; S.newFName = newFName;
   S.refreshSegments = refreshSegments;
   S.collect = collect; S.validate = validate;
-  S.saveCustomOpts = saveCustomOpts;
+  S.saveCustomOpts = saveCustomOpts; S.saveLastSession = saveLastSession;
   S.startZipProcess = startZipProcess; S.startSaveProcess = startSaveProcess;
   S.showStatus = showStatus; S.initMap = initMap;
   window.clearAll = clearAll; window.removeOne = removeOne; window.moveUp = moveUp; window.moveDown = moveDown;
@@ -246,6 +246,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   updateLensUI();
+  restoreLastSession();
   document.querySelectorAll('.section-collapse-header').forEach(function(h) {
     h.addEventListener('click', function() {
       var t = document.getElementById(h.dataset.target); var i = h.querySelector('.collapse-icon');

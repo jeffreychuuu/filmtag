@@ -181,6 +181,9 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 <details>
 <summary>Click to expand</summary>
 
+**1.3.0 (2026-06-28)** — Last session auto-restore
+- 🔄 All settings (gear, film, lab, process, scanner, checkbox) are now saved and restored on next page load — pick up where you left off
+
 **1.2.0 (2026-06-28)** — Developing Process free-text + Next Roll for ZIP + file reordering
 - ✏️ Developing Process dropdown now supports custom free-text input — type any process like C-41, ECN-2, E-6
 - 💾 Custom process entries are saved to localStorage for future sessions
