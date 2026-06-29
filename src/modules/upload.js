@@ -7,6 +7,8 @@ var S;
 export function init(refs) { S = refs; }
 
 export function handleFiles(files) {
+  var el = document.getElementById('upload-status');
+  if (el) { el.textContent = ''; el.className = 'upload-status-msg'; }
   var rejected = 0;
   for (var i = 0; i < files.length; i++) {
     var f = files[i];
@@ -16,7 +18,11 @@ export function handleFiles(files) {
       S.uploadedFiles.push({ file: f });
     }
   }
-  if (rejected > 0) S.showStatus(rejected + ' non-JPEG file(s) skipped. Only JPEG files are supported.', 'error');
+  if (rejected > 0) {
+    var el = document.getElementById('upload-status');
+    el.textContent = t('upload_non_jpeg_warn', {n: rejected});
+    el.className = 'upload-status-msg error';
+  }
   S.uploadedFiles.sort(function(a, b) { return a.file.name.localeCompare(b.file.name); });
   for (var k = 0; k < S.uploadedFiles.length; k++) S.selectedSet[k] = true;
   S.currentPage = 1;
