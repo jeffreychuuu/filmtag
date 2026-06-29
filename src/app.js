@@ -286,7 +286,7 @@ function showTutorial() {
   var isZh = lang === 'zh';
   var aboutSteps = [
     { icon: '🔒', t: 'Your Privacy', tZh: '你的私隱', d: 'Everything stays in your browser (localStorage). Your custom options, last-used settings, and photos — none of it is ever sent to any server. Even the owner cannot see your photos or settings.', dZh: '所有資料只會留喺你嘅瀏覽器 (localStorage)。你嘅自訂選項、上次嘅設定、同埋你啲相 — 全部唔會送去任何伺服器。連個 owner 都睇唔到你嘅任何設定同相片。' },
-    { icon: '🏷️', t: 'What EXIF Gets Written', tZh: '會寫入什麼 EXIF', d: 'Camera make/model · Lens name & specs · ISO · Focal length · Aperture · Shutter speed · Date & time · GPS coordinates & address · Artist · Copyright · Image description. XMP metadata is also injected: Label, Creator, Credit, DateCreated.', dZh: '相機品牌/型號 · 鏡頭名稱/規格 · ISO · 焦距 · 光圈 · 快門 · 攝影日期時間 · GPS 座標/地址 · 攝影師 · 版權 · 圖片說明。同時也會寫入 XMP 標籤：Label、Creator、Credit、DateCreated。' },
+    { icon: '🏷️', t: 'What EXIF Gets Written', tZh: '會寫入什麼 EXIF', d: 'Camera make/model · Lens name & specs · ISO · Focal length · Aperture · Shutter speed · Date & time · GPS coordinates & address · Artist · Copyright · Image description. XMP metadata is also injected: Label, Creator, Credit, DateCreated.', dZh: '相機品牌/型號 · 鏡頭名稱/規格 · ISO · 焦距 · 光圈 · 快門 · 攝影日期時間 · GPS 座標/地址 · 攝影師 · 版權 · 圖片說明。同時也會寫入 XMP 標籤：Label、Creator、Credit、DateCreated。', img: 'img/gphoto_web.png' },
     { icon: '🔍', t: 'Google Photos Ordering', tZh: 'Google Photos 排序', d: 'Google Photos sorts by the EXIF DateTimeOriginal tag. After processing, every photo has its correct shooting time written into EXIF. Your entire roll appears in the right order in Google Photos, Apple Photos, and any app that reads EXIF dates — no more messy ordering.', dZh: 'Google Photos 是依據 EXIF 裡的 DateTimeOriginal 來排序的。處理後，每張相都有正確的拍攝時間。整卷菲林在 Google Photos、Apple Photos 和所有支援 EXIF 的應用程式裡都會以正確的順序顯示，唔會再排到亂嗮。' }
   ];
   var guideSteps = [
@@ -301,7 +301,7 @@ function showTutorial() {
     var html = '';
     for (var i = 0; i < steps.length; i++) {
       var s = steps[i];
-      html += '<div class="tutorial-step"><div class="ts-icon">' + s.icon + '</div><div><div class="ts-title">' + (isZh ? s.tZh : s.t) + '</div><div class="ts-desc">' + (isZh ? s.dZh : s.d) + '</div></div></div>';
+      html += '<div class="tutorial-step"><div class="ts-icon">' + s.icon + '</div><div><div class="ts-title">' + (isZh ? s.tZh : s.t) + '</div><div class="ts-desc">' + (isZh ? s.dZh : s.d) + '</div>' + (s.img ? '<img src="' + s.img + '" class="tutorial-img">' : '') + '</div></div>';
     }
     return html;
   }
