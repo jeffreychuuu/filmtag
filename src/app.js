@@ -327,16 +327,28 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   $('feedback-success-close').addEventListener('click', function() { $('feedback-success-overlay').classList.remove('show'); });
   $('feedback-success-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
-  $('admin-close').addEventListener('click', function() { $('admin-overlay').classList.remove('show'); $('admin-panel').style.display = 'none'; $('admin-login').style.display = 'block'; });
+  $('admin-close').addEventListener('click', function() { $('admin-overlay').classList.remove('show'); $('admin-panel').style.display = 'none'; $('admin-login').style.display = 'block'; $('admin-error').style.display = 'none'; });
   $('admin-unlock-btn').addEventListener('click', function() {
     var key = $('admin-key-input').value.trim();
-    if (!key) return;
+    if (!key) { $('admin-error').textContent = 'Please enter an admin key.'; $('admin-error').style.display = 'block'; return; }
+    $('admin-error').style.display = 'none';
+    $('admin-login').style.display = 'none';
+    $('admin-loading').style.display = 'block';
+    $('admin-panel').style.display = 'block';
     fetch('/api/feedback?key=' + encodeURIComponent(key), { cache: 'no-cache' }).then(function(r) {
-      if (r.status === 401) { S.showStatus('Invalid key', 'error'); return null; }
+      if (r.status === 401) {
+        $('admin-loading').style.display = 'none';
+        $('admin-panel').style.display = 'none';
+        $('admin-login').style.display = 'block';
+        $('admin-error').textContent = 'Invalid admin key.';
+        $('admin-error').style.display = 'block';
+        return null;
+      }
       return r.json();
     }).then(function(items) {
+      $('admin-loading').style.display = 'none';
       if (!items) return;
-      $('admin-login').style.display = 'none';
+      localStorage.setItem('filmtag-admin-key', key);
       var h = '';
       for (var i = items.length - 1; i >= 0; i--) {
         var it = items[i];
@@ -351,16 +363,20 @@ document.addEventListener('DOMContentLoaded', function() {
           '<button class="btn btn-sm btn-danger admin-del-btn" data-id="' + esc(it.id) + '" style="margin-top:0.3rem;font-size:0.7rem;">🗑️ Delete</button>' +
           '</div>';
       }
-      $('admin-panel').innerHTML = h || '<p style="color:var(--text-secondary);">No feedback yet.</p>';
-      $('admin-panel').style.display = 'block';
-      $('admin-panel')._adminKey = key;
-    }).catch(function() { S.showStatus('Failed to load feedback', 'error'); });
+      $('admin-feedback-list').innerHTML = h || '<p style="color:var(--text-secondary);">No feedback yet.</p>';
+    }).catch(function() {
+      $('admin-loading').style.display = 'none';
+      $('admin-panel').style.display = 'none';
+      $('admin-login').style.display = 'block';
+      $('admin-error').textContent = 'Failed to connect to server.';
+      $('admin-error').style.display = 'block';
+    });
   });
   $('admin-panel').addEventListener('click', function(e) {
     var btn = e.target.closest('.admin-del-btn');
     if (!btn) return;
     var id = btn.getAttribute('data-id');
-    var key = $('admin-panel')._adminKey;
+    var key = localStorage.getItem('filmtag-admin-key');
     if (!confirm('Delete this feedback?')) return;
     fetch('/api/feedback?key=' + encodeURIComponent(key) + '&id=' + encodeURIComponent(id), { method: 'DELETE', cache: 'no-cache' }).then(function(r) { return r.json(); }).then(function(d) {
       if (d.ok) { var item = e.target.closest('.admin-feedback-item'); if (item) item.remove(); }
