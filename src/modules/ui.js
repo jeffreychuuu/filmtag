@@ -50,7 +50,7 @@ export function renderFileList(skipThumbs) {
   var hasS = Object.keys(S.selectedSet).length > 0;
   S.fileActions.style.display = hasS ? 'flex' : 'none';
   var h = '<div class="file-list-header"><span>' + t('file_count', {n: S.uploadedFiles.length}) + '</span><div>' +
-    '<button class="sort-btn" onclick="toggleSort()">' + (S.sortAsc ? '\u2193 A\u2192Z' : '\u2191 Z\u2192A') + '</button> ' +
+    '<button class="sort-btn" onclick="toggleSort()">' + (S.sortAsc ? '\u25BC A\u2192Z' : '\u25B2 Z\u2192A') + '</button> ' +
     '<button class="btn btn-sm btn-danger" onclick="clearAll()">' + t('clear_all') + '</button></div></div>';
   var start = S.pageSize === 0 ? 0 : (S.currentPage - 1) * S.pageSize;
   var end = S.pageSize === 0 ? S.uploadedFiles.length : Math.min(start + S.pageSize, S.uploadedFiles.length);
