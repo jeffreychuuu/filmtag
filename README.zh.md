@@ -183,7 +183,7 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 
 **1.3.0 (2026-06-28)** — 上次設定自動還原 + 教學 + 排序
 - 🔄 所有設定（gear、菲林、lab、沖洗方式、scanner、簽名）而家會喺下次開頁面時自動還原 — 唔使再逐個揀過
-- 📖 第一次用嗰陣會 show 教學 popup，之後可以㩒 ❓ button 隨時睇返
+- 📖 詳細教學 — 8 個步驟覆蓋上傳、gear 設定、排序、日期、GPS、檢閱、EXIF 詳細同 Google Photos 排序原理
 - 🔤 一鍵排序 A→Z / Z→A
 - 🤚 Drag & drop 係唯一排序方法（▲/▼ button 已移除）
 

@@ -183,7 +183,7 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 
 **1.3.0 (2026-06-28)** — Last session auto-restore + tutorial + sort
 - 🔄 All settings (gear, film, lab, process, scanner, checkbox) are now saved and restored on next page load — pick up where you left off
-- 📖 Interactive tutorial on first visit, with ❓ help button to revisit anytime
+- 📖 Expanded tutorial — 8 steps covering upload, gear, reorder, date, GPS, review, EXIF details, and Google Photos ordering
 - 🔤 Sort files A→Z / Z→A with one click
 - 🤚 Drag & drop is now the only way to reorder (▲/▼ buttons removed)
 
