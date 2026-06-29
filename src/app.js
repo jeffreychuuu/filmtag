@@ -283,20 +283,20 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 
 function showTutorial() {
-  var isZh = t('_lang') === 'zh' || lang === 'zh';
+  var isZh = lang === 'zh';
   var steps = [
-    { icon: '\uD83D\uDCE4', t: 'Upload Photos', tZh: '\u4E0A\u50B3\u76F8\u7247', d: 'Click the upload area or drag & drop your JPEG files.', dZh: '\u3129\u4E0A\u50B3\u5340\u57DF\u6216\u8005\u76F4\u63A5 drag & drop JPEG \u6A94\u6848\u3002' },
-    { icon: '\uD83D\uDCF7', t: 'Set Gear & Settings', tZh: '\u8A2D\u5B9A Gear', d: 'Choose camera, lens, film stock, lab, process, scanner and other metadata. Custom entries are saved automatically.', dZh: '\u63C0\u76F8\u6A5F\u3001\u93E1\u982D\u3001\u83F2\u6797\u3001\u6C96\u6383\u3001\u6C96\u6D17\u65B9\u5F0F\u7B49\u3002\u81EA\u8A02\u8CC7\u6599\u6703\u81EA\u52D5\u5132\u5B58\u3002' },
-    { icon: '\uD83E\uDD1A', t: 'Drag & Drop to Reorder', tZh: '\u62D6\u653E\u6392\u5E8F', d: 'Drag files to rearrange them. Order controls the sequence number and timestamp assignment.', dZh: '\u62D6\u52D5\u6A94\u6848\u91CD\u65B0\u6392\u5E8F\u3002\u6392\u5217\u6B21\u5E8F\u6703\u63A7\u5236 sequence number \u540C timestamp\u3002' },
-    { icon: '\uD83D\uDCC5', t: 'Set Date & Location', tZh: '\u8A2D\u5B9A\u65E5\u671F\u4F4D\u7F6E', d: 'Select files, then use the buttons to batch-assign date/time and GPS location.', dZh: '\u63C0\u9078\u6A94\u6848\u5F8C\uFF0C\u7528\u6309\u9215\u6279\u6B21\u8A2D\u5B9A\u65E5\u671F\u6642\u9593\u540C GPS \u4F4D\u7F6E\u3002' },
-    { icon: '\uD83D\uDCCB', t: 'Review & Process', tZh: '\u6AA2\u95B1\u540C\u8655\u7406', d: "Click 'Review Summary' to check everything, then download ZIP or save to album.", dZh: '\u3129\u300CReview Summary\u300D\u6AA2\u67E5\u8A2D\u5B9A\uFF0C\u7136\u5F8C\u4E0B\u8F09 ZIP \u6216\u5132\u5B58\u5230\u76F8\u7C3F\u3002' },
-    { icon: '\uD83C\uDFDE\uFE0F', t: 'Start a New Roll', tZh: '\u958B\u65B0\u4E00\u5377', d: "Click 'Next Roll' to start fresh. Your gear settings will be remembered.", dZh: '\u3129\u300CNext Roll\u300D\u958B\u65B0\u4E00\u5377\u3002Gear \u8A2D\u5B9A\u6703\u81EA\u52D5\u8A18\u4F4E\u3002' }
+    { icon: '\uD83D\uDCE4', t: 'Upload Photos', tZh: '\u4E0A\u50B3\u76F8\u7247', d: 'Click the upload area or drag & drop your JPEG files.', dZh: '\u6309\u4E0A\u50B3\u5340\u57DF\u6216\u662F\u76F4\u63A5 drag & drop JPEG \u6A94\u6848\u3002' },
+    { icon: '\uD83D\uDCF7', t: 'Set Gear & Settings', tZh: '\u8A2D\u5B9A Gear', d: 'Choose camera, lens, film stock, lab, process, scanner and other metadata. Custom entries are saved automatically.', dZh: '\u9078\u76F8\u6A5F\u3001\u93E1\u982D\u3001\u83F2\u6797\u3001\u6C96\u6383\u3001\u6C96\u6D17\u65B9\u5F0F\u7B49\u3002\u81EA\u8A02\u8CC7\u6599\u6703\u81EA\u52D5\u5132\u5B58\u3002' },
+    { icon: '\uD83E\uDD1A', t: 'Drag & Drop to Reorder', tZh: '\u62D6\u653E\u6392\u5E8F', d: 'Drag files to rearrange them. Order controls the sequence number and timestamp assignment.', dZh: '\u62D6\u52D5\u6A94\u6848\u91CD\u65B0\u6392\u5E8F\u3002\u6392\u5217\u6B21\u5E8F\u6703\u63A7\u5236 sequence number \u548C timestamp \u7684\u5206\u914D\u3002' },
+    { icon: '\uD83D\uDCC5', t: 'Set Date & Location', tZh: '\u8A2D\u5B9A\u65E5\u671F\u4F4D\u7F6E', d: 'Select files, then use the buttons to batch-assign date/time and GPS location.', dZh: '\u9078\u64C7\u6A94\u6848\u5F8C\uFF0C\u7528\u6309\u9215\u6279\u6B21\u8A2D\u5B9A\u65E5\u671F\u6642\u9593\u548C GPS \u4F4D\u7F6E\u3002' },
+    { icon: '\uD83D\uDCCB', t: 'Review & Process', tZh: '\u6AA2\u95B1\u548C\u8655\u7406', d: "Click 'Review Summary' to check everything, then download ZIP or save to album.", dZh: '\u9EDE\u300CReview Summary\u300D\u6AA2\u67E5\u8A2D\u5B9A\uFF0C\u7136\u5F8C\u4E0B\u8F09 ZIP \u6216\u5132\u5B58\u5230\u76F8\u7C3F\u3002' },
+    { icon: '\uD83C\uDFDE\uFE0F', t: 'Start a New Roll', tZh: '\u958B\u65B0\u4E00\u5377', d: "Click 'Next Roll' to start fresh. Your gear settings will be remembered.", dZh: '\u9EDE\u300CNext Roll\u300D\u958B\u65B0\u4E00\u5377\u3002Gear \u8A2D\u5B9A\u6703\u81EA\u52D5\u8A18\u4F4F\u3002' }
   ];
   var html = '';
   for (var i = 0; i < steps.length; i++) {
     var s = steps[i];
     html += '<div class="tutorial-step"><div class="ts-icon">' + s.icon + '</div><div><div class="ts-title">' + (isZh ? s.tZh : s.t) + '</div><div class="ts-desc">' + (isZh ? s.dZh : s.d) + '</div></div></div>';
   }
-  $('tutorial-body').innerHTML = html;
-  $('tutorial-overlay').classList.add('show');
+  document.getElementById('tutorial-body').innerHTML = html;
+  document.getElementById('tutorial-overlay').classList.add('show');
 }
