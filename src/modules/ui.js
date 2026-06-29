@@ -408,12 +408,10 @@ function renderRanges() {
     for (var i = ranges[r][0]; i <= ranges[r][1]; i++) rangeSet[i] = true;
     var otherSet = {};
     for (var j = 0; j < max; j++) { if (S.selectedSet[j] && !rangeSet[j + 1]) otherSet[j + 1] = true; }
-    var leftPct = ((ranges[r][0] - 1) / max) * 100;
-    var widthPct = ((ranges[r][1] - ranges[r][0] + 1) / max) * 100;
     var removeBtnHtml = ranges.length > 1 ? ' <button class="btn btn-sm btn-danger remove-range-btn">\u2715</button>' : '';
-    row.innerHTML = '<div class="range-bar"><div class="range-bar-fill" style="left:' + leftPct + '%;width:' + widthPct + '%;"></div></div><div class="range-controls"><select class="range-start">' + buildOptions(max, ranges[r][0], otherSet) + '</select><span class="range-sep">\u2014</span><select class="range-end">' + buildOptions(max, ranges[r][1], otherSet) + '</select>' + removeBtnHtml + '</div>';
+    row.innerHTML = 'Start: <select class="range-start">' + buildOptions(max, ranges[r][0], otherSet) + '</select> End: <select class="range-end">' + buildOptions(max, ranges[r][1], otherSet) + '</select>' + removeBtnHtml;
     if (ranges.length > 1) {
-      row.querySelector('.remove-range-btn').addEventListener('click', function() { this.closest('.range-row').remove(); syncRange(); });
+      row.querySelector('.remove-range-btn').addEventListener('click', function() { this.parentElement.remove(); syncRange(); });
     }
     row.querySelector('.range-start').addEventListener('change', function() {
       var endSel = this.parentElement.querySelector('.range-end');
