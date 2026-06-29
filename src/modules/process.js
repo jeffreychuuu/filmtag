@@ -5,6 +5,14 @@ import { toDms, toUcs2Binary, injectXmp } from '../lib/utils.js';
 
 var S;
 
+function updatePhotoCount(n) {
+  fetch('https://api.countapi.xyz/update/filmtag/photos?amount=' + n).then(function(r) { return r.json(); }).then(function(d) {
+    if (!d || d.value == null) return;
+    var el = document.getElementById('photo-count');
+    if (el) el.textContent = d.value.toLocaleString();
+  }).catch(function() {});
+}
+
 export function init(refs) { S = refs; }
 
 export function startZipProcess() {
@@ -33,6 +41,7 @@ export function startZipProcess() {
         S.reviewBtn.disabled = false;
         S.saveCustomOpts();
         S.saveLastSession();
+        updatePhotoCount(total);
         var spin = S._('progress-spinner'), done = S._('progress-done');
         if (spin) spin.style.display = 'none'; if (done) done.style.display = 'flex';
         var nextBtn = S._('progress-next-btn');
@@ -135,6 +144,7 @@ export function startSaveProcess() {
       S.reviewBtn.disabled = false;
       S.saveCustomOpts();
       S.saveLastSession();
+      updatePhotoCount(total);
       showGallery(S.processedFiles, p, zip);
     }
   }

@@ -19,6 +19,12 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 (function() {
+  fetch('https://api.countapi.xyz/get/filmtag/views').then(function(r) { return r.json(); }).then(function(d) { var el = document.getElementById('view-count'); if (el) el.textContent = d.value.toLocaleString(); }).catch(function() {});
+  fetch('https://api.countapi.xyz/get/filmtag/photos').then(function(r) { return r.json(); }).then(function(d) { var el = document.getElementById('photo-count'); if (el) el.textContent = d.value.toLocaleString(); }).catch(function() {});
+  fetch('https://api.countapi.xyz/hit/filmtag/views').catch(function() {});
+})();
+
+(function() {
   if (!localStorage.getItem('filmtag-disclaimer-acknowledged')) {
     var overlay = document.getElementById('disclaimer-overlay');
     if (overlay) {
