@@ -17,7 +17,8 @@ document.addEventListener('DOMContentLoaded', function() {
   var el = document.getElementById('version');
   if (el) el.textContent = 'v' + APP_VERSION;
   var _vc = 0, _vt;
-  if (el) el.addEventListener('click', function() {
+  if (el) el.addEventListener('click', function(e) {
+    e.preventDefault();
     _vc++;
     if (_vt) clearTimeout(_vt);
     _vt = setTimeout(function() { _vc = 0; }, 2000);
