@@ -308,6 +308,11 @@ function showTutorial() {
   document.getElementById('tutorial-about').innerHTML = renderSteps(aboutSteps);
   document.getElementById('tutorial-guide').innerHTML = renderSteps(guideSteps);
   document.getElementById('tutorial-got-it').textContent = isZh ? '🎉 明白了！' : '🎉 Got it!';
+  var tabBtns = document.querySelectorAll('.tutorial-tab');
+  if (tabBtns.length >= 2) {
+    tabBtns[0].textContent = isZh ? 'ℹ️ 關於' : 'ℹ️ About';
+    tabBtns[1].textContent = isZh ? '📖 使用教學' : '📖 How to Use';
+  }
   document.getElementById('tutorial-overlay').classList.add('show');
   var tabs = document.querySelectorAll('.tutorial-tab');
   for (var i = 0; i < tabs.length; i++) {
