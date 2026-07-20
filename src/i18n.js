@@ -166,13 +166,13 @@ tpl.en = {
   "feedback_error": "Failed to submit feedback. Please try again.",
 
   // Contact Sheet
-  "contact_sheet": "Contact Sheet",
-  "contact_sheet_generate": "Generate Content Sheet Only",
-  "contact_sheet_generating": "Generating contact sheet...",
-  "contact_sheet_adding": "Adding contact sheet to gallery...",
-  "contact_sheet_done": "Contact sheet ready",
-  "contact_sheet_lab": "Lab",
-  "contact_sheet_footer": "{film} | {camera} + {lens} | {lab} | {dateRange}",
+  "content_sheet": "Content Sheet",
+  "content_sheet_generate": "Generate Content Sheet",
+  "content_sheet_generating": "Generating content sheet...",
+  "content_sheet_adding": "Adding content sheet to gallery...",
+  "content_sheet_done": "Content sheet ready",
+  "content_sheet_lab": "Lab",
+  "content_sheet_footer": "{film} | {camera} + {lens} | {lab} | {dateRange}",
 
   // Feedback success
   "feedback_success_title": "Thank You!",
@@ -309,12 +309,12 @@ tpl.zh = {
   "feedback_error": "提交失敗，請再試一次。",
 
   // Contact Sheet
-  "contact_sheet": "索引樣片",
-  "contact_sheet_generate": "只生成索引樣片",
-  "contact_sheet_generating": "正在生成索引樣片…",
-  "contact_sheet_adding": "正在將索引樣片加入圖庫…",
-  "contact_sheet_done": "索引樣片已準備好",
-  "contact_sheet_footer": "{film} | {camera} + {lens} | {lab} | {dateRange}",
+  "content_sheet": "索引樣片",
+  "content_sheet_generate": "只生成索引樣片",
+  "content_sheet_generating": "正在生成索引樣片…",
+  "content_sheet_adding": "正在將索引樣片加入圖庫…",
+  "content_sheet_done": "索引樣片已準備好",
+  "content_sheet_footer": "{film} | {camera} + {lens} | {lab} | {dateRange}",
 
   // Feedback success
   "feedback_success_title": "多謝你！",

@@ -16,13 +16,13 @@ function updatePhotoCount(n) {
 
 export function init(refs) { S = refs; }
 
-function addContactSheetIfEnabled(files, params, zip, processedFiles, onDone) {
-  var toggle = document.getElementById('contact-sheet-toggle');
+function addContentSheetIfEnabled(files, params, zip, processedFiles, onDone) {
+  var toggle = document.getElementById('content-sheet-toggle');
   if (!toggle || !toggle.checked) { onDone(); return; }
-  generateContactSheet(files, params, function(blob) {
+  generateContentSheet(files, params, function(blob) {
     if (!blob) { onDone(); return; }
-    if (zip) zip.file('contact_sheet.jpg', blob, { binary: true });
-    if (processedFiles) processedFiles.push({ name: 'contact_sheet.jpg', blob: new Blob([blob], { type: 'image/jpeg' }) });
+    if (zip) zip.file('content_sheet.jpg', blob, { binary: true });
+    if (processedFiles) processedFiles.push({ name: 'content_sheet.jpg', blob: new Blob([blob], { type: 'image/jpeg' }) });
     onDone();
   });
 }
@@ -42,7 +42,7 @@ export function startZipProcess() {
       processFile(idx);
     }
     if (active === 0 && completed === total) {
-      addContactSheetIfEnabled(S.uploadedFiles, p, zip, null, function() {
+      addContentSheetIfEnabled(S.uploadedFiles, p, zip, null, function() {
       S.progText.textContent = t('creating_zip');
       zip.generateAsync({ type: 'blob' }).then(function(blob) {
         var url = URL.createObjectURL(blob), a = document.createElement('a');
@@ -60,7 +60,7 @@ export function startZipProcess() {
         var nextBtn = S._('progress-next-btn');
         if (nextBtn) nextBtn.style.display = 'inline-block';
       });
-    }); // end addContactSheetIfEnabled
+    }); // end addContentSheetIfEnabled
     }
   }
 
@@ -152,7 +152,7 @@ export function startSaveProcess() {
       processFile(idx);
     }
     if (active === 0 && completed === total) {
-      addContactSheetIfEnabled(S.uploadedFiles, p, zip, S.processedFiles, function() {
+      addContentSheetIfEnabled(S.uploadedFiles, p, zip, S.processedFiles, function() {
       S.progText.textContent = t('done_processed', {n: total});
       var spin = S._('progress-spinner'), done = S._('progress-done');
       if (spin) spin.style.display = 'none'; if (done) done.style.display = 'flex';
@@ -334,7 +334,7 @@ function fmtDateStr(d) {
   return y + '-' + m + '-' + day;
 }
 
-export function generateContactSheet(files, params, onComplete) {
+export function generateContentSheet(files, params, onComplete) {
   if (!files || files.length === 0) { onComplete(null); return; }
   var firstFile = files[0].file;
   var firstImg = new Image();
@@ -451,31 +451,31 @@ export function generateContactSheet(files, params, onComplete) {
   firstImg.onerror = function() { URL.revokeObjectURL(firstImg.src); onComplete(null); };
 }
 
-export function startContactSheet() {
+export function startContentSheet() {
   var p = S.collect();
   S.summaryPanel.classList.remove('show');
   S.progressSec.classList.add('show');
   S.statusMsg.className = 'status-msg';
   S.statusMsg.style.display = 'none';
-  S.progText.textContent = t('contact_sheet_generating');
+  S.progText.textContent = t('content_sheet_generating');
   S.progBar.style.width = '0%';
 
-  generateContactSheet(S.uploadedFiles, p, function(blob) {
+  generateContentSheet(S.uploadedFiles, p, function(blob) {
     if (!blob) {
-      showStatus('Contact sheet generation failed', 'error');
+      showStatus('Content sheet generation failed', 'error');
       S.reviewBtn.disabled = false;
       return;
     }
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
-    a.download = 'contact_sheet_' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '.jpg';
+    a.download = 'content_sheet_' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '.jpg';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     S.progBar.style.width = '100%';
-    S.progText.textContent = t('contact_sheet_done');
+    S.progText.textContent = t('content_sheet_done');
     var spin = S._('progress-spinner'), done = S._('progress-done');
     if (spin) spin.style.display = 'none'; if (done) done.style.display = 'flex';
     var nextBtn = S._('progress-next-btn');

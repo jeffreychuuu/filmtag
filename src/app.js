@@ -8,7 +8,7 @@ import { initGps, initMap, updateGpsDots, updateGpsSaveBtn, setGpsForSelected, r
 import { init as initUi, renderFileList, goToPage, changePageSize, goToSummaryPage, changeSummaryPageSize, clearAll, removeOne, sortFiles, toggleSort, getTotalPages, buildSummaryHtml, generateSummaryThumbnails, rebuildSummaryBody, buildOptions, syncRange, buildSelectedFromRanges } from './modules/ui.js';
 import { init as initDate, applyDateToSelected, refreshSegments, computeDateForFile, getFileDate, newFName } from './modules/date.js';
 import { init as initUpload, handleFiles } from './modules/upload.js';
-import { init as initProcess, startZipProcess, startSaveProcess, startContactSheet, showGallery, showStatus } from './modules/process.js';
+import { init as initProcess, startZipProcess, startSaveProcess, startContentSheet, showGallery, showStatus } from './modules/process.js';
 
 piexif.TAGS.Exif[0x828D] = { name: 'Instructions', type: 'Ascii' };
 
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
   S.refreshSegments = refreshSegments;
   S.collect = collect; S.validate = validate;
   S.saveCustomOpts = saveCustomOpts; S.saveLastSession = saveLastSession;
-  S.startZipProcess = startZipProcess; S.startSaveProcess = startSaveProcess; S.startContactSheet = startContactSheet;
+  S.startZipProcess = startZipProcess; S.startSaveProcess = startSaveProcess; S.startContentSheet = startContentSheet;
   S.showStatus = showStatus; S.initMap = initMap;
   window.clearAll = clearAll; window.removeOne = removeOne; window.sortFiles = sortFiles; window.toggleSort = toggleSort;
   window.goToPage = goToPage; window.changePageSize = changePageSize;

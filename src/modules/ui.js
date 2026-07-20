@@ -488,15 +488,15 @@ export function rebuildSummaryBody() {
   var tp = getSummaryTotalPages();
   S.summaryPage = Math.max(1, Math.min(S.summaryPage, tp));
   S.summaryBody.innerHTML = buildSummaryHtml(p);
-  var csChecked = localStorage.getItem('filmtag-contact-sheet') !== '0';
+  var csChecked = localStorage.getItem('filmtag-content-sheet') !== '0';
   S.summaryFooter.innerHTML =
-    '<div class="summary-footer-start">' +
+    '<div class="summary-footer-row">' +
       '<label style="display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.8rem;">' +
-        '<input type="checkbox" id="contact-sheet-toggle"' + (csChecked ? ' checked' : '') + '>' +
-        '<span>' + t('contact_sheet') + '</span></label>' +
-      '<button class="btn btn-sm btn-secondary" id="contact-sheet-btn">📋 ' + t('contact_sheet_generate') + '</button>' +
+        '<input type="checkbox" id="content-sheet-toggle"' + (csChecked ? ' checked' : '') + '>' +
+        '<span>' + t('content_sheet') + '</span></label>' +
+      '<button class="btn btn-sm btn-secondary" id="content-sheet-btn" style="display:none">📋 ' + t('content_sheet_generate') + '</button>' +
     '</div>' +
-    '<div class="summary-footer-end">' +
+    '<div class="summary-footer-row">' +
       '<button class="btn btn-secondary" id="summary-close-btn">✕ ' + t('close') + '</button>' +
       '<button class="btn btn-primary" id="confirm-save-btn">💾 ' + t('save_to_album') + '</button>' +
       '<button class="btn btn-primary" id="confirm-zip-btn">⬇ ' + t('download_zip') + '</button>' +
@@ -504,11 +504,16 @@ export function rebuildSummaryBody() {
   generateSummaryThumbnails();
   S._('confirm-zip-btn').addEventListener('click', S.startZipProcess);
   S._('confirm-save-btn').addEventListener('click', S.startSaveProcess);
-  S._('contact-sheet-btn').addEventListener('click', S.startContactSheet);
-  var toggleCs = S._('contact-sheet-toggle');
-  if (toggleCs) toggleCs.addEventListener('change', function() {
-    localStorage.setItem('filmtag-contact-sheet', this.checked ? '1' : '0');
-  });
+  S._('content-sheet-btn').addEventListener('click', S.startContentSheet);
+  var toggleCs = S._('content-sheet-toggle');
+  if (toggleCs) {
+    var genBtn = S._('content-sheet-btn');
+    if (genBtn) genBtn.style.display = toggleCs.checked ? '' : 'none';
+    toggleCs.addEventListener('change', function() {
+      localStorage.setItem('filmtag-content-sheet', this.checked ? '1' : '0');
+      if (genBtn) genBtn.style.display = this.checked ? '' : 'none';
+    });
+  }
   var closeBtn = S._('summary-close-btn');
   if (closeBtn) closeBtn.addEventListener('click', function() { S.summaryPanel.classList.remove('show'); S.summaryPage = 1; });
 }
