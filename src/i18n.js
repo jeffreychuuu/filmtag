@@ -167,7 +167,7 @@ tpl.en = {
 
   // Contact Sheet
   "contact_sheet": "Contact Sheet",
-  "contact_sheet_generate": "Generate Only",
+  "contact_sheet_generate": "Generate Content Sheet Only",
   "contact_sheet_generating": "Generating contact sheet...",
   "contact_sheet_adding": "Adding contact sheet to gallery...",
   "contact_sheet_done": "Contact sheet ready",
