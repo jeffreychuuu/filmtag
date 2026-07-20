@@ -4,6 +4,8 @@ import { esc } from '../lib/utils.js';
 var CAMERAS, $, artistSel, artistCust, cameraSel, cameraCust, lensDrop, lensSel, lensCust;
 var filmSel, filmCust, labSel, labCust, ppSel, ppCust, scanSel, scanCust, processSel, processCust;
 var selectedSet, gpsData;
+var DEFAULT_ITEMS = {};
+var HIDDEN_KEY = 'filmtag-hidden-defaults';
 
 export function initGear(refs) {
   CAMERAS = refs.CAMERAS;
@@ -29,9 +31,20 @@ export function fillSelect(sel, items) {
   }
 }
 
+function loadHidden() {
+  try { return JSON.parse(localStorage.getItem(HIDDEN_KEY) || '{}'); } catch(_) { return {}; }
+}
+
+function saveHidden(data) {
+  localStorage.setItem(HIDDEN_KEY, JSON.stringify(data));
+}
+
 // Populate <select> with items + saved custom entries + __custom__ option
 export function fillSelectWithCustom(sel, items, key) {
-  fillSelect(sel, items);
+  if (key) DEFAULT_ITEMS[key] = items;
+  var hidden = key ? (loadHidden()[key] || []) : [];
+  var filtered = items.filter(function(v) { return hidden.indexOf(v) === -1; });
+  fillSelect(sel, filtered);
   if (key) {
     var saved = loadSavedOpt(key);
     for (var i = 0; i < saved.length; i++) {
@@ -250,26 +263,59 @@ function saveAllOpts(data) {
   localStorage.setItem('filmtag-custom-opts', JSON.stringify(data));
 }
 
+export function setDefaultItems(key, items) {
+  DEFAULT_ITEMS[key] = items;
+}
+
 function refreshGearDropdowns() {
   [artistSel, cameraSel, labSel, processSel, ppSel, scanSel].forEach(function(sel) {
     var val = sel.value;
     sel.innerHTML = '';
     sel.appendChild(document.createElement('option'));
   });
-  fillSelectWithCustom(artistSel, [], 'artist');
-  fillSelectWithCustom(cameraSel, [], 'cameraModel');
-  fillSelectWithCustom(labSel, [], 'lab');
-  fillSelectWithCustom(processSel, [], 'process');
-  fillSelectWithCustom(ppSel, [], 'pushPull');
-  fillSelectWithCustom(scanSel, [], 'scanner');
+  fillSelectWithCustom(artistSel, DEFAULT_ITEMS.artist || [], 'artist');
+  fillSelectWithCustom(cameraSel, DEFAULT_ITEMS.cameraModel || [], 'cameraModel');
+  fillSelectWithCustom(labSel, DEFAULT_ITEMS.lab || [], 'lab');
+  fillSelectWithCustom(processSel, DEFAULT_ITEMS.process || [], 'process');
+  fillSelectWithCustom(ppSel, DEFAULT_ITEMS.pushPull || [], 'pushPull');
+  fillSelectWithCustom(scanSel, DEFAULT_ITEMS.scanner || [], 'scanner');
   updateLensUI();
   filmSel.innerHTML = '';
-  var oo = document.createElement('option'); oo.value = '__custom__'; oo.textContent = t('other_free_text'); filmSel.appendChild(oo);
+  var hiddenFilms = (loadHidden().filmName || []);
+  var filmDefaults = DEFAULT_ITEMS.filmName || [];
+  for (var fi = 0; fi < filmDefaults.length; fi++) {
+    if (hiddenFilms.indexOf(filmDefaults[fi]) === -1) {
+      var fo = document.createElement('option'); fo.textContent = filmDefaults[fi]; filmSel.appendChild(fo);
+    }
+  }
   var savedFilms = loadSavedOpt('filmName');
   for (var si = 0; si < savedFilms.length; si++) {
-    var o = document.createElement('option'); o.textContent = savedFilms[si]; filmSel.insertBefore(o, filmSel.firstChild);
+    var o = document.createElement('option'); o.textContent = savedFilms[si]; filmSel.appendChild(o);
   }
+  var oo = document.createElement('option'); oo.value = '__custom__'; oo.textContent = t('other_free_text'); filmSel.appendChild(oo);
   // Don't try to restore old selection — just leave at default
+}
+
+export function toggleHiddenDefault(key, value) {
+  var hidden = loadHidden();
+  if (!hidden[key]) hidden[key] = [];
+  var idx = hidden[key].indexOf(value);
+  if (idx === -1) {
+    hidden[key].push(value);
+  } else {
+    hidden[key].splice(idx, 1);
+    if (hidden[key].length === 0) delete hidden[key];
+  }
+  if (Object.keys(hidden).length === 0) localStorage.removeItem(HIDDEN_KEY);
+  else saveHidden(hidden);
+  refreshGearDropdowns();
+  renderManageOverlay();
+}
+
+export function resetHiddenDefaults() {
+  localStorage.removeItem(HIDDEN_KEY);
+  refreshGearDropdowns();
+  renderManageOverlay();
 }
 
 export function deleteCustomOpt(key, value) {
@@ -293,6 +339,7 @@ export function deleteCustomOpt(key, value) {
 
 export function renderManageOverlay() {
   var data = loadAllOpts();
+  var hidden = loadHidden();
   var body = document.getElementById('manage-body');
   if (!body) return;
   var keys = [
@@ -306,20 +353,42 @@ export function renderManageOverlay() {
   ];
   var h = '';
   var any = false;
+
+  // Default items with hide/unhide
   for (var ki = 0; ki < keys.length; ki++) {
-    var items = data[keys[ki].key];
-    if (!items || items.length === 0) continue;
+    var defaults = DEFAULT_ITEMS[keys[ki].key];
+    if (!defaults || defaults.length === 0) continue;
+    var hiddenForField = hidden[keys[ki].key] || [];
     any = true;
     h += '<div style="margin-bottom:0.75rem;">';
     h += '<div style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.05em;">' + esc(keys[ki].label) + '</div>';
-    for (var ii = 0; ii < items.length; ii++) {
+    for (var di = 0; di < defaults.length; di++) {
+      var isHidden = hiddenForField.indexOf(defaults[di]) !== -1;
       h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.3rem 0;border-bottom:1px solid var(--border);font-size:0.85rem;">';
-      h += '<span style="flex:1;">' + esc(items[ii]) + '</span>';
-      h += '<button class="manage-del-btn" data-key="' + keys[ki].key + '" data-value="' + esc(items[ii]) + '" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:0.9rem;padding:0.2rem;" title="Delete">✕</button>';
+      h += '<span style="flex:1;' + (isHidden ? 'color:var(--text-secondary);text-decoration:line-through;' : '') + '">' + esc(defaults[di]) + '</span>';
+      h += '<button class="manage-toggle-btn" data-key="' + keys[ki].key + '" data-value="' + esc(defaults[di]) + '" style="background:none;border:1px solid var(--border);border-radius:4px;color:var(--text);cursor:pointer;font-size:0.7rem;padding:0.15rem 0.4rem;">' + (isHidden ? t('show') : t('hide')) + '</button>';
       h += '</div>';
     }
     h += '</div>';
   }
+
+  // Custom items with delete
+  for (var ki2 = 0; ki2 < keys.length; ki2++) {
+    var items = data[keys[ki2].key];
+    if (!items || items.length === 0) continue;
+    any = true;
+    h += '<div style="margin-bottom:0.75rem;">';
+    h += '<div style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.05em;">' + esc(keys[ki2].label) + ' <span style="font-weight:400;text-transform:none;">(' + t('custom') + ')</span></div>';
+    for (var ii = 0; ii < items.length; ii++) {
+      h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.3rem 0;border-bottom:1px solid var(--border);font-size:0.85rem;">';
+      h += '<span style="flex:1;">' + esc(items[ii]) + '</span>';
+      h += '<button class="manage-del-btn" data-key="' + keys[ki2].key + '" data-value="' + esc(items[ii]) + '" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:0.9rem;padding:0.2rem;" title="Delete">✕</button>';
+      h += '</div>';
+    }
+    h += '</div>';
+  }
+
+  // Custom lenses with delete
   if (data.lensByCamera) {
     var cameras = Object.keys(data.lensByCamera);
     for (var ci = 0; ci < cameras.length; ci++) {
@@ -327,7 +396,7 @@ export function renderManageOverlay() {
       if (!lenses || lenses.length === 0) continue;
       any = true;
       h += '<div style="margin-bottom:0.75rem;">';
-      h += '<div style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.05em;">' + esc(t('lens')) + ' (' + esc(cameras[ci]) + ')</div>';
+      h += '<div style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.05em;">' + esc(t('lens')) + ' (' + esc(cameras[ci]) + ') <span style="font-weight:400;text-transform:none;">(' + t('custom') + ')</span></div>';
       for (var li = 0; li < lenses.length; li++) {
         var lensName = typeof lenses[li] === 'object' ? lenses[li].name : lenses[li];
         h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.3rem 0;border-bottom:1px solid var(--border);font-size:0.85rem;">';
@@ -338,8 +407,18 @@ export function renderManageOverlay() {
       h += '</div>';
     }
   }
-  if (!any) h += '<p style="color:var(--text-secondary);font-size:0.85rem;text-align:center;padding:2rem 0;">' + t('manage_opts_none') + '</p>';
+
+  // Show all defaults button
+  var hasHidden = Object.keys(hidden).length > 0;
+  h += '<div style="text-align:center;margin-top:0.75rem;">';
+  h += '<button class="btn btn-sm btn-secondary" id="reset-defaults-btn" style="' + (hasHidden ? '' : 'display:none;') + '">' + t('reset_defaults') + '</button>';
+  h += '</div>';
+
+  if (!any) {
+    h = '<p style="color:var(--text-secondary);font-size:0.85rem;text-align:center;padding:2rem 0;">' + t('manage_opts_none') + '</p>';
+  }
   body.innerHTML = h;
+
   body.querySelectorAll('.manage-del-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var key = this.getAttribute('data-key');
@@ -348,4 +427,11 @@ export function renderManageOverlay() {
       deleteCustomOpt(key, value);
     });
   });
+  body.querySelectorAll('.manage-toggle-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      toggleHiddenDefault(this.getAttribute('data-key'), this.getAttribute('data-value'));
+    });
+  });
+  var resetBtn = document.getElementById('reset-defaults-btn');
+  if (resetBtn) resetBtn.addEventListener('click', resetHiddenDefaults);
 }

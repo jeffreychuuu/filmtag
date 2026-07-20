@@ -184,6 +184,14 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 <details>
 <summary>Click to expand</summary>
 
+**1.9.0 (2026-07-20)** — Custom Options overlay: hide defaults + manage saved entries
+
+- ⚙️ "Custom Options" in footer opens overlay to manage all saved entries + built-in presets
+- 👁️ Hide/unhide built-in defaults per field (camera, lens, film, lab, etc.) — hidden items persist in localStorage
+- 🗑️ Delete custom entries (artist, camera, lens, film, lab, process, push/pull, scanner)
+- 🔄 "Show all defaults" button to restore all hidden presets
+- 🔧 Dropdowns refresh instantly after any change — no page reload needed
+
 **1.8.0 (2026-07-20)** — Manage Custom Options overlay
 
 - ⚙️ "Manage" button opens overlay to view and delete saved custom entries (artist, camera, lens, film, lab, process, push/pull, scanner)
