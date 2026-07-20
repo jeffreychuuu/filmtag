@@ -291,7 +291,9 @@ function refreshGearDropdowns() {
     var o = document.createElement('option'); o.textContent = savedFilms[si]; filmSel.appendChild(o);
   }
   var oo = document.createElement('option'); oo.value = '__custom__'; oo.textContent = t('other_free_text'); filmSel.appendChild(oo);
-  // Don't try to restore old selection — just leave at default
+  [artistSel, cameraSel, labSel, processSel, ppSel, scanSel, filmSel].forEach(function(sel) {
+    sel.dispatchEvent(new Event('change'));
+  });
 }
 
 export function toggleHiddenDefault(key, value) {
