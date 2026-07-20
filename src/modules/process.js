@@ -15,6 +15,17 @@ function updatePhotoCount(n) {
 
 export function init(refs) { S = refs; }
 
+function addContactSheetIfEnabled(files, params, zip, processedFiles, onDone) {
+  var toggle = document.getElementById('contact-sheet-toggle');
+  if (!toggle || !toggle.checked) { onDone(); return; }
+  generateContactSheet(files, params, function(blob) {
+    if (!blob) { onDone(); return; }
+    if (zip) zip.file('contact_sheet.jpg', blob, { binary: true });
+    if (processedFiles) processedFiles.push({ name: 'contact_sheet.jpg', blob: new Blob([blob], { type: 'image/jpeg' }) });
+    onDone();
+  });
+}
+
 export function startZipProcess() {
   S.summaryPanel.classList.remove('show');
   var p = S.collect();
@@ -30,6 +41,7 @@ export function startZipProcess() {
       processFile(idx);
     }
     if (active === 0 && completed === total) {
+      addContactSheetIfEnabled(S.uploadedFiles, p, zip, null, function() {
       S.progText.textContent = t('creating_zip');
       zip.generateAsync({ type: 'blob' }).then(function(blob) {
         var url = URL.createObjectURL(blob), a = document.createElement('a');
@@ -47,6 +59,7 @@ export function startZipProcess() {
         var nextBtn = S._('progress-next-btn');
         if (nextBtn) nextBtn.style.display = 'inline-block';
       });
+    }); // end addContactSheetIfEnabled
     }
   }
 
@@ -138,6 +151,7 @@ export function startSaveProcess() {
       processFile(idx);
     }
     if (active === 0 && completed === total) {
+      addContactSheetIfEnabled(S.uploadedFiles, p, zip, S.processedFiles, function() {
       S.progText.textContent = t('done_processed', {n: total});
       var spin = S._('progress-spinner'), done = S._('progress-done');
       if (spin) spin.style.display = 'none'; if (done) done.style.display = 'flex';
@@ -146,6 +160,7 @@ export function startSaveProcess() {
       S.saveLastSession();
       updatePhotoCount(total);
       showGallery(S.processedFiles, p, zip);
+      });
     }
   }
 
@@ -289,4 +304,181 @@ export function showGallery(files, params, zip) {
 
 export function showStatus(msg, type) {
   S.statusMsg.textContent = msg; S.statusMsg.className = 'status-msg ' + type; S.statusMsg.style.display = 'block';
+}
+
+function calculateGrid(n, cw, ch, mx, my_t, my_b, cg, rg) {
+  n = Math.min(n, 40);
+  if (n <= 0) return [1, 1];
+  var uw = Math.max(cw - 2 * mx, 1);
+  var uh = Math.max(ch - my_t - my_b, 1);
+  var minCell = 120;
+  var best = [1, 1, Infinity];
+  for (var cols = 1; cols <= 20; cols++) {
+    var rows = Math.ceil(n / cols);
+    var cell_w = (uw - (cols - 1) * cg) / cols;
+    var cell_h = (uh - (rows - 1) * rg) / rows;
+    if (cell_w < minCell || cell_h < minCell) continue;
+    var aspect = cw / ch;
+    var score = Math.abs((cell_w / cell_h) - aspect) + 0.05 * (cols * rows - n);
+    if (score < best[2]) best = [cols, rows, score];
+  }
+  return best;
+}
+
+function fmtDateStr(d) {
+  if (!d || isNaN(d.getTime())) return '--';
+  var y = d.getFullYear();
+  var m = String(d.getMonth() + 1).padStart(2, '0');
+  var day = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + day;
+}
+
+export function generateContactSheet(files, params, onComplete) {
+  if (!files || files.length === 0) { onComplete(null); return; }
+  var firstFile = files[0].file;
+  var firstImg = new Image();
+  firstImg.onload = function() {
+    var cw = firstImg.naturalWidth, ch = firstImg.naturalHeight;
+    URL.revokeObjectURL(firstImg.src);
+    if (cw <= 0 || ch <= 0) { onComplete(null); return; }
+
+    var n = Math.min(files.length, 40);
+    var mx = Math.round(cw * 0.025), my_t = Math.round(ch * 0.04), my_b = Math.round(ch * 0.1);
+    var cg = Math.round(cw * 0.01), rg = Math.round(ch * 0.015);
+    var grid = calculateGrid(n, cw, ch, mx, my_t, my_b, cg, rg);
+    var cols = grid[0], rows = grid[1];
+    var uw = cw - 2 * mx, uh = ch - my_t - my_b;
+    var cell_w = (uw - (cols - 1) * cg) / cols;
+    var cell_h = (uh - (rows - 1) * rg) / rows;
+
+    var canvas = document.createElement('canvas');
+    canvas.width = cw; canvas.height = ch;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ebebeb';
+    ctx.fillRect(0, 0, cw, ch);
+
+    var pending = n, active = 0, next = 0, errored = false;
+
+    function tryFinish() {
+      if (pending > 0) return;
+      if (errored) { onComplete(null); return; }
+      var footerH = Math.max(80, Math.round(ch * 0.08));
+      var footerY = ch - footerH;
+      ctx.fillStyle = '#ebebeb';
+      ctx.fillRect(0, footerY, cw, footerH);
+      ctx.fillStyle = '#444';
+      var fSize = Math.max(13, Math.round(footerH * 0.24));
+      ctx.font = 'bold ' + fSize + 'px sans-serif';
+      var lp = Math.round(cw * 0.02);
+      ctx.fillText('\uD83C\uDF9E\uFE0F ' + params.film.name + ' (ISO ' + params.film.iso + ')', lp, footerY + fSize + 4);
+      var camLens = params.camera.make + ' ' + params.camera.model + ' + ' + params.lens.name;
+      if (params.lens.focal) camLens += ' (' + params.lens.focal + 'mm)';
+      if (params.lens.aperture) camLens += ' f/' + params.lens.aperture;
+      ctx.fillText('\uD83D\uDCF7 ' + camLens, lp, footerY + fSize * 2 + 10);
+      var minD = null, maxD = null;
+      for (var di = 0; di < files.length; di++) {
+        var fd = S.getFileDate(di);
+        if (fd && fd.fileDate && fd.fileDate.length >= 8) {
+          var ts = new Date(
+            parseInt(fd.fileDate.slice(0,4), 10),
+            parseInt(fd.fileDate.slice(4,6), 10) - 1,
+            parseInt(fd.fileDate.slice(6,8), 10)
+          ).getTime();
+          if (!isNaN(ts)) {
+            if (minD === null || ts < minD) minD = ts;
+            if (maxD === null || ts > maxD) maxD = ts;
+          }
+        }
+      }
+      var dr = '--';
+      if (minD !== null && maxD !== null) dr = fmtDateStr(new Date(minD)) + ' ~ ' + fmtDateStr(new Date(maxD));
+      ctx.fillText('\uD83E\uDDEA ' + params.lab + '  |  \uD83D\uDCC5 ' + dr, lp, footerY + fSize * 3 + 16);
+      canvas.toBlob(function(blob) { onComplete(blob); }, 'image/jpeg', 0.92);
+    }
+
+    function processNext() {
+      while (active < 4 && next < n) {
+        var idx = next++;
+        active++;
+        (function(i) {
+          var r = Math.floor(i / cols);
+          var c = i % cols;
+          var cx = mx + c * (cell_w + cg);
+          var cy = my_t + r * (cell_h + rg);
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(cx, cy, cell_w, cell_h);
+          var textStr = '#' + (i + 1);
+          var numSize = Math.max(14, Math.round(Math.min(cell_w, cell_h) * 0.09));
+          ctx.font = 'bold ' + numSize + 'px sans-serif';
+          var textW = ctx.measureText(textStr).width;
+          var tx = cx + 8, ty = cy + 8;
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(tx, ty, textW + 8, numSize + 8);
+          ctx.fillStyle = 'rgba(0,0,0,0.7)';
+          ctx.fillText(textStr, tx + 4, ty + numSize + 4);
+          var img = new Image();
+          img.onload = function() {
+            var isPortrait = img.height > img.width;
+            var fitW = isPortrait ? img.height : img.width;
+            var fitH = isPortrait ? img.width : img.height;
+            var scale = Math.min(cell_w / fitW, cell_h / fitH) * 0.80;
+            var pw = img.width * scale, ph = img.height * scale;
+            if (isPortrait) {
+              ctx.save();
+              ctx.translate(cx + cell_w / 2, cy + cell_h / 2);
+              ctx.rotate(Math.PI / 2);
+              ctx.drawImage(img, -pw / 2, -ph / 2, pw, ph);
+              ctx.restore();
+            } else {
+              ctx.drawImage(img, cx + (cell_w - pw) / 2, cy + (cell_h - ph) / 2, pw, ph);
+            }
+            URL.revokeObjectURL(img.src);
+            pending--;
+            active--;
+            processNext();
+          };
+          img.onerror = function() { pending--; active--; errored = true; processNext(); };
+          img.src = URL.createObjectURL(files[i].file);
+        })(idx);
+      }
+      if (active === 0 && pending === 0) tryFinish();
+    }
+    processNext();
+  };
+  firstImg.src = URL.createObjectURL(firstFile);
+  // Revoke on error
+  firstImg.onerror = function() { URL.revokeObjectURL(firstImg.src); onComplete(null); };
+}
+
+export function startContactSheet() {
+  var p = S.collect();
+  S.summaryPanel.classList.remove('show');
+  S.progressSec.classList.add('show');
+  S.statusMsg.className = 'status-msg';
+  S.statusMsg.style.display = 'none';
+  S.progText.textContent = t('contact_sheet_generating');
+  S.progBar.style.width = '0%';
+
+  generateContactSheet(S.uploadedFiles, p, function(blob) {
+    if (!blob) {
+      showStatus('Contact sheet generation failed', 'error');
+      S.reviewBtn.disabled = false;
+      return;
+    }
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'contact_sheet_' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '.jpg';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    S.progBar.style.width = '100%';
+    S.progText.textContent = t('contact_sheet_done');
+    var spin = S._('progress-spinner'), done = S._('progress-done');
+    if (spin) spin.style.display = 'none'; if (done) done.style.display = 'flex';
+    var nextBtn = S._('progress-next-btn');
+    if (nextBtn) nextBtn.style.display = 'inline-block';
+    S.reviewBtn.disabled = false;
+  });
 }

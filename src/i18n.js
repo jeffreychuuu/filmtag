@@ -165,6 +165,15 @@ tpl.en = {
   "feedback_success": "Thank you! Your feedback has been submitted.",
   "feedback_error": "Failed to submit feedback. Please try again.",
 
+  // Contact Sheet
+  "contact_sheet": "Contact Sheet",
+  "contact_sheet_generate": "Generate Only",
+  "contact_sheet_generating": "Generating contact sheet...",
+  "contact_sheet_adding": "Adding contact sheet to gallery...",
+  "contact_sheet_done": "Contact sheet ready",
+  "contact_sheet_lab": "Lab",
+  "contact_sheet_footer": "{film} | {camera} + {lens} | {lab} | {dateRange}",
+
   // Feedback success
   "feedback_success_title": "Thank You!",
   "feedback_success_msg": "Your feedback has been submitted successfully.",
@@ -298,6 +307,14 @@ tpl.zh = {
   "feedback_submit": "提交",
   "feedback_success": "多謝你嘅意見！已成功提交。",
   "feedback_error": "提交失敗，請再試一次。",
+
+  // Contact Sheet
+  "contact_sheet": "索引樣片",
+  "contact_sheet_generate": "只生成索引樣片",
+  "contact_sheet_generating": "正在生成索引樣片…",
+  "contact_sheet_adding": "正在將索引樣片加入圖庫…",
+  "contact_sheet_done": "索引樣片已準備好",
+  "contact_sheet_footer": "{film} | {camera} + {lens} | {lab} | {dateRange}",
 
   // Feedback success
   "feedback_success_title": "多謝你！",

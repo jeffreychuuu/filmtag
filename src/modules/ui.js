@@ -480,7 +480,13 @@ export function buildSummaryHtml(p) {
       '<option value="0"' + (S.summaryPageSize === 0 ? ' selected' : '') + '>' + t('all') + '</option>' +
     '</select></div>';
   html += '</div>';
+  var csChecked = localStorage.getItem('filmtag-contact-sheet') !== '0';
+  var csHtml = '<label style="display:inline-flex;align-items:center;gap:0.4rem;margin-right:0.5rem;cursor:pointer;font-size:0.8rem;">' +
+    '<input type="checkbox" id="contact-sheet-toggle"' + (csChecked ? ' checked' : '') + '>' +
+    '<span>' + t('contact_sheet') + '</span></label>' +
+    '<button class="btn btn-sm btn-secondary" id="contact-sheet-btn">' + t('contact_sheet_generate') + '</button>';
   html += '<div class="actions" style="margin-top:1rem;">' +
+    csHtml +
     '<button class="btn btn-secondary" id="summary-close-btn">' + t('close') + '</button>' +
     '<button class="btn btn-primary" id="confirm-save-btn">' + t('save_to_album') + '</button>' +
     '<button class="btn btn-primary" id="confirm-zip-btn">' + t('download_zip') + '</button></div>';
@@ -495,6 +501,11 @@ export function rebuildSummaryBody() {
   generateSummaryThumbnails();
   S._('confirm-zip-btn').addEventListener('click', S.startZipProcess);
   S._('confirm-save-btn').addEventListener('click', S.startSaveProcess);
+  S._('contact-sheet-btn').addEventListener('click', S.startContactSheet);
+  var toggleCs = S._('contact-sheet-toggle');
+  if (toggleCs) toggleCs.addEventListener('change', function() {
+    localStorage.setItem('filmtag-contact-sheet', this.checked ? '1' : '0');
+  });
   var closeBtn = S._('summary-close-btn');
   if (closeBtn) closeBtn.addEventListener('click', function() { S.summaryPanel.classList.remove('show'); S.summaryPage = 1; });
 }
