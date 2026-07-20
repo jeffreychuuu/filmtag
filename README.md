@@ -43,6 +43,7 @@ One thing worth knowing: local storage is tied to your browser. Clear your data,
 | Time Sequencing (the best part) | Auto-increments +1 minute per photo, timezone forced to +08:00. Shot a roll across multiple days? Set up date segments with individual start times — Google Photos will order them perfectly |
 | 🌐 i18n | English & Traditional Chinese (Hong Kong) — toggle via floating button, translations for all UI text |
 | 🗺️ GPS Location | Built-in Leaflet + OpenStreetMap map. Select files, search or drop a pin — GPS coordinates written to EXIF. Reverse geocoding shows address next to each file |
+| ☑ Contact Sheet | Auto-generates a contact sheet during Save/ZIP — configurable toggle, standalone download button, footer with film/camera/lab/date range |
 
 The final result 👇
 
@@ -69,6 +70,7 @@ The final result 👇
 - Multi-select files + map-click to batch-assign GPS
 - Location search via OpenStreetMap Nominatim geocoding
 - Collapsible Origin & Disclaimer sections
+- Contact Sheet: auto-generated JPEG with thumbnail grid, footer (film, camera, lens, lab, date range) — toggle on/off, standalone download, or auto-added during Save/ZIP
 
 ## Tech
 
@@ -180,6 +182,13 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
  
 <details>
 <summary>Click to expand</summary>
+
+**1.5.0 (2026-07-20)** — Contact Sheet generation
+- ☑ Contact Sheet toggle in Review Summary — default ON, saved to localStorage
+- 📸 "Generate Only" button for standalone contact sheet download
+- 🎞️ Auto-generates during Save to Album or Download ZIP when toggle is ON
+- 📐 Dynamic grid layout — canvas matches import image dimensions, auto-calculated cols/rows for up to 40 photos
+- 📋 Footer: film stock + ISO, camera + lens, lab, date range
 
 **1.4.0 (2026-06-29)** — Feedback system · Disclaimer overlay · Tutorial About reorg
 - 💬 Floating feedback button with Bug Report / Suggestion form — submitted to Upstash KV

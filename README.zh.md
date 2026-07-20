@@ -43,6 +43,7 @@ Upload 你嘅 scans，揀你嘅 gear 同菲林，set 拍攝日期——佢會喺
 | 🕐 時間排序（最正嗰個功能） | 每張相片自動遞增 1 分鐘，時區強制寫入 +08:00。一卷菲林跨唔同日子拍？可以分段設定日期同起始時間，Google Photos 就會完美排好順序 |
 | 🌐 多語言 | 英文 & 繁體中文，透過浮動按鈕一鍵切換。所有介面文字均已翻譯 |
 | 🗺️ GPS 拍攝位置 | 內建 Leaflet + OpenStreetMap 地圖。選擇檔案後搜尋地址或點擊地圖落針，GPS 坐標寫入 EXIF。逆向地理編碼顯示街道名稱喺每張檔旁邊 |
+| ☑ Contact Sheet | 儲存或下載 ZIP 時自動生成 Contact Sheet — 可按 toggle 開關，支援獨立下載，底部 footer 顯示菲林/相機/lab/日期範圍 |
 
 成品效果 👇
 
@@ -69,6 +70,7 @@ Upload 你嘅 scans，揀你嘅 gear 同菲林，set 拍攝日期——佢會喺
 - 多選檔案後點擊地圖批次設定 GPS 位置
 - OpenStreetMap Nominatim 地名搜尋功能
 - 可摺疊嘅起源與聲明區塊
+- Contact Sheet：自動生成 JPEG 縮圖網格，底部 footer 顯示菲林、相機、鏡頭、lab、日期範圍 — 可 toggle 開關、獨立下載或隨 Save/ZIP 自動生成
 
 ## 技術
 
@@ -180,6 +182,13 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
  
 <details>
 <summary>撳開嚟睇</summary>
+
+**1.5.0 (2026-07-20)** — Contact Sheet 生成功能
+- ☑ Review Summary 加入 Contact Sheet toggle — 預設開啟，自動 save 去 localStorage
+- 📸「只生成 CS」按鈕 — 獨立下載 Contact Sheet
+- 🎞️ 儲存相簿或下載 ZIP 時，如 toggle 開啟則自動生成 Contact Sheet
+- 📐 動態網格 — canvas 尺寸跟 import 相片尺寸，自動計算最佳行列數，最多 40 張
+- 📋 Footer：菲林 + ISO、相機 + 鏡頭、沖掃工作室、日期範圍
 
 **1.4.0 (2026-06-29)** — 意見回饋系統 · 免責聲明 overlay · 教學 About 重組
 - 💬 浮動意見回饋按鈕，支援 Bug Report / Suggestion 表格 — 提交至 Upstash KV
