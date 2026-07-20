@@ -8,7 +8,7 @@ Interactive web app for writing EXIF metadata to film-scanned photos — all don
 
 ## Why FilmTag?
 
-You just got your scans back from the lab. The colours are perfect. The grain is *chef's kiss*. You're hyped.
+You just got your scans back from the lab. The colours are perfect. The grain is _chef's kiss_. You're hyped.
 
 Then you open Google Photos and your entire roll shows up as one clump — all dated the day the lab scanned them. That moody street shot from three weeks ago? Sitting right next to your dinner photos from last Tuesday. Useless.
 
@@ -35,15 +35,15 @@ One thing worth knowing: local storage is tied to your browser. Clear your data,
 
 ### Highlight Features
 
-| Feature | Description |
-|---------|-------------|
-| Camera & Lens | Built-in presets (Leica MP, Olympus OM-2Sp, etc.) plus full custom model, focal length, and max aperture support |
-| Film Stock & ISO | 23 built-in film stocks (Kodak, Fujifilm, CineStill, Ilford, etc.) — selecting a film auto-fills ISO |
-| Lab Records | Hong Kong lab presets: DOT-WELL, Megatoni, TrueFace Pro Lab, Photo Garden, HK Camera, Showa, Colorluxe — with Push/Pull and scanner model tracking |
+| Feature                         | Description                                                                                                                                                                                  |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Camera & Lens                   | Built-in presets (Leica MP, Olympus OM-2Sp, etc.) plus full custom model, focal length, and max aperture support                                                                             |
+| Film Stock & ISO                | 23 built-in film stocks (Kodak, Fujifilm, CineStill, Ilford, etc.) — selecting a film auto-fills ISO                                                                                         |
+| Lab Records                     | Hong Kong lab presets: DOT-WELL, Megatoni, TrueFace Pro Lab, Photo Garden, HK Camera, Showa, Colorluxe — with Push/Pull and scanner model tracking                                           |
 | Time Sequencing (the best part) | Auto-increments +1 minute per photo, timezone forced to +08:00. Shot a roll across multiple days? Set up date segments with individual start times — Google Photos will order them perfectly |
-| 🌐 i18n | English & Traditional Chinese (Hong Kong) — toggle via floating button, translations for all UI text |
-| 🗺️ GPS Location | Built-in Leaflet + OpenStreetMap map. Select files, search or drop a pin — GPS coordinates written to EXIF. Reverse geocoding shows address next to each file |
-| ☑ Contact Sheet | Auto-generates a contact sheet during Save/ZIP — configurable toggle, standalone download button, footer with film/camera/lab/date range |
+| 🌐 i18n                         | English & Traditional Chinese (Hong Kong) — toggle via floating button, translations for all UI text                                                                                         |
+| 🗺️ GPS Location                 | Built-in Leaflet + OpenStreetMap map. Select files, search or drop a pin — GPS coordinates written to EXIF. Reverse geocoding shows address next to each file                                |
+| ☑ Contact Sheet                 | Auto-generates a contact sheet during Save/ZIP — configurable toggle, standalone download button, footer with film/camera/lab/date range                                                     |
 
 The final result 👇
 
@@ -75,6 +75,7 @@ The final result 👇
 ## Tech
 
 ### Stack
+
 - **piexifjs** — browser-side EXIF read/write
 - **JSZip** — client-side ZIP packaging
 - **esbuild** — bundler
@@ -179,41 +180,46 @@ This tool is shared freely with the film photography community. Commercial use o
 This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You may freely use, modify, and share it for noncommercial purposes. Commercial use or profiteering is strictly prohibited. See the `LICENSE` file for details.
 
 ## What's New
- 
+
 <details>
 <summary>Click to expand</summary>
 
 **1.6.0 (2026-07-20)** — EXIF auto-fill on upload
+
 - 🎯 After uploading photos, EXIF fields (Artist, Camera, Lens, ISO, Process) auto-populate dropdowns
 - 🔍 Matches EXIF values against built-in options — selects matching entry or fills as custom value
 - 📐 Focal length & aperture auto-filled from EXIF when available
 
 **1.5.0 (2026-07-20)** — Contact Sheet generation
+
 - ☑ Contact Sheet toggle in Review Summary — default ON, saved to localStorage
-- 📸 "Generate Only" button for standalone contact sheet download
+- 📸 "Generate Content Sheet Only" button for standalone contact sheet download
 - 🎞️ Auto-generates during Save to Album or Download ZIP when toggle is ON
 - 📐 Dynamic grid layout — canvas matches import image dimensions, auto-calculated cols/rows for up to 40 photos
 - 📋 Footer: film stock + ISO, camera + lens, lab, date range
 
 **1.4.0 (2026-06-29)** — Feedback system · Disclaimer overlay · Tutorial About reorg
+
 - 💬 Floating feedback button with Bug Report / Suggestion form — submitted to Upstash KV
 - ⚠️ First-visit overlay now requires 2 checkboxes (AI tool acknowledgment + non-commercial agreement) before proceeding
 - 📖 Origin moved to tutorial About tab as first step
 - 🎯 Floating buttons reorganized: 🇭🇰 Language → ❓ Help → 💬 Feedback → 🐈 Easter egg
 
 **1.3.0 (2026-06-29)** — Session restore · Tutorial · Sort toggle · Range UX · View counter
+
 - 🔄 All settings (gear, film, lab, process, scanner, checkbox) are now saved and restored on next page load — pick up where you left off
 - 📖 Interactive tutorial on first visit with ❓ help button to revisit anytime — covers upload, gear, reorder, date, GPS, review, EXIF details, Google Photos ordering, and privacy (all data stays in localStorage, nothing sent to server)
 - 🔤 Sort button simplified to a single toggle — ▼ A→Z / ▲ Z→A
 - 🤚 Drag & drop is now the only reorder method (▲/▼ buttons removed)
 - ✅ Tick icon replaces spinner when processing is done
 - 📄 Drag to page bottom drops at the end of the current page, not the end of the roll
-- 🛠️ Session restore now tries to match saved values as dropdown options first (instead of always setting __custom__)
+- 🛠️ Session restore now tries to match saved values as dropdown options first (instead of always setting **custom**)
 - ✕ Range remove button only appears when multiple ranges exist
 - 🚫 Add Range disabled when all files are selected
 - 👁 View counter & 🖼 photos processed counter displayed in header (persisted via Upstash KV)
 
 **1.2.0 (2026-06-28)** — Developing Process free-text + Next Roll for ZIP + file reordering
+
 - ✏️ Developing Process dropdown now supports custom free-text input — type any process like C-41, ECN-2, E-6
 - 💾 Custom process entries are saved to localStorage for future sessions
 - 🎞️ "Next Roll" button now appears after ZIP download too — start fresh without reloading manually
@@ -221,16 +227,19 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 - 🤚 Drag & drop to reorder — just grab and drag files to any position
 
 **1.1.3 (2026-06-14)** — Fix add range + Clear GPS button
+
 - 🐛 Fixed: "Add Range" button not working after module refactor
 - ✏️ "Clear Selected GPS" renamed to "Clear" and moved below map
 - 🖼️ Upload restricted to `.jpg` / `.jpeg` only (TIFF/DNG/PNG rejected)
 
 **1.1.2 (2026-06-14)** — Restrict upload to JPEG only
+
 - 🖼️ Upload filter: only `.jpg` / `.jpeg` accepted; TIFF/DNG/PNG rejected with warning
 - 📝 File input `accept` attribute & UI text updated accordingly
 - 🔧 `handleFiles` now rejects non-JPEG files with status message
 
 **1.1.1 (2026-06-14)** — Codebase refactored into modules, Vitest + 57 tests
+
 - 🧩 `app.js` split from 1505→249 lines into 6 modules under `src/modules/`
 - 🧪 Vitest + happy-dom test suite (57 tests), TDD-ready
 - 🏷️ Terminology: "Author" → "Artist" in code, DOM, data.json, and translations
@@ -239,55 +248,65 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 - ⚠️ Disclaimer modal: Disagree now blocks access until refresh
 
 **1.0.1 (2026-06-14)** — README rewrite, version injection, release workflow
+
 - 📝 README rewrite with narrative pitch, HK presets, serverless note
 - 🚀 In-app version display (footer), release workflow documented
 - 📦 Changelog collapsed under details tag with version headings
 
 **2026-06-12** — Fallback date from file modified time
+
 - 🕐 When no EXIF date is found, falls back to the first file's `lastModified` timestamp, +1 minute per photo (instead of hardcoded today 12:00)
 - 📍 GPS Save button now applies the map marker position to selected files; disabled when no marker is placed
 - 🎨 Terminology: "Author" → "Artist", "file" → "photo" in all UI text
 
 **2026-06-12** — Summary & gallery as modal overlays
+
 - 📋 Review Summary is now a modal overlay with Close/Save/Download buttons
 - 📸 Gallery overlay after processing — "Next Roll 🎞️" resets and scrolls to top with fade-out animation
 - ⏳ Processing progress bar is now a modal overlay on top of the summary
 
 **2026-06-12** — UI overhaul: date/GPS modals & action buttons
+
 - 🎯 Select files → show two action buttons: "Set Date & Time" and "Set GPS Location"
 - 📅 Date/time editing moved to a modal overlay with Save/Cancel
 - 🗺️ GPS editing moved to modal overlay with map, search, Save/Cancel
 - 🔲 Overlays only close via Save/Cancel — no accidental backdrop dismissals
 
 **2026-06-12** — Background prefetch & sequenced loading
+
 - ⚡ Thumbnail prefetch — after page 1 thumbnails load, pages 2+ are decoded in background (concurrency=2) so navigation is instant
 - ⚡ Sequenced startup — EXIF extraction now runs before thumbnail generation, no I/O contention
 - ⏳ Upload loading overlay — blocks interaction until first page EXIF + thumbnails are ready, then releases
 - 🐛 Fixed: Review Summary button staying disabled after upload
 
 **2026-06-12** — Parallel processing & geocode throttle
+
 - ⚡ Zip/Save now processes 4 files concurrently instead of 1 — 36 files processed ~3× faster
 - 🗺️ Reverse geocode throttled to 1 req/s with response caching — same coordinates reuse cached address instantly
 - 🖼️ Summary thumbnails now concurrency-limited, same as file list
 
 **2026-06-12** — Pagination & thumbnail caching
+
 - 📄 File list pagination — default 5 per page, user can choose 5/10/25/50/All; prev/next controls
 - 📋 Review Summary pagination — same pagination for the file table section
 - ⚡ Thumbnail cache — thumbnails are cached as data URLs after first render; switching pages reuses cached results instantly instead of re-decoding original images
 - 🗺️ Moved "Clear Selected GPS" to its own row next to the search bar for better UX
 
 **2026-06-12** — Performance overhaul for large uploads
+
 - ⚡ Batch `renderFileList()` — file list now renders once after all EXIF extraction completes, instead of N times for N files
 - ⚡ Cached byte-to-string conversion — binary-to-string is done once per file during EXIF extraction and reused by ZIP/save processing
 - 🖼️ Thumbnail generation concurrency limit — max 6 simultaneous image decodes, prevents browser from locking up with many files
 - 💨 Blob URL memory management — all `createObjectURL` calls now properly revoked after use, eliminating memory leaks
 
 **2026-06-12** — Google AdSense integration
+
 - 📢 Added AdSense script & meta tag for ad serving
 - 📄 `ads.txt` placed at site root for ad network verification
 - 🔧 Build script updated to copy `ads.txt` to dist/
 
 **2026-06-11** — Camera-Lens association & persistence
+
 - 📸 Custom lenses are now saved per camera — each camera only shows its own saved lenses
 - 💾 Focal length & max aperture are saved alongside the lens name for custom entries
 - 🐛 Fixed: custom lens not saving to localStorage when camera is set to custom
@@ -295,6 +314,7 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 - 🐛 Fixed: saved custom cameras now show their associated lens options instead of an empty dropdown
 
 **2026-06-11** — GPS + i18n update
+
 - 🌐 English & Traditional Chinese (Hong Kong) with floating language toggle
 - 🗺️ GPS location via Leaflet + OpenStreetMap map — search or drop a pin, coordinates written to EXIF
 - 📍 Reverse geocoding — address shown next to each file after location set
@@ -302,6 +322,7 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 - 🔄 Multi-select files to batch-assign GPS location
 
 **2026-06-11** — File Setup + Date/Time + Review overhaul
+
 - 📅 Date & Time merged into File Setup section — select files, change date/time applies instantly
 - 🗓️ Date auto-extracted from uploaded EXIF files; fallback to today 12:00
 - 📍 GPS auto-extracted from uploaded EXIF with reverse geocode for address
