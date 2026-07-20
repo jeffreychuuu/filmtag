@@ -108,10 +108,12 @@ function autoFillFromFirstFile() {
     var artist = exifObj['0th'][piexif.ImageIFD.Artist];
     if (artist && !selByText(S.artistSel, artist)) setCust(S.artistSel, S.artistCust, artist);
 
-    // Camera
+    // Camera + Lens pair: auto-fill only if both model and lens are present
     var make = exifObj['0th'][piexif.ImageIFD.Make] || '';
     var model = exifObj['0th'][piexif.ImageIFD.Model] || '';
-    if (model) {
+    var lens = exifObj['Exif'][piexif.ExifIFD.LensModel];
+
+    if (model && lens) {
       var matched = false;
       for (var ci = 0; ci < S.CAMERAS.length; ci++) {
         if (S.CAMERAS[ci].model === model) {
@@ -125,20 +127,18 @@ function autoFillFromFirstFile() {
         setCust(S.cameraSel, S.cameraCust, model);
         if (make) S.$('camera-make-custom').value = make;
       }
-    }
 
-    // Lens
-    var lens = exifObj['Exif'][piexif.ExifIFD.LensModel];
-    if (lens && !selByText(S.lensSel, lens)) setCust(S.lensSel, S.lensCust, lens);
-    var focal = exifObj['Exif'][piexif.ExifIFD.FocalLength];
-    if (focal) {
-      var fv = Array.isArray(focal) ? (focal[0] / focal[1]) : focal;
-      S.$('lens-focal').value = String(Math.round(fv));
-    }
-    var aperture = exifObj['Exif'][piexif.ExifIFD.FNumber];
-    if (aperture) {
-      var av = Array.isArray(aperture) ? (aperture[0] / aperture[1]) : aperture;
-      S.$('lens-aperture').value = av.toFixed(1);
+      if (!selByText(S.lensSel, lens)) setCust(S.lensSel, S.lensCust, lens);
+      var focal = exifObj['Exif'][piexif.ExifIFD.FocalLength];
+      if (focal) {
+        var fv = Array.isArray(focal) ? (focal[0] / focal[1]) : focal;
+        S.$('lens-focal').value = String(Math.round(fv));
+      }
+      var aperture = exifObj['Exif'][piexif.ExifIFD.FNumber];
+      if (aperture) {
+        var av = Array.isArray(aperture) ? (aperture[0] / aperture[1]) : aperture;
+        S.$('lens-aperture').value = av.toFixed(1);
+      }
     }
 
     // Parse composite strings via shared functions
