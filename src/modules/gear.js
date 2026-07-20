@@ -76,7 +76,8 @@ function loadSavedLensesForCamera(cameraModel) {
 // Get current camera model string from dropdown or custom input
 function currentCameraModel() {
   if (cameraSel.value === '__custom__') return $('camera-model-custom').value.trim();
-  if (cameraSel.selectedIndex < CAMERAS.length) return CAMERAS[cameraSel.selectedIndex].model;
+  var idx = findCameraByModel(cameraSel.value);
+  if (idx !== -1) return CAMERAS[idx].model;
   return cameraSel.value;
 }
 
@@ -155,8 +156,23 @@ export function setupCustom(sel, cust) {
   toggle();
 }
 
+function findCameraByModel(modelName) {
+  for (var i = 0; i < CAMERAS.length; i++) {
+    if (CAMERAS[i].model === modelName) return i;
+  }
+  return -1;
+}
+
+function isCustomCamera() {
+  var model = cameraSel.value;
+  if (model === '__custom__') return true;
+  return findCameraByModel(model) === -1;
+}
+
 // Populate lens dropdown for a built-in camera preset
-function populateLenses(idx) {
+function populateLenses(modelName) {
+  var idx = findCameraByModel(modelName);
+  if (idx === -1) return;
   lensSel.innerHTML = '';
   CAMERAS[idx].lenses.forEach(function(l, i) {
     var o = document.createElement('option'); o.value = i; o.textContent = l.name; lensSel.appendChild(o);
@@ -181,7 +197,7 @@ function populateLenses(idx) {
 export function updateLensUI() {
   if (cameraSel.value === '__custom__') {
     lensDrop.style.display = 'none'; lensCust.classList.add('show'); lensSel.value = '__custom__';
-  } else if (cameraSel.selectedIndex >= CAMERAS.length) {
+  } else if (isCustomCamera()) {
     lensDrop.style.display = 'block';
     lensSel.innerHTML = '';
     var savedLenses = loadSavedLensesForCamera(cameraSel.value);
@@ -200,7 +216,7 @@ export function updateLensUI() {
     oo.value = '__custom__'; oo.textContent = t('other_free_text'); lensSel.appendChild(oo);
     lensCust.classList.remove('show');
   } else {
-    lensDrop.style.display = 'block'; populateLenses(cameraSel.selectedIndex);
+    lensDrop.style.display = 'block'; populateLenses(cameraSel.value);
     lensCust.classList.toggle('show', lensSel.value === '__custom__');
   }
 }
@@ -213,22 +229,33 @@ function getVal(sel, inp) { return sel.value === '__custom__' ? inp.value.trim()
 
 // Collect camera info (make, model, shutter) from dropdown or custom inputs
 function camInfo() {
-  if (cameraSel.value === '__custom__' || cameraSel.selectedIndex >= CAMERAS.length) {
+  if (cameraSel.value === '__custom__' || isCustomCamera()) {
     var model = cameraSel.value === '__custom__' ? ($('camera-model-custom').value.trim() || t('unknown')) : cameraSel.value;
     return { make: $('camera-make-custom').value.trim() || t('unknown'), model: model, shutter: null };
   }
-  var c = CAMERAS[cameraSel.selectedIndex]; return { make: c.make, model: c.model, shutter: c.shutter };
+  var idx = findCameraByModel(cameraSel.value);
+  if (idx === -1) return { make: t('unknown'), model: cameraSel.value, shutter: null };
+  var c = CAMERAS[idx]; return { make: c.make, model: c.model, shutter: c.shutter };
 }
 
 // Collect lens info (name, focal, aperture) from dropdown or custom inputs
 function lensInfo() {
   if (cameraSel.value === '__custom__' || lensSel.value === '__custom__')
     return { name: $('lens-name-custom').value.trim(), focal: $('lens-focal').value.trim(), aperture: $('lens-aperture').value.trim() };
-  if (cameraSel.selectedIndex >= CAMERAS.length || lensSel.selectedIndex >= CAMERAS[cameraSel.selectedIndex].lenses.length) {
+  if (isCustomCamera()) {
     var o = lensSel.options[lensSel.selectedIndex];
     return { name: selText(lensSel), focal: o.getAttribute('data-focal') || '', aperture: o.getAttribute('data-aperture') || '' };
   }
-  var l = CAMERAS[cameraSel.selectedIndex].lenses[lensSel.selectedIndex];
+  var idx = findCameraByModel(cameraSel.value);
+  if (idx === -1) {
+    var o = lensSel.options[lensSel.selectedIndex];
+    return { name: selText(lensSel), focal: o.getAttribute('data-focal') || '', aperture: o.getAttribute('data-aperture') || '' };
+  }
+  if (lensSel.selectedIndex >= CAMERAS[idx].lenses.length) {
+    var o = lensSel.options[lensSel.selectedIndex];
+    return { name: selText(lensSel), focal: o.getAttribute('data-focal') || '', aperture: o.getAttribute('data-aperture') || '' };
+  }
+  var l = CAMERAS[idx].lenses[lensSel.selectedIndex];
   return { name: l.name, focal: l.focal, aperture: l.aperture };
 }
 
