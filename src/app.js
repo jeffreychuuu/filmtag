@@ -3,7 +3,7 @@ import JSZip from 'jszip';
 import DATA from '../data.json';
 import { t, setLang, toggleLang, applyTranslations, lang } from './i18n.js';
 import { toDms, strToUtf8Binary, toUcs2Binary, injectXmp, escXml, esc, fmtSize, dmsToDecimal, newFilmPrefix } from './lib/utils.js';
-import { initGear, fillSelect, fillSelectWithCustom, saveCustomOpts, setupCustom, updateLensUI, collect, validate, saveLastSession, restoreLastSession } from './modules/gear.js';
+import { initGear, fillSelect, fillSelectWithCustom, saveCustomOpts, setupCustom, updateLensUI, collect, validate, saveLastSession, restoreLastSession, renderManageOverlay } from './modules/gear.js';
 import { initGps, initMap, updateGpsDots, updateGpsSaveBtn, setGpsForSelected, reverseGeocode } from './modules/gps.js';
 import { init as initUi, renderFileList, goToPage, changePageSize, goToSummaryPage, changeSummaryPageSize, clearAll, removeOne, sortFiles, toggleSort, getTotalPages, buildSummaryHtml, generateSummaryThumbnails, rebuildSummaryBody, buildOptions, syncRange, buildSelectedFromRanges } from './modules/ui.js';
 import { init as initDate, applyDateToSelected, refreshSegments, computeDateForFile, getFileDate, newFName } from './modules/date.js';
@@ -360,6 +360,9 @@ document.addEventListener('DOMContentLoaded', function() {
   $('feedback-success-close').addEventListener('click', function() { $('feedback-success-overlay').classList.remove('show'); });
   $('feedback-success-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
   $('admin-close').addEventListener('click', function() { $('admin-overlay').classList.remove('show'); $('admin-panel').style.display = 'none'; $('admin-login').style.display = 'block'; $('admin-error').style.display = 'none'; });
+  $('manage-btn').addEventListener('click', function() { renderManageOverlay(); $('manage-overlay').classList.add('show'); });
+  $('manage-close-btn').addEventListener('click', function() { $('manage-overlay').classList.remove('show'); });
+  $('manage-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
   $('admin-unlock-btn').addEventListener('click', function() {
     var key = $('admin-key-input').value.trim();
     if (!key) { $('admin-error').textContent = 'Please enter an admin key.'; $('admin-error').style.display = 'block'; return; }

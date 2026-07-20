@@ -241,3 +241,111 @@ export function validate(p) {
   if (!p.film.name) return t('film_required'); if (!p.lab) return t('lab_required');
   if (!p.scanner) return t('scanner_required'); return null;
 }
+
+function loadAllOpts() {
+  try { return JSON.parse(localStorage.getItem('filmtag-custom-opts') || '{}'); } catch(_) { return {}; }
+}
+
+function saveAllOpts(data) {
+  localStorage.setItem('filmtag-custom-opts', JSON.stringify(data));
+}
+
+function refreshGearDropdowns() {
+  [artistSel, cameraSel, labSel, processSel, ppSel, scanSel].forEach(function(sel) {
+    var val = sel.value;
+    sel.innerHTML = '';
+    sel.appendChild(document.createElement('option'));
+  });
+  fillSelectWithCustom(artistSel, [], 'artist');
+  fillSelectWithCustom(cameraSel, [], 'cameraModel');
+  fillSelectWithCustom(labSel, [], 'lab');
+  fillSelectWithCustom(processSel, [], 'process');
+  fillSelectWithCustom(ppSel, [], 'pushPull');
+  fillSelectWithCustom(scanSel, [], 'scanner');
+  updateLensUI();
+  filmSel.innerHTML = '';
+  var oo = document.createElement('option'); oo.value = '__custom__'; oo.textContent = t('other_free_text'); filmSel.appendChild(oo);
+  var savedFilms = loadSavedOpt('filmName');
+  for (var si = 0; si < savedFilms.length; si++) {
+    var o = document.createElement('option'); o.textContent = savedFilms[si]; filmSel.insertBefore(o, filmSel.firstChild);
+  }
+  // Don't try to restore old selection — just leave at default
+}
+
+export function deleteCustomOpt(key, value) {
+  var data = loadAllOpts();
+  if (key === 'lensByCamera' && typeof value === 'object') {
+    if (data.lensByCamera && data.lensByCamera[value.camera]) {
+      data.lensByCamera[value.camera] = data.lensByCamera[value.camera].filter(function(l) { return l.name !== value.name; });
+      if (data.lensByCamera[value.camera].length === 0) delete data.lensByCamera[value.camera];
+      if (Object.keys(data.lensByCamera).length === 0) delete data.lensByCamera;
+    }
+  } else {
+    if (data[key]) {
+      data[key] = data[key].filter(function(v) { return v !== value; });
+      if (data[key].length === 0) delete data[key];
+    }
+  }
+  saveAllOpts(data);
+  refreshGearDropdowns();
+  renderManageOverlay();
+}
+
+export function renderManageOverlay() {
+  var data = loadAllOpts();
+  var body = document.getElementById('manage-body');
+  if (!body) return;
+  var keys = [
+    {key: 'artist', label: t('artist')},
+    {key: 'cameraModel', label: t('camera')},
+    {key: 'filmName', label: t('film_stock')},
+    {key: 'lab', label: t('lab')},
+    {key: 'process', label: t('process')},
+    {key: 'pushPull', label: t('push_pull')},
+    {key: 'scanner', label: t('scanner')}
+  ];
+  var h = '';
+  var any = false;
+  for (var ki = 0; ki < keys.length; ki++) {
+    var items = data[keys[ki].key];
+    if (!items || items.length === 0) continue;
+    any = true;
+    h += '<div style="margin-bottom:0.75rem;">';
+    h += '<div style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.05em;">' + esc(keys[ki].label) + '</div>';
+    for (var ii = 0; ii < items.length; ii++) {
+      h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.3rem 0;border-bottom:1px solid var(--border);font-size:0.85rem;">';
+      h += '<span style="flex:1;">' + esc(items[ii]) + '</span>';
+      h += '<button class="manage-del-btn" data-key="' + keys[ki].key + '" data-value="' + esc(items[ii]) + '" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:0.9rem;padding:0.2rem;" title="Delete">✕</button>';
+      h += '</div>';
+    }
+    h += '</div>';
+  }
+  if (data.lensByCamera) {
+    var cameras = Object.keys(data.lensByCamera);
+    for (var ci = 0; ci < cameras.length; ci++) {
+      var lenses = data.lensByCamera[cameras[ci]];
+      if (!lenses || lenses.length === 0) continue;
+      any = true;
+      h += '<div style="margin-bottom:0.75rem;">';
+      h += '<div style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.05em;">' + esc(t('lens')) + ' (' + esc(cameras[ci]) + ')</div>';
+      for (var li = 0; li < lenses.length; li++) {
+        var lensName = typeof lenses[li] === 'object' ? lenses[li].name : lenses[li];
+        h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.3rem 0;border-bottom:1px solid var(--border);font-size:0.85rem;">';
+        h += '<span style="flex:1;">' + esc(lensName) + '</span>';
+        h += '<button class="manage-del-btn" data-key="lensByCamera" data-value=\'' + esc(JSON.stringify({camera: cameras[ci], name: lensName})) + '\' style="background:none;border:none;color:var(--red);cursor:pointer;font-size:0.9rem;padding:0.2rem;" title="Delete">✕</button>';
+        h += '</div>';
+      }
+      h += '</div>';
+    }
+  }
+  if (!any) h += '<p style="color:var(--text-secondary);font-size:0.85rem;text-align:center;padding:2rem 0;">' + t('manage_opts_none') + '</p>';
+  body.innerHTML = h;
+  body.querySelectorAll('.manage-del-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var key = this.getAttribute('data-key');
+      var raw = this.getAttribute('data-value');
+      var value = key === 'lensByCamera' ? JSON.parse(raw) : raw;
+      deleteCustomOpt(key, value);
+    });
+  });
+}

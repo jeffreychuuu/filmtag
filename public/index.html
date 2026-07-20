@@ -539,6 +539,7 @@
   <div class="actions">
     <button class="btn btn-primary" id="review-btn" disabled data-i18n="review_summary">Review Summary</button>
     <button class="btn btn-secondary" id="reset-btn" data-i18n="reset_all">Reset All</button>
+    <button class="btn btn-secondary manage-btn" id="manage-btn" data-i18n="manage_opts">⚙️ Manage</button>
   </div>
 
   <div class="overlay" id="progress-overlay">
@@ -551,6 +552,16 @@
       </div>
       <button class="btn btn-secondary" id="progress-edit-btn" style="margin-top:1.5rem;display:none;margin-left:0.5rem;" data-i18n="edit_roll">Edit This Roll ✏️</button>
       <button class="btn btn-primary" id="progress-next-btn" style="margin-top:1.5rem;display:none;" data-i18n="next_roll">Next Roll 🎞️</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="manage-overlay">
+  <div class="overlay-content" style="max-width:520px;">
+    <h3 style="margin-bottom:1rem;">⚙️ <span data-i18n="manage_opts_title">Manage Custom Options</span></h3>
+    <div id="manage-body" style="max-height:60vh;overflow-y:auto;"></div>
+    <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1rem;">
+      <button class="btn btn-secondary" id="manage-close-btn" data-i18n="close">✕ Close</button>
     </div>
   </div>
 </div>
