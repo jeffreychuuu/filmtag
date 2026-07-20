@@ -184,6 +184,12 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 <details>
 <summary>Click to expand</summary>
 
+**1.7.0 (2026-07-20)** — Edit This Roll button
+
+- ✏️ "Edit This Roll" button next to "Next Roll" — returns to settings form without reloading, preserves uploaded files and all settings
+- 🎯 Available after ZIP download, Content Sheet download, and in Gallery overlay
+- 🧠 All in-memory state (files, GPS, dates, selections) intact — modify settings and re-process
+
 **1.6.0 (2026-07-20)** — EXIF auto-fill on upload
 
 - 🎯 After uploading photos, EXIF fields (Artist, Camera, Lens, ISO, Process) auto-populate dropdowns

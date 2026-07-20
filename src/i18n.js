@@ -143,6 +143,7 @@ tpl.en = {
 
   "extracting_exif": "Uploading {n} photos…",
   "next_roll": "Next Roll 🎞️",
+  "edit_roll": "Edit This Roll ✏️",
 
   // Disclaimer acknowledgment
   "disclaimer_title": "Before You Use This Tool",
@@ -285,6 +286,7 @@ tpl.zh = {
   "set_gps": "設定 GPS 位置",
 
   "extracting_exif": "正在上傳 {n} 張相…",
+  "edit_roll": "編輯此卷 ✏️",
   "next_roll": "下一卷菲林 🎞️",
 
   // Disclaimer acknowledgment

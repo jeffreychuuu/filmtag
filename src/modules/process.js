@@ -59,6 +59,8 @@ export function startZipProcess() {
         if (spin) spin.style.display = 'none'; if (done) done.style.display = 'flex';
         var nextBtn = S._('progress-next-btn');
         if (nextBtn) nextBtn.style.display = 'inline-block';
+        var editBtn = S._('progress-edit-btn');
+        if (editBtn) editBtn.style.display = 'inline-block';
       });
     }); // end addContentSheetIfEnabled
     }
@@ -286,6 +288,8 @@ export function showGallery(files, params, zip) {
   }
   var nextBtn = S._('progress-next-btn');
   if (nextBtn) nextBtn.style.display = 'none';
+  var editBtn2 = S._('progress-edit-btn');
+  if (editBtn2) editBtn2.style.display = 'none';
   S.gallery.classList.add('show');
   S.galleryZipBtn.onclick = function() {
     zip.generateAsync({ type: 'blob' }).then(function(blob) {
@@ -295,6 +299,11 @@ export function showGallery(files, params, zip) {
       a.download = 'filmtag_' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '.zip';
       document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
     });
+  };
+  var editBtn = S._('gallery-edit-btn');
+  if (editBtn) editBtn.onclick = function() {
+    S.gallery.classList.remove('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   var newBtn = S._('gallery-new-btn');
   if (newBtn) newBtn.onclick = function() {
@@ -472,6 +481,8 @@ export function startContentSheet() {
     if (spin) spin.style.display = 'none'; if (done) done.style.display = 'flex';
     var nextBtn = S._('progress-next-btn');
     if (nextBtn) nextBtn.style.display = 'inline-block';
+    var editBtn = S._('progress-edit-btn');
+    if (editBtn) editBtn.style.display = 'inline-block';
     S.reviewBtn.disabled = false;
   });
 }
