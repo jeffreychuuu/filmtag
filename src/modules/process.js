@@ -370,7 +370,7 @@ export function generateContactSheet(files, params, onComplete) {
       var fSize = Math.max(13, Math.round(footerH * 0.24));
       ctx.font = 'bold ' + fSize + 'px sans-serif';
       var lp = Math.round(cw * 0.02);
-      ctx.fillText('\uD83C\uDFAC ' + params.film.name + ' (ISO ' + params.film.iso + ')', lp, footerY + fSize + 4);
+      ctx.fillText('\uD83C\uDF9E\uFE0F ' + params.film.name + ' (ISO ' + params.film.iso + ')', lp, footerY + fSize + 4);
       var camLens = params.camera.make + ' ' + params.camera.model + ' + ' + params.lens.name;
       if (params.lens.focal) camLens += ' (' + params.lens.focal + 'mm)';
       if (params.lens.aperture) camLens += ' f/' + params.lens.aperture;
