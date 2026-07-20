@@ -2,6 +2,7 @@ import piexif from 'piexifjs';
 import { t } from '../i18n.js';
 import { dmsToDecimal } from '../lib/utils.js';
 import { selByText, setCust } from './gear.js';
+import { parseSoftware, parseInstructions, parseCopyright, parseImageDescription, parseUserComment } from '../lib/exif-format.js';
 
 var S;
 
@@ -90,16 +91,6 @@ function extractExifFromFiles() {
   }
 }
 
-function decodeUcs2(str) {
-  if (!str || str.indexOf('UNICODE') !== 0) return '';
-  var raw = str.slice(8);
-  var out = '';
-  for (var i = 0; i < raw.length - 1; i += 2) {
-    out += String.fromCharCode(raw.charCodeAt(i) | (raw.charCodeAt(i + 1) << 8));
-  }
-  return out;
-}
-
 function fillField(sel, inp, val) {
   if (!val) return;
   if (!selByText(sel, val)) setCust(sel, inp, val);
@@ -168,85 +159,32 @@ function autoFillFromFirstFile() {
       if (matchedFilm) filled.film = true;
     }
 
-    // Composite string sources
-    var instructions = exifObj['Exif'][0x828D];
-    var copyright = exifObj['0th'][piexif.ImageIFD.Copyright];
-    var desc = exifObj['0th'][piexif.ImageIFD.ImageDescription];
-    var software = exifObj['0th'][piexif.ImageIFD.Software];
-    var ucStr = decodeUcs2(exifObj['Exif'][piexif.ExifIFD.UserComment]);
+    // Parse composite strings via shared functions
+    var sw = parseSoftware(exifObj['0th'][piexif.ImageIFD.Software]);
+    var ins = parseInstructions(exifObj['Exif'][0x828D]);
+    var cr = parseCopyright(exifObj['0th'][piexif.ImageIFD.Copyright]);
+    var desc = parseImageDescription(exifObj['0th'][piexif.ImageIFD.ImageDescription]);
+    var uc = parseUserComment(exifObj['Exif'][piexif.ExifIFD.UserComment]);
 
     // Scanner: Software → ImageDescription → UserComment
-    var scannerVal;
-    if (software) {
-      var cleaned = software.replace(/ \(FilmTag by Jeffrey Chu\)$/, '');
-      if (cleaned !== software) scannerVal = cleaned;
-    }
-    if (!scannerVal && desc) {
-      var m = desc.match(/Scanner:\s*([^|]+)/);
-      if (m) scannerVal = m[1].trim();
-    }
-    if (!scannerVal && ucStr) {
-      var m = ucStr.match(/Scanner:\s*([^|]+)/);
-      if (m) scannerVal = m[1].trim();
-    }
+    var scannerVal = sw || desc.scanner || uc.scanner;
     if (scannerVal) { fillField(S.scanSel, S.$('scanner-custom-input'), scannerVal); filled.scanner = true; }
 
     // Lab: Copyright → ImageDescription
-    var labVal;
-    if (copyright) {
-      var m = copyright.match(/Processed by ([^(]+)/);
-      if (m) labVal = m[1].trim();
-    }
-    if (!labVal && desc) {
-      var m = desc.match(/Lab:\s*([^|]+)/);
-      if (m) labVal = m[1].trim();
-    }
+    var labVal = cr.lab || desc.lab;
     if (labVal) { fillField(S.labSel, S.$('lab-custom-input'), labVal); filled.lab = true; }
 
-    // Process + PushPull from 0x828D Instructions: "C-41 (+1)"
-    var procVal, ppVal;
-    if (instructions) {
-      var m = instructions.match(/^(.+?)(?:\s*\((.+?)\))?$/);
-      if (m) { procVal = m[1].trim(); if (m[2]) ppVal = m[2].trim(); }
-    }
-
-    // Process fallback: Copyright → ImageDescription → UserComment
-    if (!procVal && copyright) {
-      var m = copyright.match(/Processed by [^(]+ \(([^)]+)\)/);
-      if (m) procVal = m[1].trim();
-    }
-    if (!procVal && desc) {
-      var m = desc.match(/Process:\s*([^|]+)/);
-      if (m) procVal = m[1].replace(/\s*\([^)]+\)\s*$/, '').trim();
-    }
-    if (!procVal && ucStr) {
-      var m = ucStr.match(/Process:\s*([^|]+)/);
-      if (m) procVal = m[1].trim();
-    }
+    // Process: Instructions → Copyright → ImageDescription → UserComment
+    var procVal = (ins && ins.process) || cr.process || desc.process || uc.process;
     if (procVal) { fillField(S.processSel, S.$('process-custom-input'), procVal); filled.process = true; }
 
-    // PushPull fallback: ImageDescription → UserComment
-    if (!ppVal && desc) {
-      var m = desc.match(/Process:\s*[^(]+\(([^)]+)\)/);
-      if (m) ppVal = m[1].trim();
-    }
-    if (!ppVal && ucStr) {
-      var m = ucStr.match(/Exposure:\s*([^|]+)/);
-      if (m) ppVal = m[1].trim();
-    }
+    // PushPull: Instructions → ImageDescription → UserComment
+    var ppVal = (ins && ins.pushpull) || desc.pushpull || uc.pushpull;
     if (ppVal) { fillField(S.ppSel, S.$('pushpull-custom-input'), ppVal); filled.pushpull = true; }
 
     // Film name fallback: ImageDescription → UserComment
     if (!filled.film) {
-      var filmVal;
-      if (desc) {
-        var m = desc.match(/Film:\s*([^(]+)\s*\(ISO/);
-        if (m) filmVal = m[1].trim();
-      }
-      if (!filmVal && ucStr) {
-        var m = ucStr.match(/Film Stock:\s*([^|]+)/);
-        if (m) filmVal = m[1].trim();
-      }
+      var filmVal = desc.film || uc.film;
       if (filmVal) {
         var matched = false;
         for (var fi2 = 0; fi2 < S.filmSel.options.length; fi2++) {

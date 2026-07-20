@@ -1,7 +1,8 @@
 import piexif from 'piexifjs';
 import JSZip from 'jszip';
 import { t } from '../i18n.js';
-import { toDms, toUcs2Binary, injectXmp } from '../lib/utils.js';
+import { toDms, injectXmp } from '../lib/utils.js';
+import { fmtSoftware, fmtInstructions, fmtCopyright, fmtImageDescription, fmtUserComment } from '../lib/exif-format.js';
 
 var S;
 
@@ -79,8 +80,8 @@ export function startZipProcess() {
           exifObj['0th'][piexif.ImageIFD.Make] = p.camera.make;
           exifObj['0th'][piexif.ImageIFD.Model] = p.camera.model;
           exifObj['0th'][piexif.ImageIFD.Artist] = p.artist;
-          exifObj['0th'][piexif.ImageIFD.Software] = p.scanner + ' (FilmTag by Jeffrey Chu)';
-          exifObj['Exif'][0x828D] = p.process + ' (' + p.pushpull + ')';
+          exifObj['0th'][piexif.ImageIFD.Software] = fmtSoftware(p.scanner);
+          exifObj['Exif'][0x828D] = fmtInstructions(p.process, p.pushpull);
           var dateTimeStr = fd.exifDate + ' ' + String(fd.hr).padStart(2,'0') + ':' + String(fd.min).padStart(2,'0') + ':00+08:00';
           exifObj['0th'][piexif.ImageIFD.DateTime] = dateTimeStr;
           exifObj['Exif'][piexif.ExifIFD.DateTimeOriginal] = dateTimeStr;
@@ -104,9 +105,9 @@ export function startZipProcess() {
               exifObj['Exif'][piexif.ExifIFD.ShutterSpeedValue] = [parseInt(sf[0], 10), parseInt(sf[1], 10)];
             }
           }
-          exifObj['Exif'][piexif.ExifIFD.UserComment] = 'UNICODE\x00' + toUcs2Binary('Film Stock: ' + p.film.name + ' | Process: ' + p.process + ' | Exposure: ' + p.pushpull + (p.camera.shutter ? ' | Shutter: ' + p.camera.shutter : '') + ' | Scanner: ' + p.scanner);
-          exifObj['0th'][piexif.ImageIFD.ImageDescription] = (S._('public-checkbox').checked ? 'FilmTag by Jeffrey Chu | ' : '') + 'Photo by ' + p.artist + ' | Camera: ' + p.camera.model + ' (' + p.lens.name + ') | Film: ' + p.film.name + ' (ISO ' + p.film.iso + ')' + (p.camera.shutter ? ' | Shutter: ' + p.camera.shutter : '') + ' | Lab: ' + p.lab + ' | Process: ' + p.process + ' (' + p.pushpull + ') | Scanner: ' + p.scanner;
-          exifObj['0th'][piexif.ImageIFD.Copyright] = 'FilmTag by Jeffrey Chu | ' + 'Processed by ' + p.lab + ' (' + p.process + ') | Scanned via ' + p.scanner;
+          exifObj['Exif'][piexif.ExifIFD.UserComment] = fmtUserComment(p.film.name, p.process, p.pushpull, p.scanner, p.camera.shutter);
+          exifObj['0th'][piexif.ImageIFD.ImageDescription] = fmtImageDescription(p, S._('public-checkbox').checked);
+          exifObj['0th'][piexif.ImageIFD.Copyright] = fmtCopyright(p.lab, p.process, p.scanner);
           var gps = S.gpsData[idx];
           if (gps) {
             exifObj['GPS'] = exifObj['GPS'] || {};
@@ -180,7 +181,7 @@ export function startSaveProcess() {
           exifObj['0th'][piexif.ImageIFD.Make] = p.camera.make;
           exifObj['0th'][piexif.ImageIFD.Model] = p.camera.model;
           exifObj['0th'][piexif.ImageIFD.Artist] = p.artist;
-          exifObj['0th'][piexif.ImageIFD.Software] = p.scanner + ' (FilmTag by Jeffrey Chu)';
+          exifObj['0th'][piexif.ImageIFD.Software] = fmtSoftware(p.scanner);
           var dt = fd.exifDate + ' ' + String(fd.hr).padStart(2,'0') + ':' + String(fd.min).padStart(2,'0') + ':00+08:00';
           exifObj['0th'][piexif.ImageIFD.DateTime] = dt;
           exifObj['Exif'][piexif.ExifIFD.DateTimeOriginal] = dt;
@@ -204,10 +205,10 @@ export function startSaveProcess() {
               exifObj['Exif'][piexif.ExifIFD.ShutterSpeedValue] = [parseInt(sf[0], 10), parseInt(sf[1], 10)];
             }
           }
-          exifObj['Exif'][piexif.ExifIFD.UserComment] = 'UNICODE\x00' + toUcs2Binary('Film Stock: ' + p.film.name + ' | Process: ' + p.process + ' | Exposure: ' + p.pushpull + (p.camera.shutter ? ' | Shutter: ' + p.camera.shutter : '') + ' | Scanner: ' + p.scanner);
-          exifObj['Exif'][0x828D] = p.process + ' (' + p.pushpull + ')';
-          exifObj['0th'][piexif.ImageIFD.ImageDescription] = (S._('public-checkbox').checked ? 'FilmTag by Jeffrey Chu | ' : '') + 'Photo by ' + p.artist + ' | Camera: ' + p.camera.model + ' (' + p.lens.name + ') | Film: ' + p.film.name + ' (ISO ' + p.film.iso + ')' + (p.camera.shutter ? ' | Shutter: ' + p.camera.shutter : '') + ' | Lab: ' + p.lab + ' | Process: ' + p.process + ' (' + p.pushpull + ') | Scanner: ' + p.scanner;
-          exifObj['0th'][piexif.ImageIFD.Copyright] = 'FilmTag by Jeffrey Chu | ' + 'Processed by ' + p.lab + ' (' + p.process + ') | Scanned via ' + p.scanner;
+          exifObj['Exif'][piexif.ExifIFD.UserComment] = fmtUserComment(p.film.name, p.process, p.pushpull, p.scanner, p.camera.shutter);
+          exifObj['Exif'][0x828D] = fmtInstructions(p.process, p.pushpull);
+          exifObj['0th'][piexif.ImageIFD.ImageDescription] = fmtImageDescription(p, S._('public-checkbox').checked);
+          exifObj['0th'][piexif.ImageIFD.Copyright] = fmtCopyright(p.lab, p.process, p.scanner);
           var gps2 = S.gpsData[idx];
           if (gps2) {
             exifObj['GPS'] = exifObj['GPS'] || {};
