@@ -494,12 +494,15 @@ export function rebuildSummaryBody() {
       '<label style="display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.8rem;">' +
         '<input type="checkbox" class="toggle-switch" id="content-sheet-toggle"' + (csChecked ? ' checked' : '') + '>' +
         '<span>' + t('content_sheet') + '</span></label>' +
-      '<button class="btn btn-sm btn-secondary" id="content-sheet-btn" style="display:none">📋 ' + t('content_sheet_generate') + '</button>' +
+      '<button class="btn btn-sm btn-secondary" id="content-sheet-btn" style="visibility:hidden">📋 ' + t('content_sheet_download') + '</button>' +
     '</div>' +
     '<div class="summary-footer-row">' +
-      '<button class="btn btn-secondary" id="summary-close-btn">✕ ' + t('close') + '</button>' +
+      '<button class="btn btn-secondary" id="summary-close-btn">' + t('edit_roll') + '</button>' +
       '<button class="btn btn-primary" id="confirm-save-btn">💾 ' + t('save_to_album') + '</button>' +
-      '<button class="btn btn-primary" id="confirm-zip-btn">⬇ ' + t('download_zip') + '</button>' +
+      '<button class="btn btn-primary" id="confirm-zip-btn">🗃️ ' + t('download_zip') + '</button>' +
+    '</div>' +
+    '<div class="summary-footer-row" style="justify-content:center;">' +
+      '<span id="content-sheet-hint" style="font-size:0.65rem;color:var(--text-secondary);visibility:' + (csChecked ? 'visible' : 'hidden') + ';">' + t('content_sheet_hint') + '</span>' +
     '</div>';
   generateSummaryThumbnails();
   S._('confirm-zip-btn').addEventListener('click', S.startZipProcess);
@@ -508,14 +511,16 @@ export function rebuildSummaryBody() {
   var toggleCs = S._('content-sheet-toggle');
   if (toggleCs) {
     var genBtn = S._('content-sheet-btn');
-    if (genBtn) genBtn.style.display = toggleCs.checked ? '' : 'none';
+    if (genBtn) genBtn.style.visibility = toggleCs.checked ? 'visible' : 'hidden';
+    var hintEl = S._('content-sheet-hint');
     toggleCs.addEventListener('change', function() {
       localStorage.setItem('filmtag-content-sheet', this.checked ? '1' : '0');
-      if (genBtn) genBtn.style.display = this.checked ? '' : 'none';
+      if (genBtn) genBtn.style.visibility = this.checked ? 'visible' : 'hidden';
+      if (hintEl) hintEl.style.visibility = this.checked ? 'visible' : 'hidden';
     });
   }
   var closeBtn = S._('summary-close-btn');
-  if (closeBtn) closeBtn.addEventListener('click', function() { S.summaryPanel.classList.remove('show'); S.summaryPage = 1; });
+  if (closeBtn) closeBtn.addEventListener('click', function() { S.summaryPanel.classList.remove('show'); S.summaryPage = 1; window.scrollTo({ top: 0, behavior: 'smooth' }); });
 }
 
 export function generateSummaryThumbnails() {

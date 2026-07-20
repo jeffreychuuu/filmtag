@@ -101,6 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
   S.isIPhone = /iPhone|iPad/.test(navigator.userAgent);
   S.currentPage = 1; S.pageSize = 5; S.prefetchTimer = null; S.sortAsc = true;
   S.summaryPage = 1; S.summaryPageSize = 5; S.processedFiles = [];
+  S.contentSheetResolution = DATA.contentSheetResolution;
   S.geocodeBusy = false; S.map = null; S.mapMarker = null; S.mapInitialized = false;
   S.reverseGeocode = reverseGeocode;
 
@@ -288,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
     gallery.classList.remove('show'); galleryGrid.innerHTML = '';
     dateOverlay.classList.remove('show'); gpsOverlay.classList.remove('show');
     if (S.mapMarker) { S.map.removeLayer(S.mapMarker); S.mapMarker = null; }
-    S.mapInitialized = false; progressSec.classList.remove('show'); progBar.style.width = '0%'; $('progress-next-btn').style.display = 'none'; $('progress-spinner').style.display = 'block'; $('progress-done').style.display = 'none';
+    S.mapInitialized = false; progressSec.classList.remove('show'); progBar.style.width = '0%'; $('progress-next-btn').style.display = 'none'; $('progress-edit-btn').style.display = 'none'; $('progress-spinner').style.display = 'block'; $('progress-done').style.display = 'none';
     statusMsg.className = 'status-msg'; statusMsg.style.display = 'none';
     var us = document.getElementById('upload-status'); if (us) { us.textContent = ''; us.className = 'upload-status-msg'; }
     updateLensUI(); refreshSegments();
@@ -321,6 +322,7 @@ document.addEventListener('DOMContentLoaded', function() {
     dateOverlay.classList.remove('show'); gpsOverlay.classList.remove('show');
     refreshSegments(); S.renderFileList();
   });
+  $('progress-edit-btn').addEventListener('click', function() { progressSec.classList.remove('show'); $('progress-next-btn').style.display = 'none'; $('progress-edit-btn').style.display = 'none'; $('progress-spinner').style.display = 'block'; $('progress-done').style.display = 'none'; window.scrollTo({ top: 0, behavior: 'smooth' }); });
   $('progress-next-btn').addEventListener('click', function() { progressSec.classList.remove('show'); progBar.style.width = '0%'; $('progress-next-btn').style.display = 'none'; $('progress-spinner').style.display = 'block'; $('progress-done').style.display = 'none'; location.reload(); });
   $('easter-egg-btn').addEventListener('click', function() { $('egg-overlay').classList.add('show'); });
   $('egg-close').addEventListener('click', function() { $('egg-overlay').classList.remove('show'); });

@@ -143,6 +143,7 @@ tpl.en = {
 
   "extracting_exif": "Uploading {n} photos…",
   "next_roll": "Next Roll 🎞️",
+  "edit_roll": "Edit This Roll ✏️",
 
   // Disclaimer acknowledgment
   "disclaimer_title": "Before You Use This Tool",
@@ -166,7 +167,9 @@ tpl.en = {
   "feedback_error": "Failed to submit feedback. Please try again.",
 
   // Contact Sheet
-  "content_sheet": "Include content sheet",
+  "content_sheet": "Include Content Sheet",
+  "content_sheet_hint": "Content Sheet Included",
+  "content_sheet_download": "Download Content Sheet",
   "content_sheet_generate": "Generate Content Sheet",
   "content_sheet_generating": "Generating content sheet...",
   "content_sheet_adding": "Adding content sheet to gallery...",
@@ -285,6 +288,7 @@ tpl.zh = {
   "set_gps": "設定 GPS 位置",
 
   "extracting_exif": "正在上傳 {n} 張相…",
+  "edit_roll": "編輯此卷 ✏️",
   "next_roll": "下一卷菲林 🎞️",
 
   // Disclaimer acknowledgment
@@ -310,6 +314,8 @@ tpl.zh = {
 
   // Contact Sheet
   "content_sheet": "包含索引樣片",
+  "content_sheet_hint": "已包含索引樣片",
+  "content_sheet_download": "下載索引樣片",
   "content_sheet_generate": "只生成索引樣片",
   "content_sheet_generating": "正在生成索引樣片…",
   "content_sheet_adding": "正在將索引樣片加入圖庫…",

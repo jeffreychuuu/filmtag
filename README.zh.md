@@ -183,6 +183,12 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 <details>
 <summary>撳開嚟睇</summary>
 
+**1.7.0 (2026-07-20)** — 編輯此卷按鈕
+
+- ✏️「編輯此卷」按鈕喺「下一卷」隔籬 — 返回設定表格唔 reload，保留 upload 嘅檔案同所有設定
+- 🎯 ZIP 下載、Content Sheet 下載、Gallery 畫面都會顯示
+- 🧠 所有 in-memory state（檔案、GPS、日期、選擇）原封不動 — 改完設定可以再處理過
+
 **1.6.0 (2026-07-20)** — EXIF 自動填入
 - 🎯 上傳相片後自動讀取 EXIF，Artist、Camera、Lens、ISO、Process 自動填入對應欄位
 - 🔍 將 EXIF 值匹配內建選項 — 匹配到就自動揀，匹配唔到就設為自訂值
