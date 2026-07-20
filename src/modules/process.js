@@ -407,12 +407,11 @@ export function generateContactSheet(files, params, onComplete) {
           var numSize = Math.max(14, Math.round(Math.min(cell_w, cell_h) * 0.09));
           ctx.font = 'bold ' + numSize + 'px sans-serif';
           var textW = ctx.measureText(textStr).width;
-          var badgePad = 6;
-          ctx.fillStyle = 'rgba(0,0,0,0.65)';
-          var badgeX = cx + 8, badgeY = cy + 8;
-          ctx.fillRect(badgeX, badgeY, textW + badgePad * 2, numSize + badgePad * 2);
+          var tx = cx + 8, ty = cy + 8;
           ctx.fillStyle = '#fff';
-          ctx.fillText(textStr, badgeX + badgePad, badgeY + numSize + badgePad);
+          ctx.fillRect(tx, ty, textW + 8, numSize + 8);
+          ctx.fillStyle = 'rgba(0,0,0,0.7)';
+          ctx.fillText(textStr, tx + 4, ty + numSize + 4);
           var img = new Image();
           img.onload = function() {
             var isPortrait = img.height > img.width;
