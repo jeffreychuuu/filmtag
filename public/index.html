@@ -82,9 +82,11 @@
     .btn-sm { font-size: 0.75rem; padding: 0.4rem 0.85rem; }
     .btn:disabled { opacity: 0.45; cursor: not-allowed; }
     .actions { display: flex; gap: 0.75rem; margin-top: 2rem; flex-wrap: wrap; }
-    .summary-actions { display:flex; flex-direction:column; gap:0.75rem; margin-top:1rem; }
-    .summary-actions-row { display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap; }
-    .summary-actions-row:last-child { justify-content:flex-end; }
+    .summary-overlay-inner { display:flex; flex-direction:column; max-height:85vh; overflow:hidden; padding:0; }
+    .summary-overlay-inner .summary-body { flex:1; overflow-y:auto; padding:2rem; max-height:none; }
+    .summary-footer { flex-shrink:0; display:flex; align-items:center; gap:0.75rem; padding:0.75rem 1.25rem; border-top:1px solid var(--border); background:var(--surface); }
+    .summary-footer-start { display:flex; align-items:center; gap:0.75rem; margin-right:auto; }
+    .summary-footer-end { display:flex; align-items:center; gap:0.75rem; }
 
     .upload-wrap {
       position: relative; border: 2px dashed var(--border);
@@ -610,8 +612,9 @@
 </div>
 
 <div class="overlay" id="summary-overlay">
-  <div class="overlay-content overlay-content--wide">
+  <div class="overlay-content overlay-content--wide summary-overlay-inner">
     <div class="summary-body" id="summary-body"></div>
+    <div class="summary-footer" id="summary-footer"></div>
   </div>
 </div>
 

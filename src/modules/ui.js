@@ -480,19 +480,6 @@ export function buildSummaryHtml(p) {
       '<option value="0"' + (S.summaryPageSize === 0 ? ' selected' : '') + '>' + t('all') + '</option>' +
     '</select></div>';
   html += '</div>';
-  var csChecked = localStorage.getItem('filmtag-contact-sheet') !== '0';
-  html += '<div class="summary-actions">' +
-    '<div class="summary-actions-row">' +
-      '<label style="display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.8rem;">' +
-        '<input type="checkbox" id="contact-sheet-toggle"' + (csChecked ? ' checked' : '') + '>' +
-        '<span>' + t('contact_sheet') + '</span></label>' +
-      '<button class="btn btn-sm btn-secondary" id="contact-sheet-btn">📋 ' + t('contact_sheet_generate') + '</button>' +
-    '</div>' +
-    '<div class="summary-actions-row">' +
-      '<button class="btn btn-secondary" id="summary-close-btn">✕ ' + t('close') + '</button>' +
-      '<button class="btn btn-primary" id="confirm-save-btn">💾 ' + t('save_to_album') + '</button>' +
-      '<button class="btn btn-primary" id="confirm-zip-btn">⬇ ' + t('download_zip') + '</button>' +
-    '</div></div>';
   return html;
 }
 
@@ -501,6 +488,19 @@ export function rebuildSummaryBody() {
   var tp = getSummaryTotalPages();
   S.summaryPage = Math.max(1, Math.min(S.summaryPage, tp));
   S.summaryBody.innerHTML = buildSummaryHtml(p);
+  var csChecked = localStorage.getItem('filmtag-contact-sheet') !== '0';
+  S.summaryFooter.innerHTML =
+    '<div class="summary-footer-start">' +
+      '<label style="display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.8rem;">' +
+        '<input type="checkbox" id="contact-sheet-toggle"' + (csChecked ? ' checked' : '') + '>' +
+        '<span>' + t('contact_sheet') + '</span></label>' +
+      '<button class="btn btn-sm btn-secondary" id="contact-sheet-btn">📋 ' + t('contact_sheet_generate') + '</button>' +
+    '</div>' +
+    '<div class="summary-footer-end">' +
+      '<button class="btn btn-secondary" id="summary-close-btn">✕ ' + t('close') + '</button>' +
+      '<button class="btn btn-primary" id="confirm-save-btn">💾 ' + t('save_to_album') + '</button>' +
+      '<button class="btn btn-primary" id="confirm-zip-btn">⬇ ' + t('download_zip') + '</button>' +
+    '</div>';
   generateSummaryThumbnails();
   S._('confirm-zip-btn').addEventListener('click', S.startZipProcess);
   S._('confirm-save-btn').addEventListener('click', S.startSaveProcess);
