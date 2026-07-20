@@ -41,7 +41,7 @@ function saveHidden(data) {
 
 // Populate <select> with items + saved custom entries + __custom__ option
 export function fillSelectWithCustom(sel, items, key) {
-  if (key) DEFAULT_ITEMS[key] = items;
+  if (key && !DEFAULT_ITEMS[key]) DEFAULT_ITEMS[key] = items;
   var hidden = key ? (loadHidden()[key] || []) : [];
   var filtered = items.filter(function(v) { return hidden.indexOf(v) === -1; });
   fillSelect(sel, filtered);
@@ -269,9 +269,7 @@ export function setDefaultItems(key, items) {
 
 function refreshGearDropdowns() {
   [artistSel, cameraSel, labSel, processSel, ppSel, scanSel].forEach(function(sel) {
-    var val = sel.value;
     sel.innerHTML = '';
-    sel.appendChild(document.createElement('option'));
   });
   fillSelectWithCustom(artistSel, DEFAULT_ITEMS.artist || [], 'artist');
   fillSelectWithCustom(cameraSel, DEFAULT_ITEMS.cameraModel || [], 'cameraModel');
