@@ -494,15 +494,15 @@ export function rebuildSummaryBody() {
       '<label style="display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.8rem;">' +
         '<input type="checkbox" class="toggle-switch" id="content-sheet-toggle"' + (csChecked ? ' checked' : '') + '>' +
         '<span>' + t('content_sheet') + '</span></label>' +
-      '<button class="btn btn-sm btn-secondary" id="content-sheet-btn" style="display:none">📋 ' + t('content_sheet_generate') + '</button>' +
+      '<button class="btn btn-sm btn-secondary" id="content-sheet-btn" style="display:none">⬇ ' + t('content_sheet_download') + '</button>' +
     '</div>' +
     '<div class="summary-footer-row">' +
       '<button class="btn btn-secondary" id="summary-close-btn">' + t('edit_roll') + '</button>' +
       '<button class="btn btn-primary" id="confirm-save-btn">💾 ' + t('save_to_album') + '</button>' +
-      '<div style="display:flex;flex-direction:column;align-items:center;">' +
-        '<button class="btn btn-primary" id="confirm-zip-btn">⬇ ' + t('download_zip') + '</button>' +
-        '<span id="content-sheet-hint" style="font-size:0.65rem;color:var(--text-secondary);line-height:1;margin-top:2px;display:' + (csChecked ? '' : 'none') + ';">' + t('content_sheet_hint') + '</span>' +
-      '</div>' +
+      '<button class="btn btn-primary" id="confirm-zip-btn">🗃️ ' + t('download_zip') + '</button>' +
+    '</div>' +
+    '<div class="summary-footer-row" style="justify-content:center;">' +
+      '<span id="content-sheet-hint" style="font-size:0.65rem;color:var(--text-secondary);display:' + (csChecked ? '' : 'none') + ';">' + t('content_sheet_hint') + '</span>' +
     '</div>';
   generateSummaryThumbnails();
   S._('confirm-zip-btn').addEventListener('click', S.startZipProcess);
