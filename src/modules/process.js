@@ -303,6 +303,15 @@ export function showGallery(files, params, zip) {
   var editBtn = S._('gallery-edit-btn');
   if (editBtn) editBtn.onclick = function() {
     S.gallery.classList.remove('show');
+    S.progressSec.classList.remove('show');
+    S.progBar.style.width = '0%';
+    var spin = S._('progress-spinner'), done = S._('progress-done');
+    if (spin) spin.style.display = 'block';
+    if (done) done.style.display = 'none';
+    var nextBtn = S._('progress-next-btn');
+    if (nextBtn) nextBtn.style.display = 'none';
+    var editBtn2 = S._('progress-edit-btn');
+    if (editBtn2) editBtn2.style.display = 'none';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   var newBtn = S._('gallery-new-btn');
