@@ -445,7 +445,7 @@ export function renderManageOverlay() {
   // Show all defaults button
   var hasHidden = Object.keys(hidden).length > 0;
   h += '<div style="text-align:center;margin-top:0.75rem;">';
-  h += '<button class="btn btn-sm btn-primary" id="reset-defaults-btn" style="' + (hasHidden ? '' : 'display:none;') + '">' + t('reset_defaults') + '</button>';
+  h += '<button class="btn btn-sm btn-primary" id="reset-defaults-btn" style="visibility:' + (hasHidden ? 'visible' : 'hidden') + ';">' + t('reset_defaults') + '</button>';
   h += '</div>';
 
   if (!any) {
