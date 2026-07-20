@@ -364,9 +364,9 @@ export function generateContactSheet(files, params, onComplete) {
       if (errored) { onComplete(null); return; }
       var footerH = Math.max(80, Math.round(ch * 0.08));
       var footerY = ch - footerH;
-      ctx.fillStyle = '#222';
+      ctx.fillStyle = '#ebebeb';
       ctx.fillRect(0, footerY, cw, footerH);
-      ctx.fillStyle = '#fff';
+      ctx.fillStyle = '#444';
       var fSize = Math.max(13, Math.round(footerH * 0.24));
       ctx.font = 'bold ' + fSize + 'px sans-serif';
       var lp = Math.round(cw * 0.02);
@@ -403,10 +403,16 @@ export function generateContactSheet(files, params, onComplete) {
           var cy = my_t + r * (cell_h + rg);
           ctx.fillStyle = '#fff';
           ctx.fillRect(cx, cy, cell_w, cell_h);
+          var textStr = '#' + (i + 1);
           var numSize = Math.max(14, Math.round(Math.min(cell_w, cell_h) * 0.09));
           ctx.font = 'bold ' + numSize + 'px sans-serif';
+          var textW = ctx.measureText(textStr).width;
+          var badgePad = 6;
           ctx.fillStyle = 'rgba(0,0,0,0.65)';
-          ctx.fillText('#' + (i + 1), cx + 8, cy + numSize + 8);
+          var badgeX = cx + 8, badgeY = cy + 8;
+          ctx.fillRect(badgeX, badgeY, textW + badgePad * 2, numSize + badgePad * 2);
+          ctx.fillStyle = '#fff';
+          ctx.fillText(textStr, badgeX + badgePad, badgeY + numSize + badgePad);
           var img = new Image();
           img.onload = function() {
             var isPortrait = img.height > img.width;
@@ -466,7 +472,10 @@ export function startContactSheet() {
     URL.revokeObjectURL(url);
     S.progBar.style.width = '100%';
     S.progText.textContent = t('contact_sheet_done');
-    showStatus(t('contact_sheet_done'), 'success');
+    var spin = S._('progress-spinner'), done = S._('progress-done');
+    if (spin) spin.style.display = 'none'; if (done) done.style.display = 'flex';
+    var nextBtn = S._('progress-next-btn');
+    if (nextBtn) nextBtn.style.display = 'inline-block';
     S.reviewBtn.disabled = false;
   });
 }
