@@ -183,6 +183,11 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 <details>
 <summary>Click to expand</summary>
 
+**1.6.0 (2026-07-20)** — EXIF auto-fill on upload
+- 🎯 After uploading photos, EXIF fields (Artist, Camera, Lens, ISO, Process) auto-populate dropdowns
+- 🔍 Matches EXIF values against built-in options — selects matching entry or fills as custom value
+- 📐 Focal length & aperture auto-filled from EXIF when available
+
 **1.5.0 (2026-07-20)** — Contact Sheet generation
 - ☑ Contact Sheet toggle in Review Summary — default ON, saved to localStorage
 - 📸 "Generate Only" button for standalone contact sheet download

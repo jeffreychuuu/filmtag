@@ -183,6 +183,11 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 <details>
 <summary>撳開嚟睇</summary>
 
+**1.6.0 (2026-07-20)** — EXIF 自動填入
+- 🎯 上傳相片後自動讀取 EXIF，Artist、Camera、Lens、ISO、Process 自動填入對應欄位
+- 🔍 將 EXIF 值匹配內建選項 — 匹配到就自動揀，匹配唔到就設為自訂值
+- 📐 焦距同光圈值亦會從 EXIF 自動填入
+
 **1.5.0 (2026-07-20)** — Contact Sheet 生成功能
 - ☑ Review Summary 加入 Contact Sheet toggle — 預設開啟，自動 save 去 localStorage
 - 📸「只生成 CS」按鈕 — 獨立下載 Contact Sheet
