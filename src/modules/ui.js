@@ -497,10 +497,10 @@ export function rebuildSummaryBody() {
       '<button class="btn btn-sm btn-secondary" id="content-sheet-btn" style="display:none">📋 ' + t('content_sheet_generate') + '</button>' +
     '</div>' +
     '<div class="summary-footer-row">' +
-      '<button class="btn btn-secondary" id="summary-close-btn">✕ ' + t('close') + '</button>' +
+      '<button class="btn btn-secondary" id="summary-close-btn">' + t('edit_roll') + '</button>' +
       '<button class="btn btn-primary" id="confirm-save-btn">💾 ' + t('save_to_album') + '</button>' +
       '<div style="display:flex;flex-direction:column;align-items:center;">' +
-        '<button class="btn btn-secondary" id="confirm-zip-btn">⬇ ' + t('download_zip') + '</button>' +
+        '<button class="btn btn-primary" id="confirm-zip-btn">⬇ ' + t('download_zip') + '</button>' +
         '<span id="content-sheet-hint" style="font-size:0.65rem;color:var(--text-secondary);line-height:1;margin-top:2px;display:' + (csChecked ? '' : 'none') + ';">' + t('content_sheet_hint') + '</span>' +
       '</div>' +
     '</div>';
@@ -520,7 +520,7 @@ export function rebuildSummaryBody() {
     });
   }
   var closeBtn = S._('summary-close-btn');
-  if (closeBtn) closeBtn.addEventListener('click', function() { S.summaryPanel.classList.remove('show'); S.summaryPage = 1; });
+  if (closeBtn) closeBtn.addEventListener('click', function() { S.summaryPanel.classList.remove('show'); S.summaryPage = 1; window.scrollTo({ top: 0, behavior: 'smooth' }); });
 }
 
 export function generateSummaryThumbnails() {

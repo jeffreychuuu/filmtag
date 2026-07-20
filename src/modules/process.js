@@ -243,6 +243,7 @@ export function startSaveProcess() {
 export function showGallery(files, params, zip) {
   S.galleryTitle.textContent = t('files_ready', {n: files.length});
   S.galleryGrid.innerHTML = '';
+  S.galleryZipBtn.style.display = 'none';
   for (var i = 0; i < files.length; i++) {
     (function(f) {
       var item = document.createElement('div');
