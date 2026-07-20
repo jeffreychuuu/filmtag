@@ -424,7 +424,29 @@ export function renderManageOverlay() {
   if (!any) {
     h = '<p style="color:var(--text-secondary);font-size:0.85rem;text-align:center;padding:2rem 0;">' + t('manage_opts_none') + '</p>';
   }
+
+  // Preserve open sections
+  var openKeys = [];
+  body.querySelectorAll('.manage-section-hdr').forEach(function(hdr) {
+    if (hdr.nextElementSibling && hdr.nextElementSibling.style.display !== 'none') {
+      openKeys.push(hdr.getAttribute('data-key') || '');
+    }
+  });
+
   body.innerHTML = h;
+
+  // Restore open sections
+  body.querySelectorAll('.manage-section-hdr').forEach(function(hdr) {
+    var key = hdr.getAttribute('data-key') || '';
+    if (openKeys.indexOf(key) !== -1) {
+      var sectionBody = hdr.nextElementSibling;
+      if (sectionBody) {
+        sectionBody.style.display = 'block';
+        var icon = hdr.querySelector('.manage-icon');
+        if (icon) icon.textContent = '▼';
+      }
+    }
+  });
 
   body.querySelectorAll('.manage-del-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
