@@ -1,6 +1,7 @@
 import piexif from 'piexifjs';
 import { t } from '../i18n.js';
 import { dmsToDecimal } from '../lib/utils.js';
+import { selByText, setCust } from './gear.js';
 
 var S;
 
@@ -82,9 +83,70 @@ function extractExifFromFiles() {
         } catch(_) {}
         completed++;
         if (completed >= firstPageSize && !firstPageDone) { firstPageDone = true; S.renderFileList(); }
-        if (completed === total) S.renderFileList();
+        if (completed === total) { S.renderFileList(); autoFillFromFirstFile(); }
       };
       reader.readAsArrayBuffer(file);
     })(i);
   }
+}
+
+function autoFillFromFirstFile() {
+  if (S.uploadedFiles.length === 0) return;
+  var first = S.uploadedFiles[0];
+  if (!first._jpegStr) return;
+  try {
+    var exifObj = piexif.load(first._jpegStr);
+    var artist = exifObj['0th'][piexif.ImageIFD.Artist];
+    if (artist && !selByText(S.artistSel, artist)) setCust(S.artistSel, S.artistCust, artist);
+
+    var make = exifObj['0th'][piexif.ImageIFD.Make] || '';
+    var model = exifObj['0th'][piexif.ImageIFD.Model] || '';
+    if (model) {
+      var matched = false;
+      for (var ci = 0; ci < S.CAMERAS.length; ci++) {
+        if (S.CAMERAS[ci].model === model) {
+          S.cameraSel.selectedIndex = ci;
+          S.cameraSel.dispatchEvent(new Event('change'));
+          matched = true;
+          break;
+        }
+      }
+      if (!matched && !selByText(S.cameraSel, model)) {
+        setCust(S.cameraSel, S.cameraCust, model);
+        if (make) S.$('camera-make-custom').value = make;
+      }
+    }
+
+    var lens = exifObj['Exif'][piexif.ExifIFD.LensModel];
+    if (lens && !selByText(S.lensSel, lens)) setCust(S.lensSel, S.lensCust, lens);
+    var focal = exifObj['Exif'][piexif.ExifIFD.FocalLength];
+    if (focal) {
+      var fv = Array.isArray(focal) ? (focal[0] / focal[1]) : focal;
+      S.$('lens-focal').value = String(Math.round(fv));
+    }
+    var aperture = exifObj['Exif'][piexif.ExifIFD.FNumber];
+    if (aperture) {
+      var av = Array.isArray(aperture) ? (aperture[0] / aperture[1]) : aperture;
+      S.$('lens-aperture').value = av.toFixed(1);
+    }
+
+    var iso = exifObj['Exif'][piexif.ExifIFD.ISOSpeedRatings];
+    if (iso) {
+      var isoVal = Array.isArray(iso) ? iso[0] : iso;
+      var matchedFilm = false;
+      for (var fi = 0; fi < S.filmSel.options.length; fi++) {
+        var opt = S.filmSel.options[fi];
+        if (opt.getAttribute('data-iso') == isoVal) {
+          S.filmSel.selectedIndex = fi;
+          S.filmSel.dispatchEvent(new Event('change'));
+          matchedFilm = true;
+          break;
+        }
+      }
+      if (!matchedFilm && S.$('film-iso-custom')) S.$('film-iso-custom').value = String(isoVal);
+    }
+
+    var instructions = exifObj['Exif'][0x828D];
+    if (instructions && !selByText(S.processSel, instructions)) setCust(S.processSel, S.processCust, instructions);
+  } catch(_) {}
 }
