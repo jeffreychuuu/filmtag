@@ -183,6 +183,14 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 <details>
 <summary>撳開嚟睇</summary>
 
+**1.9.0 (2026-07-20)** — 自訂選項：隱藏預設 + 管理已儲存
+
+- ⚙️ Footer「自訂選項」打開 overlay 管理已儲存同內建嘅選項
+- 👁️ 可以隱藏/顯示每個欄位嘅內建預設（相機、鏡頭、菲林、沖曬店等）
+- 🗑️ 刪除自訂選項（artist、camera、lens、film、lab、process、push/pull、scanner）
+- 🔄「顯示所有預設」一鍵恢復所有隱藏嘅選項
+- 🔧 改完即時 refresh 下拉選單，唔使 reload
+
 **1.8.0 (2026-07-20)** — 管理自訂選項
 
 - ⚙️「管理」按鈕打開 overlay，可以檢視同刪除已儲存嘅自訂選項（artist、camera、lens、film、lab、process、push/pull、scanner）

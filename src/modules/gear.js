@@ -4,6 +4,8 @@ import { esc } from '../lib/utils.js';
 var CAMERAS, $, artistSel, artistCust, cameraSel, cameraCust, lensDrop, lensSel, lensCust;
 var filmSel, filmCust, labSel, labCust, ppSel, ppCust, scanSel, scanCust, processSel, processCust;
 var selectedSet, gpsData;
+var DEFAULT_ITEMS = {};
+var HIDDEN_KEY = 'filmtag-hidden-defaults';
 
 export function initGear(refs) {
   CAMERAS = refs.CAMERAS;
@@ -29,9 +31,20 @@ export function fillSelect(sel, items) {
   }
 }
 
+function loadHidden() {
+  try { return JSON.parse(localStorage.getItem(HIDDEN_KEY) || '{}'); } catch(_) { return {}; }
+}
+
+function saveHidden(data) {
+  localStorage.setItem(HIDDEN_KEY, JSON.stringify(data));
+}
+
 // Populate <select> with items + saved custom entries + __custom__ option
 export function fillSelectWithCustom(sel, items, key) {
-  fillSelect(sel, items);
+  if (key && !DEFAULT_ITEMS[key]) DEFAULT_ITEMS[key] = items;
+  var hidden = key ? (loadHidden()[key] || []) : [];
+  var filtered = items.filter(function(v) { return hidden.indexOf(v) === -1; });
+  fillSelect(sel, filtered);
   if (key) {
     var saved = loadSavedOpt(key);
     for (var i = 0; i < saved.length; i++) {
@@ -63,7 +76,8 @@ function loadSavedLensesForCamera(cameraModel) {
 // Get current camera model string from dropdown or custom input
 function currentCameraModel() {
   if (cameraSel.value === '__custom__') return $('camera-model-custom').value.trim();
-  if (cameraSel.selectedIndex < CAMERAS.length) return CAMERAS[cameraSel.selectedIndex].model;
+  var idx = findCameraByModel(cameraSel.value);
+  if (idx !== -1) return CAMERAS[idx].model;
   return cameraSel.value;
 }
 
@@ -142,8 +156,23 @@ export function setupCustom(sel, cust) {
   toggle();
 }
 
+function findCameraByModel(modelName) {
+  for (var i = 0; i < CAMERAS.length; i++) {
+    if (CAMERAS[i].model === modelName) return i;
+  }
+  return -1;
+}
+
+function isCustomCamera() {
+  var model = cameraSel.value;
+  if (model === '__custom__') return true;
+  return findCameraByModel(model) === -1;
+}
+
 // Populate lens dropdown for a built-in camera preset
-function populateLenses(idx) {
+function populateLenses(modelName) {
+  var idx = findCameraByModel(modelName);
+  if (idx === -1) return;
   lensSel.innerHTML = '';
   CAMERAS[idx].lenses.forEach(function(l, i) {
     var o = document.createElement('option'); o.value = i; o.textContent = l.name; lensSel.appendChild(o);
@@ -168,7 +197,7 @@ function populateLenses(idx) {
 export function updateLensUI() {
   if (cameraSel.value === '__custom__') {
     lensDrop.style.display = 'none'; lensCust.classList.add('show'); lensSel.value = '__custom__';
-  } else if (cameraSel.selectedIndex >= CAMERAS.length) {
+  } else if (isCustomCamera()) {
     lensDrop.style.display = 'block';
     lensSel.innerHTML = '';
     var savedLenses = loadSavedLensesForCamera(cameraSel.value);
@@ -187,7 +216,7 @@ export function updateLensUI() {
     oo.value = '__custom__'; oo.textContent = t('other_free_text'); lensSel.appendChild(oo);
     lensCust.classList.remove('show');
   } else {
-    lensDrop.style.display = 'block'; populateLenses(cameraSel.selectedIndex);
+    lensDrop.style.display = 'block'; populateLenses(cameraSel.value);
     lensCust.classList.toggle('show', lensSel.value === '__custom__');
   }
 }
@@ -200,22 +229,33 @@ function getVal(sel, inp) { return sel.value === '__custom__' ? inp.value.trim()
 
 // Collect camera info (make, model, shutter) from dropdown or custom inputs
 function camInfo() {
-  if (cameraSel.value === '__custom__' || cameraSel.selectedIndex >= CAMERAS.length) {
+  if (cameraSel.value === '__custom__' || isCustomCamera()) {
     var model = cameraSel.value === '__custom__' ? ($('camera-model-custom').value.trim() || t('unknown')) : cameraSel.value;
     return { make: $('camera-make-custom').value.trim() || t('unknown'), model: model, shutter: null };
   }
-  var c = CAMERAS[cameraSel.selectedIndex]; return { make: c.make, model: c.model, shutter: c.shutter };
+  var idx = findCameraByModel(cameraSel.value);
+  if (idx === -1) return { make: t('unknown'), model: cameraSel.value, shutter: null };
+  var c = CAMERAS[idx]; return { make: c.make, model: c.model, shutter: c.shutter };
 }
 
 // Collect lens info (name, focal, aperture) from dropdown or custom inputs
 function lensInfo() {
   if (cameraSel.value === '__custom__' || lensSel.value === '__custom__')
     return { name: $('lens-name-custom').value.trim(), focal: $('lens-focal').value.trim(), aperture: $('lens-aperture').value.trim() };
-  if (cameraSel.selectedIndex >= CAMERAS.length || lensSel.selectedIndex >= CAMERAS[cameraSel.selectedIndex].lenses.length) {
+  if (isCustomCamera()) {
     var o = lensSel.options[lensSel.selectedIndex];
     return { name: selText(lensSel), focal: o.getAttribute('data-focal') || '', aperture: o.getAttribute('data-aperture') || '' };
   }
-  var l = CAMERAS[cameraSel.selectedIndex].lenses[lensSel.selectedIndex];
+  var idx = findCameraByModel(cameraSel.value);
+  if (idx === -1) {
+    var o = lensSel.options[lensSel.selectedIndex];
+    return { name: selText(lensSel), focal: o.getAttribute('data-focal') || '', aperture: o.getAttribute('data-aperture') || '' };
+  }
+  if (lensSel.selectedIndex >= CAMERAS[idx].lenses.length) {
+    var o = lensSel.options[lensSel.selectedIndex];
+    return { name: selText(lensSel), focal: o.getAttribute('data-focal') || '', aperture: o.getAttribute('data-aperture') || '' };
+  }
+  var l = CAMERAS[idx].lenses[lensSel.selectedIndex];
   return { name: l.name, focal: l.focal, aperture: l.aperture };
 }
 
@@ -250,26 +290,59 @@ function saveAllOpts(data) {
   localStorage.setItem('filmtag-custom-opts', JSON.stringify(data));
 }
 
+export function setDefaultItems(key, items) {
+  DEFAULT_ITEMS[key] = items;
+}
+
 function refreshGearDropdowns() {
   [artistSel, cameraSel, labSel, processSel, ppSel, scanSel].forEach(function(sel) {
-    var val = sel.value;
     sel.innerHTML = '';
-    sel.appendChild(document.createElement('option'));
   });
-  fillSelectWithCustom(artistSel, [], 'artist');
-  fillSelectWithCustom(cameraSel, [], 'cameraModel');
-  fillSelectWithCustom(labSel, [], 'lab');
-  fillSelectWithCustom(processSel, [], 'process');
-  fillSelectWithCustom(ppSel, [], 'pushPull');
-  fillSelectWithCustom(scanSel, [], 'scanner');
+  fillSelectWithCustom(artistSel, DEFAULT_ITEMS.artist || [], 'artist');
+  fillSelectWithCustom(cameraSel, DEFAULT_ITEMS.cameraModel || [], 'cameraModel');
+  fillSelectWithCustom(labSel, DEFAULT_ITEMS.lab || [], 'lab');
+  fillSelectWithCustom(processSel, DEFAULT_ITEMS.process || [], 'process');
+  fillSelectWithCustom(ppSel, DEFAULT_ITEMS.pushPull || [], 'pushPull');
+  fillSelectWithCustom(scanSel, DEFAULT_ITEMS.scanner || [], 'scanner');
   updateLensUI();
   filmSel.innerHTML = '';
-  var oo = document.createElement('option'); oo.value = '__custom__'; oo.textContent = t('other_free_text'); filmSel.appendChild(oo);
+  var hiddenFilms = (loadHidden().filmName || []);
+  var filmDefaults = DEFAULT_ITEMS.filmName || [];
+  for (var fi = 0; fi < filmDefaults.length; fi++) {
+    if (hiddenFilms.indexOf(filmDefaults[fi]) === -1) {
+      var fo = document.createElement('option'); fo.textContent = filmDefaults[fi]; filmSel.appendChild(fo);
+    }
+  }
   var savedFilms = loadSavedOpt('filmName');
   for (var si = 0; si < savedFilms.length; si++) {
-    var o = document.createElement('option'); o.textContent = savedFilms[si]; filmSel.insertBefore(o, filmSel.firstChild);
+    var o = document.createElement('option'); o.textContent = savedFilms[si]; filmSel.appendChild(o);
   }
-  // Don't try to restore old selection — just leave at default
+  var oo = document.createElement('option'); oo.value = '__custom__'; oo.textContent = t('other_free_text'); filmSel.appendChild(oo);
+  [artistSel, cameraSel, labSel, processSel, ppSel, scanSel, filmSel].forEach(function(sel) {
+    sel.dispatchEvent(new Event('change'));
+  });
+}
+
+export function toggleHiddenDefault(key, value) {
+  var hidden = loadHidden();
+  if (!hidden[key]) hidden[key] = [];
+  var idx = hidden[key].indexOf(value);
+  if (idx === -1) {
+    hidden[key].push(value);
+  } else {
+    hidden[key].splice(idx, 1);
+    if (hidden[key].length === 0) delete hidden[key];
+  }
+  if (Object.keys(hidden).length === 0) localStorage.removeItem(HIDDEN_KEY);
+  else saveHidden(hidden);
+  refreshGearDropdowns();
+  renderManageOverlay();
+}
+
+export function resetHiddenDefaults() {
+  localStorage.removeItem(HIDDEN_KEY);
+  refreshGearDropdowns();
+  renderManageOverlay();
 }
 
 export function deleteCustomOpt(key, value) {
@@ -293,6 +366,7 @@ export function deleteCustomOpt(key, value) {
 
 export function renderManageOverlay() {
   var data = loadAllOpts();
+  var hidden = loadHidden();
   var body = document.getElementById('manage-body');
   if (!body) return;
   var keys = [
@@ -306,40 +380,101 @@ export function renderManageOverlay() {
   ];
   var h = '';
   var any = false;
+
   for (var ki = 0; ki < keys.length; ki++) {
-    var items = data[keys[ki].key];
-    if (!items || items.length === 0) continue;
+    var defaults = DEFAULT_ITEMS[keys[ki].key];
+    var customItems = data[keys[ki].key];
+    var hiddenForField = hidden[keys[ki].key] || [];
+    var hasDefaults = defaults && defaults.length > 0;
+    var hasCustom = customItems && customItems.length > 0;
+    if (!hasDefaults && !hasCustom) continue;
     any = true;
-    h += '<div style="margin-bottom:0.75rem;">';
-    h += '<div style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.05em;">' + esc(keys[ki].label) + '</div>';
-    for (var ii = 0; ii < items.length; ii++) {
-      h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.3rem 0;border-bottom:1px solid var(--border);font-size:0.85rem;">';
-      h += '<span style="flex:1;">' + esc(items[ii]) + '</span>';
-      h += '<button class="manage-del-btn" data-key="' + keys[ki].key + '" data-value="' + esc(items[ii]) + '" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:0.9rem;padding:0.2rem;" title="Delete">✕</button>';
-      h += '</div>';
+
+    h += '<div class="manage-section" style="margin-bottom:0.5rem;">';
+    h += '<div class="manage-section-hdr" style="cursor:pointer;font-size:0.8rem;font-weight:600;color:var(--text-secondary);padding:0.3rem 0;user-select:none;" data-key="' + keys[ki].key + '">';
+    h += '<span class="manage-icon" style="display:inline-block;width:1rem;">▶</span> ' + esc(keys[ki].label) + '</div>';
+    h += '<div class="manage-section-body" style="display:none;margin-left:1.2rem;border-left:1px solid var(--border);padding-left:0.75rem;">';
+
+    if (hasDefaults) {
+      h += '<div style="font-size:0.65rem;color:var(--text-secondary);margin-bottom:0.2rem;">' + t('default') + '</div>';
+      for (var di = 0; di < defaults.length; di++) {
+        var isHidden = hiddenForField.indexOf(defaults[di]) !== -1;
+        h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">';
+        h += '<span style="flex:1;' + (isHidden ? 'color:var(--text-secondary);text-decoration:line-through;' : '') + '">' + esc(defaults[di]) + '</span>';
+        h += '<button class="manage-toggle-btn" data-key="' + keys[ki].key + '" data-value="' + esc(defaults[di]) + '" style="background:none;border:1px solid ' + (isHidden ? '#50fa7b' : 'var(--border)') + ';border-radius:4px;color:' + (isHidden ? '#50fa7b' : 'var(--text)') + ';cursor:pointer;font-size:0.65rem;padding:0.1rem 0.35rem;">' + (isHidden ? t('show') : t('hide')) + '</button>';
+        h += '</div>';
+      }
     }
-    h += '</div>';
+
+    if (hasCustom) {
+      h += '<div style="font-size:0.65rem;color:var(--text-secondary);margin-top:0.3rem;margin-bottom:0.2rem;">' + t('custom') + '</div>';
+      for (var ii = 0; ii < customItems.length; ii++) {
+        h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">';
+        h += '<span style="flex:1;">' + esc(customItems[ii]) + '</span>';
+        h += '<button class="manage-del-btn" data-key="' + keys[ki].key + '" data-value="' + esc(customItems[ii]) + '" style="background:#c0392b;color:#fff;border:1px solid #c0392b;border-radius:4px;cursor:pointer;font-size:0.7rem;padding:0.1rem 0.4rem;">' + t('remove') + '</button>';
+        h += '</div>';
+      }
+    }
+
+    h += '</div></div>';
   }
+
+  // Custom lenses
   if (data.lensByCamera) {
     var cameras = Object.keys(data.lensByCamera);
     for (var ci = 0; ci < cameras.length; ci++) {
       var lenses = data.lensByCamera[cameras[ci]];
       if (!lenses || lenses.length === 0) continue;
       any = true;
-      h += '<div style="margin-bottom:0.75rem;">';
-      h += '<div style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.05em;">' + esc(t('lens')) + ' (' + esc(cameras[ci]) + ')</div>';
+      h += '<div class="manage-section" style="margin-bottom:0.5rem;">';
+      h += '<div class="manage-section-hdr" style="cursor:pointer;font-size:0.8rem;font-weight:600;color:var(--text-secondary);padding:0.3rem 0;user-select:none;">';
+      h += '<span class="manage-icon" style="display:inline-block;width:1rem;">▶</span> ' + esc(t('lens')) + ' (' + esc(cameras[ci]) + ')</div>';
+      h += '<div class="manage-section-body" style="display:none;margin-left:1.2rem;border-left:1px solid var(--border);padding-left:0.75rem;">';
+      h += '<div style="font-size:0.65rem;color:var(--text-secondary);margin-bottom:0.2rem;">' + t('custom') + '</div>';
       for (var li = 0; li < lenses.length; li++) {
         var lensName = typeof lenses[li] === 'object' ? lenses[li].name : lenses[li];
-        h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.3rem 0;border-bottom:1px solid var(--border);font-size:0.85rem;">';
+        h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">';
         h += '<span style="flex:1;">' + esc(lensName) + '</span>';
-        h += '<button class="manage-del-btn" data-key="lensByCamera" data-value=\'' + esc(JSON.stringify({camera: cameras[ci], name: lensName})) + '\' style="background:none;border:none;color:var(--red);cursor:pointer;font-size:0.9rem;padding:0.2rem;" title="Delete">✕</button>';
+        h += '<button class="manage-del-btn" data-key="lensByCamera" data-value=\'' + esc(JSON.stringify({camera: cameras[ci], name: lensName})) + '\' style="background:#c0392b;color:#fff;border:1px solid #c0392b;border-radius:4px;cursor:pointer;font-size:0.7rem;padding:0.1rem 0.4rem;">' + t('remove') + '</button>';
         h += '</div>';
       }
-      h += '</div>';
+      h += '</div></div>';
     }
   }
-  if (!any) h += '<p style="color:var(--text-secondary);font-size:0.85rem;text-align:center;padding:2rem 0;">' + t('manage_opts_none') + '</p>';
+
+  // Show all defaults button
+  var hasHidden = Object.keys(hidden).length > 0;
+  h += '<div style="text-align:center;margin-top:0.75rem;">';
+  h += '<button class="btn btn-sm btn-primary" id="reset-defaults-btn" style="visibility:' + (hasHidden ? 'visible' : 'hidden') + ';">' + t('reset_defaults') + '</button>';
+  h += '</div>';
+
+  if (!any) {
+    h = '<p style="color:var(--text-secondary);font-size:0.85rem;text-align:center;padding:2rem 0;">' + t('manage_opts_none') + '</p>';
+  }
+
+  // Preserve open sections
+  var openKeys = [];
+  body.querySelectorAll('.manage-section-hdr').forEach(function(hdr) {
+    if (hdr.nextElementSibling && hdr.nextElementSibling.style.display !== 'none') {
+      openKeys.push(hdr.getAttribute('data-key') || '');
+    }
+  });
+
   body.innerHTML = h;
+
+  // Restore open sections
+  body.querySelectorAll('.manage-section-hdr').forEach(function(hdr) {
+    var key = hdr.getAttribute('data-key') || '';
+    if (openKeys.indexOf(key) !== -1) {
+      var sectionBody = hdr.nextElementSibling;
+      if (sectionBody) {
+        sectionBody.style.display = 'block';
+        var icon = hdr.querySelector('.manage-icon');
+        if (icon) icon.textContent = '▼';
+      }
+    }
+  });
+
   body.querySelectorAll('.manage-del-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var key = this.getAttribute('data-key');
@@ -348,4 +483,20 @@ export function renderManageOverlay() {
       deleteCustomOpt(key, value);
     });
   });
+  body.querySelectorAll('.manage-toggle-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      toggleHiddenDefault(this.getAttribute('data-key'), this.getAttribute('data-value'));
+    });
+  });
+  body.querySelectorAll('.manage-section-hdr').forEach(function(hdr) {
+    hdr.addEventListener('click', function() {
+      var sectionBody = this.nextElementSibling;
+      var icon = this.querySelector('.manage-icon');
+      var isOpen = sectionBody.style.display !== 'none';
+      sectionBody.style.display = isOpen ? 'none' : 'block';
+      icon.textContent = isOpen ? '▶' : '▼';
+    });
+  });
+  var resetBtn = document.getElementById('reset-defaults-btn');
+  if (resetBtn) resetBtn.addEventListener('click', resetHiddenDefaults);
 }

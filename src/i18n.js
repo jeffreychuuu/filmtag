@@ -80,9 +80,14 @@ tpl.en = {
   // Actions / Status
   "review_summary": "Review Summary",
   "reset_all": "Reset All",
-  "manage_opts": "⚙️ Manage",
-  "manage_opts_title": "Manage Custom Options",
+  "manage_opts": "⚙️ Custom Options",
+  "manage_opts_title": "Custom Options",
   "manage_opts_none": "No saved custom options yet. Use the free-text dropdown option to add your own camera, lens, film, lab, and more — they'll be saved here automatically.",
+  "hide": "Hide",
+  "show": "Show",
+  "default": "Default",
+  "custom": "Custom",
+  "reset_defaults": "Show all defaults",
   "close": "Close",
   "download_zip": "Download ZIP",
   "save_to_album": "Save to Album",
@@ -146,7 +151,7 @@ tpl.en = {
 
   "extracting_exif": "Uploading {n} photos…",
   "next_roll": "Next Roll 🎞️",
-  "edit_roll": "✏️ Edit This Roll",
+  "edit_roll": "Edit This Roll ✏️",
 
   // Disclaimer acknowledgment
   "disclaimer_title": "Before You Use This Tool",
@@ -229,9 +234,14 @@ tpl.zh = {
   // Actions / Status
   "review_summary": "檢視摘要",
   "reset_all": "全部重設",
-  "manage_opts": "⚙️ 管理",
-  "manage_opts_title": "管理自訂選項",
+  "manage_opts": "⚙️ 自訂選項",
+  "manage_opts_title": "自訂選項",
   "manage_opts_none": "未有已儲存嘅自訂選項。用下拉選單嘅「其他（自由輸入）」選項加入你嘅相機、鏡頭、菲林、沖曬店等 — 佢哋會自動儲存喺呢度。",
+  "hide": "隱藏",
+  "show": "顯示",
+  "default": "預設",
+  "custom": "自訂",
+  "reset_defaults": "顯示所有預設",
   "close": "關閉",
   "download_zip": "下載 ZIP",
   "save_to_album": "儲存至相簿",
@@ -294,7 +304,7 @@ tpl.zh = {
   "set_gps": "設定 GPS 位置",
 
   "extracting_exif": "正在上傳 {n} 張相…",
-  "edit_roll": "✏️ 編輯此卷",
+  "edit_roll": "編輯此卷 ✏️",
   "next_roll": "下一卷菲林 🎞️",
 
   // Disclaimer acknowledgment

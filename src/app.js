@@ -3,7 +3,7 @@ import JSZip from 'jszip';
 import DATA from '../data.json';
 import { t, setLang, toggleLang, applyTranslations, lang } from './i18n.js';
 import { toDms, strToUtf8Binary, toUcs2Binary, injectXmp, escXml, esc, fmtSize, dmsToDecimal, newFilmPrefix } from './lib/utils.js';
-import { initGear, fillSelect, fillSelectWithCustom, saveCustomOpts, setupCustom, updateLensUI, collect, validate, saveLastSession, restoreLastSession, renderManageOverlay } from './modules/gear.js';
+import { initGear, fillSelect, fillSelectWithCustom, saveCustomOpts, setupCustom, updateLensUI, collect, validate, saveLastSession, restoreLastSession, renderManageOverlay, setDefaultItems } from './modules/gear.js';
 import { initGps, initMap, updateGpsDots, updateGpsSaveBtn, setGpsForSelected, reverseGeocode } from './modules/gps.js';
 import { init as initUi, renderFileList, goToPage, changePageSize, goToSummaryPage, changeSummaryPageSize, clearAll, removeOne, sortFiles, toggleSort, getTotalPages, buildSummaryHtml, generateSummaryThumbnails, rebuildSummaryBody, buildOptions, syncRange, buildSelectedFromRanges } from './modules/ui.js';
 import { init as initDate, applyDateToSelected, refreshSegments, computeDateForFile, getFileDate, newFName } from './modules/date.js';
@@ -167,9 +167,13 @@ document.addEventListener('DOMContentLoaded', function() {
   fillSelectWithCustom(scanSel, DATA.scanners, 'scanner');
   fillSelectWithCustom(ppSel, DATA.pushpulls, 'pushPull');
   fillSelectWithCustom(processSel, DATA.processes, 'process');
+  var filmNames = DATA.films.map(function(f) { return f.name; });
+  setDefaultItems('filmName', filmNames);
   (function() {
     filmSel.innerHTML = '';
+    var hiddenFilms = JSON.parse(localStorage.getItem('filmtag-hidden-defaults') || '{}').filmName || [];
     for (var i = 0; i < DATA.films.length; i++) {
+      if (hiddenFilms.indexOf(DATA.films[i].name) !== -1) continue;
       var o = document.createElement('option');
       o.textContent = DATA.films[i].name;
       o.setAttribute('data-iso', DATA.films[i].iso);
