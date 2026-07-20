@@ -401,7 +401,7 @@ export function renderManageOverlay() {
         var isHidden = hiddenForField.indexOf(defaults[di]) !== -1;
         h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">';
         h += '<span style="flex:1;' + (isHidden ? 'color:var(--text-secondary);text-decoration:line-through;' : '') + '">' + esc(defaults[di]) + '</span>';
-        h += '<button class="manage-toggle-btn" data-key="' + keys[ki].key + '" data-value="' + esc(defaults[di]) + '" style="background:none;border:1px solid ' + (isHidden ? '#50fa7b' : 'var(--border)') + ';border-radius:4px;color:' + (isHidden ? '#50fa7b' : 'var(--text)') + ';cursor:pointer;font-size:0.65rem;padding:0.1rem 0.35rem;">' + (isHidden ? t('show') : t('hide')) + '</button>';
+        h += '<button class="manage-toggle-btn" data-key="' + keys[ki].key + '" data-value="' + esc(defaults[di]) + '" style="background:none;border:1px solid ' + (isHidden ? 'var(--accent)' : 'var(--border)') + ';border-radius:4px;color:' + (isHidden ? 'var(--accent)' : 'var(--text)') + ';cursor:pointer;font-size:0.65rem;padding:0.1rem 0.35rem;">' + (isHidden ? t('show') : t('hide')) + '</button>';
         h += '</div>';
       }
     }
