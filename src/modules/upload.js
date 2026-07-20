@@ -2,6 +2,7 @@ import piexif from 'piexifjs';
 import { t } from '../i18n.js';
 import { dmsToDecimal } from '../lib/utils.js';
 import { selByText, setCust } from './gear.js';
+import { parseSoftware, parseInstructions, parseCopyright, parseImageDescription, parseUserComment, tryFixUtf8 } from '../lib/exif-format.js';
 
 var S;
 
@@ -90,15 +91,24 @@ function extractExifFromFiles() {
   }
 }
 
+function fillField(sel, inp, val) {
+  if (!val) return;
+  if (!selByText(sel, val)) setCust(sel, inp, val);
+}
+
 function autoFillFromFirstFile() {
   if (S.uploadedFiles.length === 0) return;
   var first = S.uploadedFiles[0];
   if (!first._jpegStr) return;
   try {
     var exifObj = piexif.load(first._jpegStr);
+    var filled = {};
+
+    // Artist
     var artist = exifObj['0th'][piexif.ImageIFD.Artist];
     if (artist && !selByText(S.artistSel, artist)) setCust(S.artistSel, S.artistCust, artist);
 
+    // Camera
     var make = exifObj['0th'][piexif.ImageIFD.Make] || '';
     var model = exifObj['0th'][piexif.ImageIFD.Model] || '';
     if (model) {
@@ -117,6 +127,7 @@ function autoFillFromFirstFile() {
       }
     }
 
+    // Lens
     var lens = exifObj['Exif'][piexif.ExifIFD.LensModel];
     if (lens && !selByText(S.lensSel, lens)) setCust(S.lensSel, S.lensCust, lens);
     var focal = exifObj['Exif'][piexif.ExifIFD.FocalLength];
@@ -130,23 +141,69 @@ function autoFillFromFirstFile() {
       S.$('lens-aperture').value = av.toFixed(1);
     }
 
-    var iso = exifObj['Exif'][piexif.ExifIFD.ISOSpeedRatings];
-    if (iso) {
-      var isoVal = Array.isArray(iso) ? iso[0] : iso;
+    // Parse composite strings via shared functions
+    var sw = parseSoftware(exifObj['0th'][piexif.ImageIFD.Software]);
+    var ins = parseInstructions(exifObj['Exif'][0x828D]);
+    var cr = parseCopyright(exifObj['0th'][piexif.ImageIFD.Copyright]);
+    var desc = parseImageDescription(exifObj['0th'][piexif.ImageIFD.ImageDescription]);
+    var uc = parseUserComment(exifObj['Exif'][piexif.ExifIFD.UserComment]);
+
+    // Scanner: Software → ImageDescription → UserComment
+    var scannerVal = sw || desc.scanner || uc.scanner;
+    if (scannerVal) { fillField(S.scanSel, S.$('scanner-custom-input'), scannerVal); filled.scanner = true; }
+
+    // Artist: standard EXIF → UserComment (Unicode-safe) → ImageDescription
+    var artistVal = artist || uc.artist || desc.artist;
+    // artist already set above if found; skipping overwrite
+
+    // Lab: UserComment (Unicode-safe) → Copyright (try UTF-8 fix) → ImageDescription (try UTF-8 fix)
+    var labVal = uc.lab || tryFixUtf8(cr.lab) || tryFixUtf8(desc.lab);
+    if (labVal) { fillField(S.labSel, S.$('lab-custom-input'), labVal); filled.lab = true; }
+
+    // Process: Instructions → Copyright → UserComment → ImageDescription
+    var procVal = (ins && ins.process) || cr.process || uc.process || desc.process;
+    if (procVal) { fillField(S.processSel, S.$('process-custom-input'), procVal); filled.process = true; }
+
+    // PushPull: Instructions → UserComment → ImageDescription
+    var ppVal = (ins && ins.pushpull) || uc.pushpull || desc.pushpull;
+    if (ppVal) { fillField(S.ppSel, S.$('pushpull-custom-input'), ppVal); filled.pushpull = true; }
+
+    // Film matching: name match first, ISO fallback
+    var rawIso = exifObj['Exif'][piexif.ExifIFD.ISOSpeedRatings];
+    var isoVal = rawIso ? (Array.isArray(rawIso) ? rawIso[0] : rawIso) : null;
+
+    if (!filled.film) {
+      var filmVal = uc.film || desc.film;
+      var filmIso = uc.iso || desc.iso || isoVal;
       var matchedFilm = false;
-      for (var fi = 0; fi < S.filmSel.options.length; fi++) {
-        var opt = S.filmSel.options[fi];
-        if (opt.getAttribute('data-iso') == isoVal) {
-          S.filmSel.selectedIndex = fi;
-          S.filmSel.dispatchEvent(new Event('change'));
-          matchedFilm = true;
-          break;
+
+      if (filmVal) {
+        for (var fi = 0; fi < S.filmSel.options.length; fi++) {
+          if (S.filmSel.options[fi].textContent === filmVal) {
+            S.filmSel.selectedIndex = fi;
+            S.filmSel.dispatchEvent(new Event('change'));
+            matchedFilm = true;
+            break;
+          }
         }
       }
-      if (!matchedFilm && S.$('film-iso-custom')) S.$('film-iso-custom').value = String(isoVal);
+
+      if (!matchedFilm && filmIso) {
+        for (var fi = 0; fi < S.filmSel.options.length; fi++) {
+          if (S.filmSel.options[fi].getAttribute('data-iso') == filmIso) {
+            S.filmSel.selectedIndex = fi;
+            S.filmSel.dispatchEvent(new Event('change'));
+            matchedFilm = true;
+            break;
+          }
+        }
+      }
+
+      if (!matchedFilm) {
+        if (filmVal && !selByText(S.filmSel, filmVal)) setCust(S.filmSel, S.filmCust, filmVal);
+        if (filmIso && S.$('film-iso-custom')) S.$('film-iso-custom').value = filmIso;
+      }
     }
 
-    var instructions = exifObj['Exif'][0x828D];
-    if (instructions && !selByText(S.processSel, instructions)) setCust(S.processSel, S.processCust, instructions);
   } catch(_) {}
 }
