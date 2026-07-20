@@ -336,119 +336,111 @@ function fmtDateStr(d) {
 
 export function generateContentSheet(files, params, onComplete) {
   if (!files || files.length === 0) { onComplete(null); return; }
-  var firstFile = files[0].file;
-  var firstImg = new Image();
-  firstImg.onload = function() {
-    var cw = firstImg.naturalWidth, ch = firstImg.naturalHeight;
-    URL.revokeObjectURL(firstImg.src);
-    if (cw <= 0 || ch <= 0) { onComplete(null); return; }
+  var res = S.contentSheetResolution;
+  var cw = res[0], ch = res[1];
 
-    var n = Math.min(files.length, 40);
-    var mx = Math.round(cw * 0.025), my_t = Math.round(ch * 0.04), my_b = Math.round(ch * 0.1);
-    var cg = Math.round(cw * 0.01), rg = Math.round(ch * 0.015);
-    var grid = calculateGrid(n, cw, ch, mx, my_t, my_b, cg, rg);
-    var cols = grid[0], rows = grid[1];
-    var uw = cw - 2 * mx, uh = ch - my_t - my_b;
-    var cell_w = (uw - (cols - 1) * cg) / cols;
-    var cell_h = (uh - (rows - 1) * rg) / rows;
+  var n = Math.min(files.length, 40);
+  var mx = Math.round(cw * 0.025), my_t = Math.round(ch * 0.04), my_b = Math.round(ch * 0.1);
+  var cg = Math.round(cw * 0.01), rg = Math.round(ch * 0.015);
+  var grid = calculateGrid(n, cw, ch, mx, my_t, my_b, cg, rg);
+  var cols = grid[0], rows = grid[1];
+  var uw = cw - 2 * mx, uh = ch - my_t - my_b;
+  var cell_w = (uw - (cols - 1) * cg) / cols;
+  var cell_h = (uh - (rows - 1) * rg) / rows;
 
-    var canvas = document.createElement('canvas');
-    canvas.width = cw; canvas.height = ch;
-    var ctx = canvas.getContext('2d');
+  var canvas = document.createElement('canvas');
+  canvas.width = cw; canvas.height = ch;
+  var ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ebebeb';
+  ctx.fillRect(0, 0, cw, ch);
+
+  var pending = n, active = 0, next = 0, errored = false;
+
+  function tryFinish() {
+    if (pending > 0) return;
+    if (errored) { onComplete(null); return; }
+    var footerH = Math.max(80, Math.round(ch * 0.08));
+    var footerY = ch - footerH;
     ctx.fillStyle = '#ebebeb';
-    ctx.fillRect(0, 0, cw, ch);
-
-    var pending = n, active = 0, next = 0, errored = false;
-
-    function tryFinish() {
-      if (pending > 0) return;
-      if (errored) { onComplete(null); return; }
-      var footerH = Math.max(80, Math.round(ch * 0.08));
-      var footerY = ch - footerH;
-      ctx.fillStyle = '#ebebeb';
-      ctx.fillRect(0, footerY, cw, footerH);
-      ctx.fillStyle = '#444';
-      var fSize = Math.max(13, Math.round(footerH * 0.24));
-      ctx.font = 'bold ' + fSize + 'px sans-serif';
-      var lp = Math.round(cw * 0.02);
-      ctx.fillText('\uD83C\uDF9E\uFE0F ' + params.film.name + ' (ISO ' + params.film.iso + ')', lp, footerY + fSize + 4);
-      var camLens = params.camera.make + ' ' + params.camera.model + ' + ' + params.lens.name;
-      if (params.lens.focal) camLens += ' (' + params.lens.focal + 'mm)';
-      if (params.lens.aperture) camLens += ' f/' + params.lens.aperture;
-      ctx.fillText('\uD83D\uDCF7 ' + camLens, lp, footerY + fSize * 2 + 10);
-      var minD = null, maxD = null;
-      for (var di = 0; di < files.length; di++) {
-        var fd = S.getFileDate(di);
-        if (fd && fd.fileDate && fd.fileDate.length >= 8) {
-          var ts = new Date(
-            parseInt(fd.fileDate.slice(0,4), 10),
-            parseInt(fd.fileDate.slice(4,6), 10) - 1,
-            parseInt(fd.fileDate.slice(6,8), 10)
-          ).getTime();
-          if (!isNaN(ts)) {
-            if (minD === null || ts < minD) minD = ts;
-            if (maxD === null || ts > maxD) maxD = ts;
-          }
+    ctx.fillRect(0, footerY, cw, footerH);
+    ctx.fillStyle = '#444';
+    var fSize = Math.max(13, Math.round(footerH * 0.24));
+    ctx.font = 'bold ' + fSize + 'px sans-serif';
+    var lp = Math.round(cw * 0.02);
+    ctx.fillText('\uD83C\uDF9E\uFE0F ' + params.film.name + ' (ISO ' + params.film.iso + ')', lp, footerY + fSize + 4);
+    var camLens = params.camera.make + ' ' + params.camera.model + ' + ' + params.lens.name;
+    if (params.lens.focal) camLens += ' (' + params.lens.focal + 'mm)';
+    if (params.lens.aperture) camLens += ' f/' + params.lens.aperture;
+    ctx.fillText('\uD83D\uDCF7 ' + camLens, lp, footerY + fSize * 2 + 10);
+    var minD = null, maxD = null;
+    for (var di = 0; di < files.length; di++) {
+      var fd = S.getFileDate(di);
+      if (fd && fd.fileDate && fd.fileDate.length >= 8) {
+        var ts = new Date(
+          parseInt(fd.fileDate.slice(0,4), 10),
+          parseInt(fd.fileDate.slice(4,6), 10) - 1,
+          parseInt(fd.fileDate.slice(6,8), 10)
+        ).getTime();
+        if (!isNaN(ts)) {
+          if (minD === null || ts < minD) minD = ts;
+          if (maxD === null || ts > maxD) maxD = ts;
         }
       }
-      var dr = '--';
-      if (minD !== null && maxD !== null) dr = fmtDateStr(new Date(minD)) + ' ~ ' + fmtDateStr(new Date(maxD));
-      ctx.fillText('\uD83E\uDDEA ' + params.lab + '  |  \uD83D\uDCC5 ' + dr, lp, footerY + fSize * 3 + 16);
-      canvas.toBlob(function(blob) { onComplete(blob); }, 'image/jpeg', 0.92);
     }
+    var dr = '--';
+    if (minD !== null && maxD !== null) dr = fmtDateStr(new Date(minD)) + ' ~ ' + fmtDateStr(new Date(maxD));
+    ctx.fillText('\uD83E\uDDEA ' + params.lab + '  |  \uD83D\uDCC5 ' + dr, lp, footerY + fSize * 3 + 16);
+    canvas.toBlob(function(blob) { onComplete(blob); }, 'image/jpeg', 0.92);
+  }
 
-    function processNext() {
-      while (active < 4 && next < n) {
-        var idx = next++;
-        active++;
-        (function(i) {
-          var r = Math.floor(i / cols);
-          var c = i % cols;
-          var cx = mx + c * (cell_w + cg);
-          var cy = my_t + r * (cell_h + rg);
-          ctx.fillStyle = '#fff';
-          ctx.fillRect(cx, cy, cell_w, cell_h);
-          var textStr = '#' + (i + 1);
-          var numSize = Math.max(14, Math.round(Math.min(cell_w, cell_h) * 0.09));
-          ctx.font = 'bold ' + numSize + 'px sans-serif';
-          var textW = ctx.measureText(textStr).width;
-          var tx = cx + 8, ty = cy + 8;
-          ctx.fillStyle = '#fff';
-          ctx.fillRect(tx, ty, textW + 8, numSize + 8);
-          ctx.fillStyle = 'rgba(0,0,0,0.7)';
-          ctx.fillText(textStr, tx + 4, ty + numSize + 4);
-          var img = new Image();
-          img.onload = function() {
-            var isPortrait = img.height > img.width;
-            var fitW = isPortrait ? img.height : img.width;
-            var fitH = isPortrait ? img.width : img.height;
-            var scale = Math.min(cell_w / fitW, cell_h / fitH) * 0.80;
-            var pw = img.width * scale, ph = img.height * scale;
-            if (isPortrait) {
-              ctx.save();
-              ctx.translate(cx + cell_w / 2, cy + cell_h / 2);
-              ctx.rotate(Math.PI / 2);
-              ctx.drawImage(img, -pw / 2, -ph / 2, pw, ph);
-              ctx.restore();
-            } else {
-              ctx.drawImage(img, cx + (cell_w - pw) / 2, cy + (cell_h - ph) / 2, pw, ph);
-            }
-            URL.revokeObjectURL(img.src);
-            pending--;
-            active--;
-            processNext();
-          };
-          img.onerror = function() { pending--; active--; errored = true; processNext(); };
-          img.src = URL.createObjectURL(files[i].file);
-        })(idx);
-      }
-      if (active === 0 && pending === 0) tryFinish();
+  function processNext() {
+    while (active < 4 && next < n) {
+      var idx = next++;
+      active++;
+      (function(i) {
+        var r = Math.floor(i / cols);
+        var c = i % cols;
+        var cx = mx + c * (cell_w + cg);
+        var cy = my_t + r * (cell_h + rg);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(cx, cy, cell_w, cell_h);
+        var textStr = '#' + (i + 1);
+        var numSize = Math.max(14, Math.round(Math.min(cell_w, cell_h) * 0.09));
+        ctx.font = 'bold ' + numSize + 'px sans-serif';
+        var textW = ctx.measureText(textStr).width;
+        var tx = cx + 8, ty = cy + 8;
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(tx, ty, textW + 8, numSize + 8);
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillText(textStr, tx + 4, ty + numSize + 4);
+        var img = new Image();
+        img.onload = function() {
+          var isPortrait = img.height > img.width;
+          var fitW = isPortrait ? img.height : img.width;
+          var fitH = isPortrait ? img.width : img.height;
+          var scale = Math.min(cell_w / fitW, cell_h / fitH) * 0.80;
+          var pw = img.width * scale, ph = img.height * scale;
+          if (isPortrait) {
+            ctx.save();
+            ctx.translate(cx + cell_w / 2, cy + cell_h / 2);
+            ctx.rotate(Math.PI / 2);
+            ctx.drawImage(img, -pw / 2, -ph / 2, pw, ph);
+            ctx.restore();
+          } else {
+            ctx.drawImage(img, cx + (cell_w - pw) / 2, cy + (cell_h - ph) / 2, pw, ph);
+          }
+          URL.revokeObjectURL(img.src);
+          pending--;
+          active--;
+          processNext();
+        };
+        img.onerror = function() { pending--; active--; errored = true; processNext(); };
+        img.src = URL.createObjectURL(files[i].file);
+      })(idx);
     }
-    processNext();
-  };
-  firstImg.src = URL.createObjectURL(firstFile);
-  // Revoke on error
-  firstImg.onerror = function() { URL.revokeObjectURL(firstImg.src); onComplete(null); };
+    if (active === 0 && pending === 0) tryFinish();
+  }
+  processNext();
 }
 
 export function startContentSheet() {

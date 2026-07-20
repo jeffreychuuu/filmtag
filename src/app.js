@@ -101,6 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
   S.isIPhone = /iPhone|iPad/.test(navigator.userAgent);
   S.currentPage = 1; S.pageSize = 5; S.prefetchTimer = null; S.sortAsc = true;
   S.summaryPage = 1; S.summaryPageSize = 5; S.processedFiles = [];
+  S.contentSheetResolution = DATA.contentSheetResolution;
   S.geocodeBusy = false; S.map = null; S.mapMarker = null; S.mapInitialized = false;
   S.reverseGeocode = reverseGeocode;
 
