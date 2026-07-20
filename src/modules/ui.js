@@ -494,7 +494,7 @@ export function rebuildSummaryBody() {
       '<label style="display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.8rem;">' +
         '<input type="checkbox" class="toggle-switch" id="content-sheet-toggle"' + (csChecked ? ' checked' : '') + '>' +
         '<span>' + t('content_sheet') + '</span></label>' +
-      '<button class="btn btn-sm btn-secondary" id="content-sheet-btn" style="display:none">⬇ ' + t('content_sheet_download') + '</button>' +
+      '<button class="btn btn-sm btn-secondary" id="content-sheet-btn" style="display:none">📋 ' + t('content_sheet_download') + '</button>' +
     '</div>' +
     '<div class="summary-footer-row">' +
       '<button class="btn btn-secondary" id="summary-close-btn">' + t('edit_roll') + '</button>' +
