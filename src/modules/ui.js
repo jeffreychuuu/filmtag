@@ -491,9 +491,12 @@ export function rebuildSummaryBody() {
   var csChecked = localStorage.getItem('filmtag-content-sheet') !== '0';
   S.summaryFooter.innerHTML =
     '<div class="summary-footer-row">' +
+      '<div style="display:flex;flex-direction:column;gap:0.2rem;">' +
       '<label style="display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.8rem;">' +
         '<input type="checkbox" class="toggle-switch" id="content-sheet-toggle"' + (csChecked ? ' checked' : '') + '>' +
         '<span>' + t('content_sheet') + '</span></label>' +
+      '<span style="font-size:0.7rem;color:var(--text-secondary);margin-left:1.8rem;">' + t('content_sheet_hint') + '</span>' +
+      '</div>' +
       '<button class="btn btn-sm btn-secondary" id="content-sheet-btn" style="display:none">📋 ' + t('content_sheet_generate') + '</button>' +
     '</div>' +
     '<div class="summary-footer-row">' +
