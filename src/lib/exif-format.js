@@ -134,6 +134,23 @@ function _decodeUc(str) {
   return '';
 }
 
+// ---- UTF-8 recovery for garbled ASCII EXIF text ----
+// Some EXIF readers store non-ASCII as UTF-8 bytes in ASCII-type tags.
+// When read back, each byte becomes a Latin-1 character.
+// tryFixUtf8 attempts to recover the original UTF-8 text.
+
+export function tryFixUtf8(s) {
+  if (!s) return s;
+  var hasHigh = false;
+  for (var i = 0; i < s.length; i++) {
+    if (s.charCodeAt(i) > 0x7E) { hasHigh = true; break; }
+  }
+  if (!hasHigh) return s;
+  var bytes = new Uint8Array(s.length);
+  for (var j = 0; j < s.length; j++) bytes[j] = s.charCodeAt(j);
+  try { return new TextDecoder('utf-8', { fatal: true }).decode(bytes); } catch(_) { return s; }
+}
+
 // ---- internal ----
 
 function _m(s, re) {

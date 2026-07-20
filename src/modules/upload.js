@@ -2,7 +2,7 @@ import piexif from 'piexifjs';
 import { t } from '../i18n.js';
 import { dmsToDecimal } from '../lib/utils.js';
 import { selByText, setCust } from './gear.js';
-import { parseSoftware, parseInstructions, parseCopyright, parseImageDescription, parseUserComment } from '../lib/exif-format.js';
+import { parseSoftware, parseInstructions, parseCopyright, parseImageDescription, parseUserComment, tryFixUtf8 } from '../lib/exif-format.js';
 
 var S;
 
@@ -141,24 +141,6 @@ function autoFillFromFirstFile() {
       S.$('lens-aperture').value = av.toFixed(1);
     }
 
-    // ISO → Film
-    var iso = exifObj['Exif'][piexif.ExifIFD.ISOSpeedRatings];
-    if (iso) {
-      var isoVal = Array.isArray(iso) ? iso[0] : iso;
-      var matchedFilm = false;
-      for (var fi = 0; fi < S.filmSel.options.length; fi++) {
-        var opt = S.filmSel.options[fi];
-        if (opt.getAttribute('data-iso') == isoVal) {
-          S.filmSel.selectedIndex = fi;
-          S.filmSel.dispatchEvent(new Event('change'));
-          matchedFilm = true;
-          break;
-        }
-      }
-      if (!matchedFilm && S.$('film-iso-custom')) S.$('film-iso-custom').value = String(isoVal);
-      if (matchedFilm) filled.film = true;
-    }
-
     // Parse composite strings via shared functions
     var sw = parseSoftware(exifObj['0th'][piexif.ImageIFD.Software]);
     var ins = parseInstructions(exifObj['Exif'][0x828D]);
@@ -174,8 +156,8 @@ function autoFillFromFirstFile() {
     var artistVal = artist || uc.artist || desc.artist;
     // artist already set above if found; skipping overwrite
 
-    // Lab: UserComment (Unicode-safe) → Copyright → ImageDescription
-    var labVal = uc.lab || cr.lab || desc.lab;
+    // Lab: UserComment (Unicode-safe) → Copyright (try UTF-8 fix) → ImageDescription (try UTF-8 fix)
+    var labVal = uc.lab || tryFixUtf8(cr.lab) || tryFixUtf8(desc.lab);
     if (labVal) { fillField(S.labSel, S.$('lab-custom-input'), labVal); filled.lab = true; }
 
     // Process: Instructions → Copyright → UserComment → ImageDescription
@@ -186,24 +168,40 @@ function autoFillFromFirstFile() {
     var ppVal = (ins && ins.pushpull) || uc.pushpull || desc.pushpull;
     if (ppVal) { fillField(S.ppSel, S.$('pushpull-custom-input'), ppVal); filled.pushpull = true; }
 
-    // Film name fallback: UserComment (Unicode-safe) → ImageDescription
+    // Film matching: name match first, ISO fallback
+    var rawIso = exifObj['Exif'][piexif.ExifIFD.ISOSpeedRatings];
+    var isoVal = rawIso ? (Array.isArray(rawIso) ? rawIso[0] : rawIso) : null;
+
     if (!filled.film) {
       var filmVal = uc.film || desc.film;
-      var filmIso = uc.iso || desc.iso;
+      var filmIso = uc.iso || desc.iso || isoVal;
+      var matchedFilm = false;
+
       if (filmVal) {
-        var matched = false;
-        for (var fi2 = 0; fi2 < S.filmSel.options.length; fi2++) {
-          if (S.filmSel.options[fi2].textContent === filmVal) {
-            S.filmSel.selectedIndex = fi2;
+        for (var fi = 0; fi < S.filmSel.options.length; fi++) {
+          if (S.filmSel.options[fi].textContent === filmVal) {
+            S.filmSel.selectedIndex = fi;
             S.filmSel.dispatchEvent(new Event('change'));
-            matched = true;
+            matchedFilm = true;
             break;
           }
         }
-        if (!matched && !selByText(S.filmSel, filmVal)) {
-          setCust(S.filmSel, S.filmCust, filmVal);
-          if (filmIso && S.$('film-iso-custom')) S.$('film-iso-custom').value = filmIso;
+      }
+
+      if (!matchedFilm && filmIso) {
+        for (var fi = 0; fi < S.filmSel.options.length; fi++) {
+          if (S.filmSel.options[fi].getAttribute('data-iso') == filmIso) {
+            S.filmSel.selectedIndex = fi;
+            S.filmSel.dispatchEvent(new Event('change'));
+            matchedFilm = true;
+            break;
+          }
         }
+      }
+
+      if (!matchedFilm) {
+        if (filmVal && !selByText(S.filmSel, filmVal)) setCust(S.filmSel, S.filmCust, filmVal);
+        if (filmIso && S.$('film-iso-custom')) S.$('film-iso-custom').value = filmIso;
       }
     }
 
