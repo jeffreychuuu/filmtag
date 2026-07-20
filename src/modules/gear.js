@@ -411,7 +411,7 @@ export function renderManageOverlay() {
       for (var ii = 0; ii < customItems.length; ii++) {
         h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">';
         h += '<span style="flex:1;">' + esc(customItems[ii]) + '</span>';
-        h += '<button class="manage-del-btn" data-key="' + keys[ki].key + '" data-value="' + esc(customItems[ii]) + '" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:0.85rem;padding:0.1rem;" title="Delete">✕</button>';
+        h += '<button class="manage-del-btn" data-key="' + keys[ki].key + '" data-value="' + esc(customItems[ii]) + '" style="background:#c0392b;color:#fff;border:1px solid #c0392b;border-radius:4px;cursor:pointer;font-size:0.7rem;padding:0.1rem 0.4rem;">' + t('remove') + '</button>';
         h += '</div>';
       }
     }
@@ -435,7 +435,7 @@ export function renderManageOverlay() {
         var lensName = typeof lenses[li] === 'object' ? lenses[li].name : lenses[li];
         h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">';
         h += '<span style="flex:1;">' + esc(lensName) + '</span>';
-        h += '<button class="manage-del-btn" data-key="lensByCamera" data-value=\'' + esc(JSON.stringify({camera: cameras[ci], name: lensName})) + '\' style="background:none;border:none;color:var(--red);cursor:pointer;font-size:0.85rem;padding:0.1rem;" title="Delete">✕</button>';
+        h += '<button class="manage-del-btn" data-key="lensByCamera" data-value=\'' + esc(JSON.stringify({camera: cameras[ci], name: lensName})) + '\' style="background:#c0392b;color:#fff;border:1px solid #c0392b;border-radius:4px;cursor:pointer;font-size:0.7rem;padding:0.1rem 0.4rem;">' + t('remove') + '</button>';
         h += '</div>';
       }
       h += '</div></div>';
