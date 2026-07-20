@@ -82,6 +82,14 @@
     .btn-sm { font-size: 0.75rem; padding: 0.4rem 0.85rem; }
     .btn:disabled { opacity: 0.45; cursor: not-allowed; }
     .actions { display: flex; gap: 0.75rem; margin-top: 2rem; flex-wrap: wrap; }
+    .summary-overlay-inner { display:flex; flex-direction:column; max-height:85vh; overflow:hidden; padding:0; }
+    .summary-overlay-inner .summary-body { flex:1; overflow-y:auto; padding:2rem; max-height:none; }
+    .summary-footer { flex-shrink:0; display:flex; flex-direction:column; gap:0.5rem; padding:0.75rem 1.25rem; border-top:1px solid var(--border); background:var(--surface); }
+    .summary-footer-row { display:flex; align-items:center; gap:0.75rem; }
+    .toggle-switch { appearance:none; -webkit-appearance:none; width:36px; height:20px; background:var(--surface2); border:1px solid var(--border); border-radius:10px; cursor:pointer; position:relative; transition:all var(--transition); flex-shrink:0; }
+    .toggle-switch::before { content:''; position:absolute; top:2px; left:2px; width:14px; height:14px; background:var(--text-secondary); border-radius:50%; transition:all var(--transition); }
+    .toggle-switch:checked { background:var(--accent); border-color:var(--accent); }
+    .toggle-switch:checked::before { left:18px; background:#000; }
 
     .upload-wrap {
       position: relative; border: 2px dashed var(--border);
@@ -607,8 +615,9 @@
 </div>
 
 <div class="overlay" id="summary-overlay">
-  <div class="overlay-content overlay-content--wide">
+  <div class="overlay-content overlay-content--wide summary-overlay-inner">
     <div class="summary-body" id="summary-body"></div>
+    <div class="summary-footer" id="summary-footer"></div>
   </div>
 </div>
 

@@ -8,7 +8,7 @@ import { initGps, initMap, updateGpsDots, updateGpsSaveBtn, setGpsForSelected, r
 import { init as initUi, renderFileList, goToPage, changePageSize, goToSummaryPage, changeSummaryPageSize, clearAll, removeOne, sortFiles, toggleSort, getTotalPages, buildSummaryHtml, generateSummaryThumbnails, rebuildSummaryBody, buildOptions, syncRange, buildSelectedFromRanges } from './modules/ui.js';
 import { init as initDate, applyDateToSelected, refreshSegments, computeDateForFile, getFileDate, newFName } from './modules/date.js';
 import { init as initUpload, handleFiles } from './modules/upload.js';
-import { init as initProcess, startZipProcess, startSaveProcess, startContactSheet, showGallery, showStatus } from './modules/process.js';
+import { init as initProcess, startZipProcess, startSaveProcess, startContentSheet, showGallery, showStatus } from './modules/process.js';
 
 piexif.TAGS.Exif[0x828D] = { name: 'Instructions', type: 'Ascii' };
 
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var imgOverlay = $('img-overlay'), imgOverlayImg = $('img-overlay-img'), imgOverlayClose = $('img-overlay-close');
   var selectToolbar = $('select-toolbar'), selectAllBtn = $('select-all-btn');
   var rangeRowsEl = $('range-rows'), addRangeBtn = $('add-range-btn');
-  var summaryPanel = $('summary-overlay'), summaryBody = $('summary-body');
+  var summaryPanel = $('summary-overlay'), summaryBody = $('summary-body'), summaryFooter = $('summary-footer');
   var progressSec = $('progress-overlay'), progBar = $('progress-bar'), progText = $('progress-text');
   var statusMsg = $('status-msg');
   var loadingEl = $('loading-overlay'), loadingText = $('loading-text');
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
   S.imgOverlay = imgOverlay; S.imgOverlayImg = imgOverlayImg; S.imgOverlayClose = imgOverlayClose;
   S.selectToolbar = selectToolbar; S.selectAllBtn = selectAllBtn;
   S.rangeRowsEl = rangeRowsEl; S.addRangeBtn = addRangeBtn;
-  S.summaryPanel = summaryPanel; S.summaryBody = summaryBody;
+  S.summaryPanel = summaryPanel; S.summaryBody = summaryBody; S.summaryFooter = summaryFooter;
   S.progressSec = progressSec; S.progBar = progBar; S.progText = progText;
   S.statusMsg = statusMsg; S.loadingEl = loadingEl; S.loadingText = loadingText;
 
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
   S.refreshSegments = refreshSegments;
   S.collect = collect; S.validate = validate;
   S.saveCustomOpts = saveCustomOpts; S.saveLastSession = saveLastSession;
-  S.startZipProcess = startZipProcess; S.startSaveProcess = startSaveProcess; S.startContactSheet = startContactSheet;
+  S.startZipProcess = startZipProcess; S.startSaveProcess = startSaveProcess; S.startContentSheet = startContentSheet;
   S.showStatus = showStatus; S.initMap = initMap;
   window.clearAll = clearAll; window.removeOne = removeOne; window.sortFiles = sortFiles; window.toggleSort = toggleSort;
   window.goToPage = goToPage; window.changePageSize = changePageSize;
@@ -284,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('input[type="text"], input[type="number"]').forEach(function(i) { i.value = ''; });
     singleDateInp.valueAsDate = new Date(); singleTimeInp.value = '12:00';
     S.uploadedFiles = []; S.gpsData = {}; S.selectedSet = {}; S.fileDates = {};
-    summaryPanel.classList.remove('show'); summaryBody.innerHTML = ''; S.summaryPage = 1;
+    summaryPanel.classList.remove('show'); summaryBody.innerHTML = ''; summaryFooter.innerHTML = ''; S.summaryPage = 1;
     gallery.classList.remove('show'); galleryGrid.innerHTML = '';
     dateOverlay.classList.remove('show'); gpsOverlay.classList.remove('show');
     if (S.mapMarker) { S.map.removeLayer(S.mapMarker); S.mapMarker = null; }
@@ -316,7 +316,7 @@ document.addEventListener('DOMContentLoaded', function() {
   $('lang-float-btn').addEventListener('click', function() {
     toggleLang();
     document.querySelectorAll('select option[value="__custom__"]').forEach(function(o) { o.textContent = t('other_free_text'); });
-    summaryPanel.classList.remove('show'); summaryBody.innerHTML = ''; S.summaryPage = 1;
+    summaryPanel.classList.remove('show'); summaryBody.innerHTML = ''; summaryFooter.innerHTML = ''; S.summaryPage = 1;
     gallery.classList.remove('show'); galleryGrid.innerHTML = '';
     dateOverlay.classList.remove('show'); gpsOverlay.classList.remove('show');
     refreshSegments(); S.renderFileList();
