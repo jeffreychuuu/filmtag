@@ -392,7 +392,7 @@ export function generateContactSheet(files, params, onComplete) {
       }
       var dr = '--';
       if (minD !== null && maxD !== null) dr = fmtDateStr(new Date(minD)) + ' ~ ' + fmtDateStr(new Date(maxD));
-      ctx.fillText('\uD83E\uDD7A ' + params.lab + '  |  \uD83D\uDCC5 ' + dr, lp, footerY + fSize * 3 + 16);
+      ctx.fillText('\uD83E\uDDEA ' + params.lab + '  |  \uD83D\uDCC5 ' + dr, lp, footerY + fSize * 3 + 16);
       canvas.toBlob(function(blob) { onComplete(blob); }, 'image/jpeg', 0.92);
     }
 
