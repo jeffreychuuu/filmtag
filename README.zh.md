@@ -183,6 +183,13 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 <details>
 <summary>撳開嚟睇</summary>
 
+**1.8.0 (2026-07-20)** — 管理自訂選項
+
+- ⚙️「管理」按鈕打開 overlay，可以檢視同刪除已儲存嘅自訂選項（artist、camera、lens、film、lab、process、push/pull、scanner）
+- 🗑️ 每個選項都有刪除（✕）按鈕 — 改完即時 save 去 localStorage
+- 🔄 刪除後自動 refresh 下拉選單，唔使 reload 頁面
+- 👁️ 空白狀態提示話俾 user 知點樣加入自訂選項
+
 **1.7.0 (2026-07-20)** — 編輯此卷按鈕
 
 - ✏️「編輯此卷」按鈕喺「下一卷」隔籬 — 返回設定表格唔 reload，保留 upload 嘅檔案同所有設定

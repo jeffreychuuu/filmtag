@@ -184,6 +184,13 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 <details>
 <summary>Click to expand</summary>
 
+**1.8.0 (2026-07-20)** — Manage Custom Options overlay
+
+- ⚙️ "Manage" button opens overlay to view and delete saved custom entries (artist, camera, lens, film, lab, process, push/pull, scanner)
+- 🗑️ Each saved entry has a delete (✕) button — changes saved immediately to localStorage
+- 🔄 After deletion, dropdowns are refreshed automatically — no page reload needed
+- 👁️ Empty state message guides users on how to add custom options
+
 **1.7.0 (2026-07-20)** — Edit This Roll button
 
 - ✏️ "Edit This Roll" button next to "Next Roll" — returns to settings form without reloading, preserves uploaded files and all settings
