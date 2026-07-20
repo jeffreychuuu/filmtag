@@ -1,5 +1,3 @@
-import { toUcs2Binary } from './utils.js';
-
 // ---- Software (Scanner) ----
 
 export var SOFTWARE_SUFFIX = ' (FilmTag by Jeffrey Chu)';
@@ -80,29 +78,60 @@ export function parseImageDescription(str) {
   return r;
 }
 
-// ---- UserComment (Film + Process + PushPull + Scanner) ----
+// ---- UserComment (all fields, UTF-8 encoded) ----
+// Format: 8 null bytes + UTF-8 encoded key|val pairs
+// Backward compat: also handles old UNICODE\x00 + UCS-2 LE format
 
-export function fmtUserComment(filmName, process, pushpull, scanner, shutter) {
-  var s = 'Film Stock: ' + filmName + ' | Process: ' + process + ' | Exposure: ' + pushpull;
-  if (shutter) s += ' | Shutter: ' + shutter;
-  s += ' | Scanner: ' + scanner;
-  return 'UNICODE\x00' + toUcs2Binary(s);
+export function fmtUserComment(p) {
+  var s = 'Artist: ' + p.artist + ' | Camera: ' + p.camera.model + ' | Lens: ' + p.lens.name;
+  s += ' | Film Stock: ' + p.film.name + ' (ISO ' + p.film.iso + ')';
+  s += ' | Lab: ' + p.lab + ' | Process: ' + p.process + ' | Exposure: ' + p.pushpull;
+  if (p.camera.shutter) s += ' | Shutter: ' + p.camera.shutter;
+  s += ' | Scanner: ' + p.scanner;
+  var encoder = new TextEncoder();
+  var utf8 = encoder.encode(s);
+  var raw = '';
+  for (var i = 0; i < utf8.length; i++) raw += String.fromCharCode(utf8[i]);
+  return '\x00\x00\x00\x00\x00\x00\x00\x00' + raw;
 }
 
 export function parseUserComment(str) {
-  if (!str || str.indexOf('UNICODE') !== 0) return {};
-  var raw = str.slice(8);
-  var decoded = '';
-  for (var i = 0; i < raw.length - 1; i += 2) {
-    decoded += String.fromCharCode(raw.charCodeAt(i) | (raw.charCodeAt(i + 1) << 8));
-  }
+  if (!str) return {};
+  var decoded = _decodeUc(str);
+  if (!decoded) return {};
   return {
-    film: _m(decoded, /Film Stock:\s*([^|]+)/),
+    artist: _m(decoded, /Artist:\s*([^|]+)/),
+    cameraModel: _m(decoded, /Camera:\s*([^|]+)/),
+    lensName: _m(decoded, /Lens:\s*([^|]+)/),
+    film: _m(decoded, /Film Stock:\s*([^(]+)\s*\(ISO/),
+    iso: _m(decoded, /Film Stock:\s*[^(]+\s*\(ISO\s*([^)]+)\)/),
+    lab: _m(decoded, /Lab:\s*([^|]+)/),
     process: _m(decoded, /Process:\s*([^|]+)/),
     pushpull: _m(decoded, /Exposure:\s*([^|]+)/),
     scanner: _m(decoded, /Scanner:\s*([^|]+)/),
     shutter: _m(decoded, /Shutter:\s*([^|]+)/)
   };
+}
+
+function _decodeUc(str) {
+  // New UTF-8 format: 8 null bytes prefix
+  if (str.charCodeAt(0) === 0 && str.charCodeAt(1) === 0 && str.charCodeAt(2) === 0 && str.charCodeAt(3) === 0 &&
+      str.charCodeAt(4) === 0 && str.charCodeAt(5) === 0 && str.charCodeAt(6) === 0 && str.charCodeAt(7) === 0) {
+    var raw = str.slice(8);
+    var bytes = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    try { return new TextDecoder('utf-8').decode(bytes); } catch(_) {}
+  }
+  // Old UCS-2 LE format: UNICODE\x00 prefix (backward compat)
+  if (str.indexOf('UNICODE') === 0) {
+    var raw2 = str.slice(8);
+    var out = '';
+    for (var j = 0; j < raw2.length - 1; j += 2) {
+      out += String.fromCharCode(raw2.charCodeAt(j) | (raw2.charCodeAt(j + 1) << 8));
+    }
+    return out;
+  }
+  return '';
 }
 
 // ---- internal ----

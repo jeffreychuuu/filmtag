@@ -170,21 +170,26 @@ function autoFillFromFirstFile() {
     var scannerVal = sw || desc.scanner || uc.scanner;
     if (scannerVal) { fillField(S.scanSel, S.$('scanner-custom-input'), scannerVal); filled.scanner = true; }
 
-    // Lab: Copyright → ImageDescription
-    var labVal = cr.lab || desc.lab;
+    // Artist: standard EXIF → UserComment (Unicode-safe) → ImageDescription
+    var artistVal = artist || uc.artist || desc.artist;
+    // artist already set above if found; skipping overwrite
+
+    // Lab: UserComment (Unicode-safe) → Copyright → ImageDescription
+    var labVal = uc.lab || cr.lab || desc.lab;
     if (labVal) { fillField(S.labSel, S.$('lab-custom-input'), labVal); filled.lab = true; }
 
-    // Process: Instructions → Copyright → ImageDescription → UserComment
-    var procVal = (ins && ins.process) || cr.process || desc.process || uc.process;
+    // Process: Instructions → Copyright → UserComment → ImageDescription
+    var procVal = (ins && ins.process) || cr.process || uc.process || desc.process;
     if (procVal) { fillField(S.processSel, S.$('process-custom-input'), procVal); filled.process = true; }
 
-    // PushPull: Instructions → ImageDescription → UserComment
-    var ppVal = (ins && ins.pushpull) || desc.pushpull || uc.pushpull;
+    // PushPull: Instructions → UserComment → ImageDescription
+    var ppVal = (ins && ins.pushpull) || uc.pushpull || desc.pushpull;
     if (ppVal) { fillField(S.ppSel, S.$('pushpull-custom-input'), ppVal); filled.pushpull = true; }
 
-    // Film name fallback: ImageDescription → UserComment
+    // Film name fallback: UserComment (Unicode-safe) → ImageDescription
     if (!filled.film) {
-      var filmVal = desc.film || uc.film;
+      var filmVal = uc.film || desc.film;
+      var filmIso = uc.iso || desc.iso;
       if (filmVal) {
         var matched = false;
         for (var fi2 = 0; fi2 < S.filmSel.options.length; fi2++) {
@@ -195,7 +200,10 @@ function autoFillFromFirstFile() {
             break;
           }
         }
-        if (!matched && !selByText(S.filmSel, filmVal)) setCust(S.filmSel, S.filmCust, filmVal);
+        if (!matched && !selByText(S.filmSel, filmVal)) {
+          setCust(S.filmSel, S.filmCust, filmVal);
+          if (filmIso && S.$('film-iso-custom')) S.$('film-iso-custom').value = filmIso;
+        }
       }
     }
 

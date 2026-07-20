@@ -105,7 +105,7 @@ export function startZipProcess() {
               exifObj['Exif'][piexif.ExifIFD.ShutterSpeedValue] = [parseInt(sf[0], 10), parseInt(sf[1], 10)];
             }
           }
-          exifObj['Exif'][piexif.ExifIFD.UserComment] = fmtUserComment(p.film.name, p.process, p.pushpull, p.scanner, p.camera.shutter);
+          exifObj['Exif'][piexif.ExifIFD.UserComment] = fmtUserComment(p);
           exifObj['0th'][piexif.ImageIFD.ImageDescription] = fmtImageDescription(p, S._('public-checkbox').checked);
           exifObj['0th'][piexif.ImageIFD.Copyright] = fmtCopyright(p.lab, p.process, p.scanner);
           var gps = S.gpsData[idx];
@@ -205,7 +205,7 @@ export function startSaveProcess() {
               exifObj['Exif'][piexif.ExifIFD.ShutterSpeedValue] = [parseInt(sf[0], 10), parseInt(sf[1], 10)];
             }
           }
-          exifObj['Exif'][piexif.ExifIFD.UserComment] = fmtUserComment(p.film.name, p.process, p.pushpull, p.scanner, p.camera.shutter);
+          exifObj['Exif'][piexif.ExifIFD.UserComment] = fmtUserComment(p);
           exifObj['Exif'][0x828D] = fmtInstructions(p.process, p.pushpull);
           exifObj['0th'][piexif.ImageIFD.ImageDescription] = fmtImageDescription(p, S._('public-checkbox').checked);
           exifObj['0th'][piexif.ImageIFD.Copyright] = fmtCopyright(p.lab, p.process, p.scanner);
