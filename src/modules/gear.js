@@ -354,57 +354,64 @@ export function renderManageOverlay() {
   var h = '';
   var any = false;
 
-  // Default items with hide/unhide
   for (var ki = 0; ki < keys.length; ki++) {
     var defaults = DEFAULT_ITEMS[keys[ki].key];
-    if (!defaults || defaults.length === 0) continue;
+    var customItems = data[keys[ki].key];
     var hiddenForField = hidden[keys[ki].key] || [];
+    var hasDefaults = defaults && defaults.length > 0;
+    var hasCustom = customItems && customItems.length > 0;
+    if (!hasDefaults && !hasCustom) continue;
     any = true;
-    h += '<div style="margin-bottom:0.75rem;">';
-    h += '<div style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.05em;">' + esc(keys[ki].label) + '</div>';
-    for (var di = 0; di < defaults.length; di++) {
-      var isHidden = hiddenForField.indexOf(defaults[di]) !== -1;
-      h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.3rem 0;border-bottom:1px solid var(--border);font-size:0.85rem;">';
-      h += '<span style="flex:1;' + (isHidden ? 'color:var(--text-secondary);text-decoration:line-through;' : '') + '">' + esc(defaults[di]) + '</span>';
-      h += '<button class="manage-toggle-btn" data-key="' + keys[ki].key + '" data-value="' + esc(defaults[di]) + '" style="background:none;border:1px solid var(--border);border-radius:4px;color:var(--text);cursor:pointer;font-size:0.7rem;padding:0.15rem 0.4rem;">' + (isHidden ? t('show') : t('hide')) + '</button>';
-      h += '</div>';
+
+    h += '<div class="manage-section" style="margin-bottom:0.5rem;">';
+    h += '<div class="manage-section-hdr" style="cursor:pointer;font-size:0.8rem;font-weight:600;color:var(--text-secondary);padding:0.3rem 0;user-select:none;" data-key="' + keys[ki].key + '">';
+    h += '<span class="manage-icon" style="display:inline-block;width:1rem;">▶</span> ' + esc(keys[ki].label) + '</div>';
+    h += '<div class="manage-section-body" style="display:none;margin-left:1.2rem;border-left:1px solid var(--border);padding-left:0.75rem;">';
+
+    if (hasDefaults) {
+      h += '<div style="font-size:0.65rem;color:var(--text-secondary);margin-bottom:0.2rem;">' + t('default') + '</div>';
+      for (var di = 0; di < defaults.length; di++) {
+        var isHidden = hiddenForField.indexOf(defaults[di]) !== -1;
+        h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">';
+        h += '<span style="flex:1;' + (isHidden ? 'color:var(--text-secondary);text-decoration:line-through;' : '') + '">' + esc(defaults[di]) + '</span>';
+        h += '<button class="manage-toggle-btn" data-key="' + keys[ki].key + '" data-value="' + esc(defaults[di]) + '" style="background:none;border:1px solid var(--border);border-radius:4px;color:var(--text);cursor:pointer;font-size:0.65rem;padding:0.1rem 0.35rem;">' + (isHidden ? t('show') : t('hide')) + '</button>';
+        h += '</div>';
+      }
     }
-    h += '</div>';
+
+    if (hasCustom) {
+      h += '<div style="font-size:0.65rem;color:var(--text-secondary);margin-top:0.3rem;margin-bottom:0.2rem;">' + t('custom') + '</div>';
+      for (var ii = 0; ii < customItems.length; ii++) {
+        h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">';
+        h += '<span style="flex:1;">' + esc(customItems[ii]) + '</span>';
+        h += '<button class="manage-del-btn" data-key="' + keys[ki].key + '" data-value="' + esc(customItems[ii]) + '" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:0.85rem;padding:0.1rem;" title="Delete">✕</button>';
+        h += '</div>';
+      }
+    }
+
+    h += '</div></div>';
   }
 
-  // Custom items with delete
-  for (var ki2 = 0; ki2 < keys.length; ki2++) {
-    var items = data[keys[ki2].key];
-    if (!items || items.length === 0) continue;
-    any = true;
-    h += '<div style="margin-bottom:0.75rem;">';
-    h += '<div style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.05em;">' + esc(keys[ki2].label) + ' <span style="font-weight:400;text-transform:none;">(' + t('custom') + ')</span></div>';
-    for (var ii = 0; ii < items.length; ii++) {
-      h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.3rem 0;border-bottom:1px solid var(--border);font-size:0.85rem;">';
-      h += '<span style="flex:1;">' + esc(items[ii]) + '</span>';
-      h += '<button class="manage-del-btn" data-key="' + keys[ki2].key + '" data-value="' + esc(items[ii]) + '" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:0.9rem;padding:0.2rem;" title="Delete">✕</button>';
-      h += '</div>';
-    }
-    h += '</div>';
-  }
-
-  // Custom lenses with delete
+  // Custom lenses
   if (data.lensByCamera) {
     var cameras = Object.keys(data.lensByCamera);
     for (var ci = 0; ci < cameras.length; ci++) {
       var lenses = data.lensByCamera[cameras[ci]];
       if (!lenses || lenses.length === 0) continue;
       any = true;
-      h += '<div style="margin-bottom:0.75rem;">';
-      h += '<div style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.05em;">' + esc(t('lens')) + ' (' + esc(cameras[ci]) + ') <span style="font-weight:400;text-transform:none;">(' + t('custom') + ')</span></div>';
+      h += '<div class="manage-section" style="margin-bottom:0.5rem;">';
+      h += '<div class="manage-section-hdr" style="cursor:pointer;font-size:0.8rem;font-weight:600;color:var(--text-secondary);padding:0.3rem 0;user-select:none;">';
+      h += '<span class="manage-icon" style="display:inline-block;width:1rem;">▶</span> ' + esc(t('lens')) + ' (' + esc(cameras[ci]) + ')</div>';
+      h += '<div class="manage-section-body" style="display:none;margin-left:1.2rem;border-left:1px solid var(--border);padding-left:0.75rem;">';
+      h += '<div style="font-size:0.65rem;color:var(--text-secondary);margin-bottom:0.2rem;">' + t('custom') + '</div>';
       for (var li = 0; li < lenses.length; li++) {
         var lensName = typeof lenses[li] === 'object' ? lenses[li].name : lenses[li];
-        h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.3rem 0;border-bottom:1px solid var(--border);font-size:0.85rem;">';
+        h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">';
         h += '<span style="flex:1;">' + esc(lensName) + '</span>';
-        h += '<button class="manage-del-btn" data-key="lensByCamera" data-value=\'' + esc(JSON.stringify({camera: cameras[ci], name: lensName})) + '\' style="background:none;border:none;color:var(--red);cursor:pointer;font-size:0.9rem;padding:0.2rem;" title="Delete">✕</button>';
+        h += '<button class="manage-del-btn" data-key="lensByCamera" data-value=\'' + esc(JSON.stringify({camera: cameras[ci], name: lensName})) + '\' style="background:none;border:none;color:var(--red);cursor:pointer;font-size:0.85rem;padding:0.1rem;" title="Delete">✕</button>';
         h += '</div>';
       }
-      h += '</div>';
+      h += '</div></div>';
     }
   }
 
@@ -430,6 +437,15 @@ export function renderManageOverlay() {
   body.querySelectorAll('.manage-toggle-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       toggleHiddenDefault(this.getAttribute('data-key'), this.getAttribute('data-value'));
+    });
+  });
+  body.querySelectorAll('.manage-section-hdr').forEach(function(hdr) {
+    hdr.addEventListener('click', function() {
+      var sectionBody = this.nextElementSibling;
+      var icon = this.querySelector('.manage-icon');
+      var isOpen = sectionBody.style.display !== 'none';
+      sectionBody.style.display = isOpen ? 'none' : 'block';
+      icon.textContent = isOpen ? '▶' : '▼';
     });
   });
   var resetBtn = document.getElementById('reset-defaults-btn');
