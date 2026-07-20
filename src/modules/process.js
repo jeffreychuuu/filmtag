@@ -403,15 +403,26 @@ export function generateContactSheet(files, params, onComplete) {
           var cy = my_t + r * (cell_h + rg);
           ctx.fillStyle = '#fff';
           ctx.fillRect(cx, cy, cell_w, cell_h);
-          var numSize = Math.max(12, Math.round(Math.min(cell_w, cell_h) * 0.08));
+          var numSize = Math.max(14, Math.round(Math.min(cell_w, cell_h) * 0.09));
           ctx.font = 'bold ' + numSize + 'px sans-serif';
-          ctx.fillStyle = 'rgba(0,0,0,0.6)';
-          ctx.fillText('#' + (i + 1), cx + 4, cy + numSize + 2);
+          ctx.fillStyle = 'rgba(0,0,0,0.65)';
+          ctx.fillText('#' + (i + 1), cx + 8, cy + numSize + 8);
           var img = new Image();
           img.onload = function() {
-            var scale = Math.min(cell_w / img.width, cell_h / img.height) * 0.92;
+            var isPortrait = img.height > img.width;
+            var fitW = isPortrait ? img.height : img.width;
+            var fitH = isPortrait ? img.width : img.height;
+            var scale = Math.min(cell_w / fitW, cell_h / fitH) * 0.80;
             var pw = img.width * scale, ph = img.height * scale;
-            ctx.drawImage(img, cx + (cell_w - pw) / 2, cy + (cell_h - ph) / 2, pw, ph);
+            if (isPortrait) {
+              ctx.save();
+              ctx.translate(cx + cell_w / 2, cy + cell_h / 2);
+              ctx.rotate(Math.PI / 2);
+              ctx.drawImage(img, -pw / 2, -ph / 2, pw, ph);
+              ctx.restore();
+            } else {
+              ctx.drawImage(img, cx + (cell_w - pw) / 2, cy + (cell_h - ph) / 2, pw, ph);
+            }
             URL.revokeObjectURL(img.src);
             pending--;
             active--;

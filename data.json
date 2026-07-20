@@ -43,6 +43,7 @@
     { "name": "Fujicolor C200", "iso": "200" },
     { "name": "Fujicolor Superia Premium 400", "iso": "400" },
     { "name": "Lucky C200", "iso": "200" },
+    { "name": "Lucky SHD 400", "iso": "400" },
     { "name": "Crystal 250D AHU - 5207", "iso": "250" },
     { "name": "Crystal 250D AHU - 5219", "iso": "500" },
     { "name": "CineStill 50D", "iso": "50" },
@@ -69,8 +70,7 @@
     "C-41",
     "ECN-2",
     "E-6",
-    "B&W",
-    "B&W Reversal"
+    "D-76"
   ],
   "pushpulls": [
     "Normal",

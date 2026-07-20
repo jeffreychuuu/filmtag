@@ -309,11 +309,11 @@ tpl.zh = {
   "feedback_error": "提交失敗，請再試一次。",
 
   // Contact Sheet
-  "contact_sheet": "Contact Sheet",
-  "contact_sheet_generate": "只生成 CS",
-  "contact_sheet_generating": "正在生成 Contact Sheet…",
-  "contact_sheet_adding": "正在將 Contact Sheet 加入圖庫…",
-  "contact_sheet_done": "Contact Sheet 已準備好",
+  "contact_sheet": "索引樣片",
+  "contact_sheet_generate": "只生成索引樣片",
+  "contact_sheet_generating": "正在生成索引樣片…",
+  "contact_sheet_adding": "正在將索引樣片加入圖庫…",
+  "contact_sheet_done": "索引樣片已準備好",
   "contact_sheet_footer": "{film} | {camera} + {lens} | {lab} | {dateRange}",
 
   // Feedback success
