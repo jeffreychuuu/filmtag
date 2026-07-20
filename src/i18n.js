@@ -168,7 +168,7 @@ tpl.en = {
 
   // Contact Sheet
   "content_sheet": "Include Content Sheet",
-  "content_sheet_hint": "Content sheet auto-added to Save to Album &amp; Download ZIP",
+  "content_sheet_hint": "Content Sheet Included",
   "content_sheet_download": "Download Content Sheet",
   "content_sheet_generate": "Generate Content Sheet",
   "content_sheet_generating": "Generating content sheet...",
@@ -314,7 +314,7 @@ tpl.zh = {
 
   // Contact Sheet
   "content_sheet": "包含索引樣片",
-  "content_sheet_hint": "索引樣片自動加入 Save to Album 及 Download ZIP",
+  "content_sheet_hint": "已包含索引樣片",
   "content_sheet_download": "下載索引樣片",
   "content_sheet_generate": "只生成索引樣片",
   "content_sheet_generating": "正在生成索引樣片…",
