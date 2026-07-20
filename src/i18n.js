@@ -166,7 +166,7 @@ tpl.en = {
   "feedback_error": "Failed to submit feedback. Please try again.",
 
   // Contact Sheet
-  "content_sheet": "Content Sheet",
+  "content_sheet": "Include content sheet in export",
   "content_sheet_generate": "Generate Content Sheet",
   "content_sheet_generating": "Generating content sheet...",
   "content_sheet_adding": "Adding content sheet to gallery...",
@@ -309,7 +309,7 @@ tpl.zh = {
   "feedback_error": "提交失敗，請再試一次。",
 
   // Contact Sheet
-  "content_sheet": "索引樣片",
+  "content_sheet": "匯出時包含索引樣片",
   "content_sheet_generate": "只生成索引樣片",
   "content_sheet_generating": "正在生成索引樣片…",
   "content_sheet_adding": "正在將索引樣片加入圖庫…",
