@@ -378,8 +378,12 @@ export function generateContactSheet(files, params, onComplete) {
       var minD = null, maxD = null;
       for (var di = 0; di < files.length; di++) {
         var fd = S.getFileDate(di);
-        if (fd && fd.exifDate) {
-          var ts = new Date(fd.exifDate).getTime();
+        if (fd && fd.fileDate && fd.fileDate.length >= 8) {
+          var ts = new Date(
+            parseInt(fd.fileDate.slice(0,4), 10),
+            parseInt(fd.fileDate.slice(4,6), 10) - 1,
+            parseInt(fd.fileDate.slice(6,8), 10)
+          ).getTime();
           if (!isNaN(ts)) {
             if (minD === null || ts < minD) minD = ts;
             if (maxD === null || ts > maxD) maxD = ts;
