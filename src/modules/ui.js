@@ -485,11 +485,13 @@ export function rebuildSummaryBody() {
     '</div>' +
     '<div class="summary-footer-row">' +
       '<button class="btn btn-secondary" id="summary-close-btn">' + t('edit_roll') + '</button>' +
-      '<button class="btn btn-primary" id="confirm-save-btn">💾 ' + t('save_to_album') + '</button>' +
-      '<button class="btn btn-primary" id="confirm-zip-btn">🗃️ ' + t('download_zip') + '</button>' +
-    '</div>' +
-    '<div class="summary-footer-row" style="justify-content:center;">' +
-      '<span id="content-sheet-hint" style="font-size:0.65rem;color:var(--text-secondary);font-weight:bold;font-style:italic;visibility:' + (csChecked ? 'visible' : 'hidden') + ';">' + t('content_sheet_hint') + '</span>' +
+      '<div style="display:flex;flex-direction:column;align-items:center;gap:0.15rem;">' +
+        '<div style="display:flex;gap:0.75rem;">' +
+          '<button class="btn btn-primary" id="confirm-save-btn">💾 ' + t('save_to_album') + '</button>' +
+          '<button class="btn btn-primary" id="confirm-zip-btn">🗃️ ' + t('download_zip') + '</button>' +
+        '</div>' +
+        '<span id="content-sheet-hint" style="font-size:0.65rem;color:var(--text-secondary);font-weight:bold;font-style:italic;visibility:' + (csChecked ? 'visible' : 'hidden') + ';">' + t('content_sheet_hint') + '</span>' +
+      '</div>' +
     '</div>';
   generateSummaryThumbnails();
   S._('confirm-zip-btn').addEventListener('click', S.startZipProcess);
