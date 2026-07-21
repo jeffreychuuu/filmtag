@@ -345,6 +345,17 @@ export function resetHiddenDefaults() {
   renderManageOverlay();
 }
 
+export function resetHiddenDefaultsForField(key) {
+  var hidden = loadHidden();
+  if (hidden[key]) {
+    delete hidden[key];
+    if (Object.keys(hidden).length === 0) localStorage.removeItem(HIDDEN_KEY);
+    else saveHidden(hidden);
+  }
+  refreshGearDropdowns();
+  renderManageOverlay();
+}
+
 export function deleteCustomOpt(key, value) {
   var data = loadAllOpts();
   if (key === 'lensByCamera' && typeof value === 'object') {
@@ -484,5 +495,5 @@ export function renderManageOverlay(key) {
     });
   });
   var resetBtn = document.getElementById('reset-defaults-btn');
-  if (resetBtn) resetBtn.addEventListener('click', resetHiddenDefaults);
+  if (resetBtn) resetBtn.addEventListener('click', function() { resetHiddenDefaultsForField(key); });
 }
