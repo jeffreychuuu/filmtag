@@ -36,16 +36,6 @@ export function strToUtf8Binary(s) {
   return out;
 }
 
-// Encode JS string to UCS-2 little-endian for EXIF UserComment
-export function toUcs2Binary(s) {
-  var out = '';
-  for (var i = 0; i < s.length; i++) {
-    var c = s.charCodeAt(i);
-    out += String.fromCharCode(c & 0xFF, (c >> 8) & 0xFF);
-  }
-  return out;
-}
-
 // Escape XML special characters for XMP metadata
 export function escXml(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
