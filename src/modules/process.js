@@ -27,7 +27,74 @@ function addContentSheetIfEnabled(files, params, zip, processedFiles, onDone) {
   });
 }
 
-export function startZipProcess() {
+function processFileCommon(idx, p, zip, onFileDone) {
+  var entry = S.uploadedFiles[idx], ext = entry.file.name.split('.').pop().toLowerCase();
+  var fd = S.getFileDate(idx);
+  var nn = S.newFName(p.film.name, ext, idx);
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var bytes = new Uint8Array(e.target.result);
+    if (ext === 'jpg' || ext === 'jpeg') {
+      try {
+        var jpegStr = entry._jpegStr || '';
+        if (!jpegStr) { for (var b = 0; b < bytes.length; b++) jpegStr += String.fromCharCode(bytes[b]); }
+        var exifObj;
+        try { exifObj = piexif.load(jpegStr); } catch(_) { exifObj = { '0th': {}, 'Exif': {}, 'GPS': {}, 'Interop': {}, '1st': {}, 'thumbnail': null }; }
+        exifObj['0th'][piexif.ImageIFD.Make] = p.camera.make;
+        exifObj['0th'][piexif.ImageIFD.Model] = p.camera.model;
+        exifObj['0th'][piexif.ImageIFD.Artist] = p.artist;
+        exifObj['0th'][piexif.ImageIFD.Software] = fmtSoftware(p.scanner);
+        var dt = fd.exifDate + ' ' + String(fd.hr).padStart(2,'0') + ':' + String(fd.min).padStart(2,'0') + ':00+08:00';
+        exifObj['0th'][piexif.ImageIFD.DateTime] = dt;
+        exifObj['Exif'][piexif.ExifIFD.DateTimeOriginal] = dt;
+        exifObj['Exif'][piexif.ExifIFD.DateTimeDigitized] = dt;
+        exifObj['Exif'][piexif.ExifIFD.ISOSpeedRatings] = parseInt(p.film.iso, 10) || 400;
+        exifObj['Exif'][piexif.ExifIFD.LensModel] = p.lens.name;
+        if (p.lens.focal) {
+          var fl = parseFloat(p.lens.focal);
+          exifObj['Exif'][piexif.ExifIFD.FocalLength] = Number.isInteger(fl) ? [fl, 1] : [Math.round(fl * 100), 100];
+        }
+        if (p.lens.aperture) {
+          var ap = Math.round(parseFloat(p.lens.aperture) * 100);
+          exifObj['Exif'][piexif.ExifIFD.FNumber] = [ap, 100];
+          exifObj['Exif'][piexif.ExifIFD.MaxApertureValue] = [ap, 100];
+          exifObj['Exif'][piexif.ExifIFD.ApertureValue] = [ap, 100];
+        }
+        if (p.camera.shutter) {
+          var sf = p.camera.shutter.split('/');
+          if (sf.length === 2) {
+            exifObj['Exif'][piexif.ExifIFD.ExposureTime] = [parseInt(sf[0], 10), parseInt(sf[1], 10)];
+            exifObj['Exif'][piexif.ExifIFD.ShutterSpeedValue] = [parseInt(sf[0], 10), parseInt(sf[1], 10)];
+          }
+        }
+        exifObj['Exif'][piexif.ExifIFD.UserComment] = fmtUserComment(p);
+        exifObj['Exif'][0x828D] = fmtInstructions(p.process, p.pushpull);
+        exifObj['0th'][piexif.ImageIFD.ImageDescription] = fmtImageDescription(p, S._('public-checkbox').checked);
+        exifObj['0th'][piexif.ImageIFD.Copyright] = fmtCopyright(p.lab, p.process, p.scanner);
+        var gps = S.gpsData[idx];
+        if (gps) {
+          exifObj['GPS'] = exifObj['GPS'] || {};
+          exifObj['GPS'][piexif.GPSIFD.GPSLatitude] = toDms(gps.lat);
+          exifObj['GPS'][piexif.GPSIFD.GPSLatitudeRef] = gps.lat >= 0 ? 'N' : 'S';
+          exifObj['GPS'][piexif.GPSIFD.GPSLongitude] = toDms(gps.lng);
+          exifObj['GPS'][piexif.GPSIFD.GPSLongitudeRef] = gps.lng >= 0 ? 'E' : 'W';
+        }
+        var exifBytes = piexif.dump(exifObj);
+        var newStr = piexif.insert(exifBytes, jpegStr);
+        p.dateTime = dt;
+        p.publicDesc = S._('public-checkbox').checked;
+        newStr = injectXmp(newStr, p, p.lab, p.process, p.scanner);
+        bytes = new Uint8Array(newStr.length);
+        for (var b2 = 0; b2 < newStr.length; b2++) bytes[b2] = newStr.charCodeAt(b2) & 0xFF;
+      } catch(err) { console.warn('EXIF write failed', err); }
+    }
+    zip.file(nn, bytes, { binary: true });
+    onFileDone(bytes, nn, entry);
+  };
+  reader.readAsArrayBuffer(entry.file);
+}
+
+function runProcessPipeline(onFileDone, onAllDone) {
   S.summaryPanel.classList.remove('show');
   var p = S.collect();
   S.reviewBtn.disabled = true;
@@ -39,205 +106,69 @@ export function startZipProcess() {
   function startNext() {
     while (active < CONCURRENCY && nextIdx < total) {
       var idx = nextIdx++; active++;
-      processFile(idx);
+      processFileCommon(idx, p, zip, function(bytes, nn, entry) {
+        onFileDone(bytes, nn, entry);
+        completed++; active--;
+        S.progBar.style.width = Math.round((completed / total) * 100) + '%';
+        S.progText.textContent = t('processing_of', {i: completed, n: total});
+        startNext();
+      });
     }
     if (active === 0 && completed === total) {
-      addContentSheetIfEnabled(S.uploadedFiles, p, zip, null, function() {
-      S.progText.textContent = t('creating_zip');
-      zip.generateAsync({ type: 'blob' }).then(function(blob) {
-        var url = URL.createObjectURL(blob), a = document.createElement('a');
-        a.href = url;
-        a.download = 'filmtag_' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '.zip';
-        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-        S.progBar.style.width = '100%'; S.progText.textContent = t('done_processed', {n: total});
-        showStatus(t('processed_success', {n: total}), 'success');
-        S.reviewBtn.disabled = false;
-        S.saveCustomOpts();
-        S.saveLastSession();
-        updatePhotoCount(total);
-        var spin = S._('progress-spinner'), done = S._('progress-done');
-        if (spin) spin.style.display = 'none'; if (done) done.style.display = 'flex';
-        var nextBtn = S._('progress-next-btn');
-        if (nextBtn) nextBtn.style.display = 'inline-block';
-        var editBtn = S._('progress-edit-btn');
-        if (editBtn) editBtn.style.display = 'inline-block';
-      });
-    }); // end addContentSheetIfEnabled
+      onAllDone(p, zip, total);
     }
-  }
-
-  function processFile(idx) {
-    var entry = S.uploadedFiles[idx], ext = entry.file.name.split('.').pop().toLowerCase();
-    var fd = S.getFileDate(idx);
-    var nn = S.newFName(p.film.name, ext, idx);
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      var bytes = new Uint8Array(e.target.result);
-      if (ext === 'jpg' || ext === 'jpeg') {
-        try {
-          var jpegStr = entry._jpegStr || '';
-          if (!jpegStr) { for (var b = 0; b < bytes.length; b++) jpegStr += String.fromCharCode(bytes[b]); }
-          var exifObj;
-          try { exifObj = piexif.load(jpegStr); } catch(_) { exifObj = { '0th': {}, 'Exif': {}, 'GPS': {}, 'Interop': {}, '1st': {}, 'thumbnail': null }; }
-          exifObj['0th'][piexif.ImageIFD.Make] = p.camera.make;
-          exifObj['0th'][piexif.ImageIFD.Model] = p.camera.model;
-          exifObj['0th'][piexif.ImageIFD.Artist] = p.artist;
-          exifObj['0th'][piexif.ImageIFD.Software] = fmtSoftware(p.scanner);
-          exifObj['Exif'][0x828D] = fmtInstructions(p.process, p.pushpull);
-          var dateTimeStr = fd.exifDate + ' ' + String(fd.hr).padStart(2,'0') + ':' + String(fd.min).padStart(2,'0') + ':00+08:00';
-          exifObj['0th'][piexif.ImageIFD.DateTime] = dateTimeStr;
-          exifObj['Exif'][piexif.ExifIFD.DateTimeOriginal] = dateTimeStr;
-          exifObj['Exif'][piexif.ExifIFD.DateTimeDigitized] = dateTimeStr;
-          exifObj['Exif'][piexif.ExifIFD.ISOSpeedRatings] = parseInt(p.film.iso, 10) || 400;
-          exifObj['Exif'][piexif.ExifIFD.LensModel] = p.lens.name;
-          if (p.lens.focal) {
-            var fl = parseFloat(p.lens.focal);
-            exifObj['Exif'][piexif.ExifIFD.FocalLength] = Number.isInteger(fl) ? [fl, 1] : [Math.round(fl * 100), 100];
-          }
-          if (p.lens.aperture) {
-            var ap = Math.round(parseFloat(p.lens.aperture) * 100);
-            exifObj['Exif'][piexif.ExifIFD.FNumber] = [ap, 100];
-            exifObj['Exif'][piexif.ExifIFD.MaxApertureValue] = [ap, 100];
-            exifObj['Exif'][piexif.ExifIFD.ApertureValue] = [ap, 100];
-          }
-          if (p.camera.shutter) {
-            var sf = p.camera.shutter.split('/');
-            if (sf.length === 2) {
-              exifObj['Exif'][piexif.ExifIFD.ExposureTime] = [parseInt(sf[0], 10), parseInt(sf[1], 10)];
-              exifObj['Exif'][piexif.ExifIFD.ShutterSpeedValue] = [parseInt(sf[0], 10), parseInt(sf[1], 10)];
-            }
-          }
-          exifObj['Exif'][piexif.ExifIFD.UserComment] = fmtUserComment(p);
-          exifObj['0th'][piexif.ImageIFD.ImageDescription] = fmtImageDescription(p, S._('public-checkbox').checked);
-          exifObj['0th'][piexif.ImageIFD.Copyright] = fmtCopyright(p.lab, p.process, p.scanner);
-          var gps = S.gpsData[idx];
-          if (gps) {
-            exifObj['GPS'] = exifObj['GPS'] || {};
-            exifObj['GPS'][piexif.GPSIFD.GPSLatitude] = toDms(gps.lat);
-            exifObj['GPS'][piexif.GPSIFD.GPSLatitudeRef] = gps.lat >= 0 ? 'N' : 'S';
-            exifObj['GPS'][piexif.GPSIFD.GPSLongitude] = toDms(gps.lng);
-            exifObj['GPS'][piexif.GPSIFD.GPSLongitudeRef] = gps.lng >= 0 ? 'E' : 'W';
-          }
-          var exifBytes = piexif.dump(exifObj);
-          var newStr = piexif.insert(exifBytes, jpegStr);
-          p.dateTime = dateTimeStr;
-          p.publicDesc = S._('public-checkbox').checked;
-          newStr = injectXmp(newStr, p, p.lab, p.process, p.scanner);
-          bytes = new Uint8Array(newStr.length);
-          for (var b2 = 0; b2 < newStr.length; b2++) bytes[b2] = newStr.charCodeAt(b2) & 0xFF;
-        } catch(err) { console.warn('EXIF write failed', err); }
-      }
-      zip.file(nn, bytes, { binary: true });
-      completed++; active--;
-      S.progBar.style.width = Math.round((completed / total) * 100) + '%';
-      S.progText.textContent = t('processing_of', {i: completed, n: total});
-      startNext();
-    };
-    reader.readAsArrayBuffer(entry.file);
   }
   startNext();
 }
 
-export function startSaveProcess() {
-  S.summaryPanel.classList.remove('show');
-  var p = S.collect();
-  S.reviewBtn.disabled = true;
-  S.progressSec.classList.add('show');
-  S.statusMsg.className = 'status-msg'; S.statusMsg.style.display = 'none';
-  S.processedFiles = [];
-  var total = S.uploadedFiles.length, zip = new JSZip();
-  var completed = 0, nextIdx = 0, active = 0, CONCURRENCY = 4;
-
-  function startNext() {
-    while (active < CONCURRENCY && nextIdx < total) {
-      var idx = nextIdx++; active++;
-      processFile(idx);
-    }
-    if (active === 0 && completed === total) {
-      addContentSheetIfEnabled(S.uploadedFiles, p, zip, S.processedFiles, function() {
-      S.progText.textContent = t('done_processed', {n: total});
-      var spin = S._('progress-spinner'), done = S._('progress-done');
-      if (spin) spin.style.display = 'none'; if (done) done.style.display = 'flex';
-      S.reviewBtn.disabled = false;
-      S.saveCustomOpts();
-      S.saveLastSession();
-      updatePhotoCount(total);
-      showGallery(S.processedFiles, p, zip);
+export function startZipProcess() {
+  runProcessPipeline(
+    function(bytes, nn) {},
+    function(p, zip, total) {
+      addContentSheetIfEnabled(S.uploadedFiles, p, zip, null, function() {
+        S.progText.textContent = t('creating_zip');
+        zip.generateAsync({ type: 'blob' }).then(function(blob) {
+          var url = URL.createObjectURL(blob), a = document.createElement('a');
+          a.href = url;
+          a.download = 'filmtag_' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '.zip';
+          document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+          S.progBar.style.width = '100%'; S.progText.textContent = t('done_processed', {n: total});
+          showStatus(t('processed_success', {n: total}), 'success');
+          S.reviewBtn.disabled = false;
+          S.saveCustomOpts();
+          S.saveLastSession();
+          updatePhotoCount(total);
+          var spin = S._('progress-spinner'), done = S._('progress-done');
+          if (spin) spin.style.display = 'none'; if (done) done.style.display = 'flex';
+          var nextBtn = S._('progress-next-btn');
+          if (nextBtn) nextBtn.style.display = 'inline-block';
+          var editBtn = S._('progress-edit-btn');
+          if (editBtn) editBtn.style.display = 'inline-block';
+        });
       });
     }
-  }
+  );
+}
 
-  function processFile(idx) {
-    var entry = S.uploadedFiles[idx], ext = entry.file.name.split('.').pop().toLowerCase();
-    var fd = S.getFileDate(idx);
-    var nn = S.newFName(p.film.name, ext, idx);
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      var bytes = new Uint8Array(e.target.result);
-      if (ext === 'jpg' || ext === 'jpeg') {
-        try {
-          var jpegStr = entry._jpegStr || '';
-          if (!jpegStr) { for (var b = 0; b < bytes.length; b++) jpegStr += String.fromCharCode(bytes[b]); }
-          var exifObj;
-          try { exifObj = piexif.load(jpegStr); } catch(_) { exifObj = { '0th': {}, 'Exif': {}, 'GPS': {}, 'Interop': {}, '1st': {}, 'thumbnail': null }; }
-          exifObj['0th'][piexif.ImageIFD.Make] = p.camera.make;
-          exifObj['0th'][piexif.ImageIFD.Model] = p.camera.model;
-          exifObj['0th'][piexif.ImageIFD.Artist] = p.artist;
-          exifObj['0th'][piexif.ImageIFD.Software] = fmtSoftware(p.scanner);
-          var dt = fd.exifDate + ' ' + String(fd.hr).padStart(2,'0') + ':' + String(fd.min).padStart(2,'0') + ':00+08:00';
-          exifObj['0th'][piexif.ImageIFD.DateTime] = dt;
-          exifObj['Exif'][piexif.ExifIFD.DateTimeOriginal] = dt;
-          exifObj['Exif'][piexif.ExifIFD.DateTimeDigitized] = dt;
-          exifObj['Exif'][piexif.ExifIFD.ISOSpeedRatings] = parseInt(p.film.iso, 10) || 400;
-          exifObj['Exif'][piexif.ExifIFD.LensModel] = p.lens.name;
-          if (p.lens.focal) {
-            var fl = parseFloat(p.lens.focal);
-            exifObj['Exif'][piexif.ExifIFD.FocalLength] = Number.isInteger(fl) ? [fl, 1] : [Math.round(fl * 100), 100];
-          }
-          if (p.lens.aperture) {
-            var ap = Math.round(parseFloat(p.lens.aperture) * 100);
-            exifObj['Exif'][piexif.ExifIFD.FNumber] = [ap, 100];
-            exifObj['Exif'][piexif.ExifIFD.MaxApertureValue] = [ap, 100];
-            exifObj['Exif'][piexif.ExifIFD.ApertureValue] = [ap, 100];
-          }
-          if (p.camera.shutter) {
-            var sf = p.camera.shutter.split('/');
-            if (sf.length === 2) {
-              exifObj['Exif'][piexif.ExifIFD.ExposureTime] = [parseInt(sf[0], 10), parseInt(sf[1], 10)];
-              exifObj['Exif'][piexif.ExifIFD.ShutterSpeedValue] = [parseInt(sf[0], 10), parseInt(sf[1], 10)];
-            }
-          }
-          exifObj['Exif'][piexif.ExifIFD.UserComment] = fmtUserComment(p);
-          exifObj['Exif'][0x828D] = fmtInstructions(p.process, p.pushpull);
-          exifObj['0th'][piexif.ImageIFD.ImageDescription] = fmtImageDescription(p, S._('public-checkbox').checked);
-          exifObj['0th'][piexif.ImageIFD.Copyright] = fmtCopyright(p.lab, p.process, p.scanner);
-          var gps2 = S.gpsData[idx];
-          if (gps2) {
-            exifObj['GPS'] = exifObj['GPS'] || {};
-            exifObj['GPS'][piexif.GPSIFD.GPSLatitude] = toDms(gps2.lat);
-            exifObj['GPS'][piexif.GPSIFD.GPSLatitudeRef] = gps2.lat >= 0 ? 'N' : 'S';
-            exifObj['GPS'][piexif.GPSIFD.GPSLongitude] = toDms(gps2.lng);
-            exifObj['GPS'][piexif.GPSIFD.GPSLongitudeRef] = gps2.lng >= 0 ? 'E' : 'W';
-          }
-          var exifBytes = piexif.dump(exifObj);
-          var newStr = piexif.insert(exifBytes, jpegStr);
-          p.dateTime = dt;
-          p.publicDesc = S._('public-checkbox').checked;
-          newStr = injectXmp(newStr, p, p.lab, p.process, p.scanner);
-          bytes = new Uint8Array(newStr.length);
-          for (var b2 = 0; b2 < newStr.length; b2++) bytes[b2] = newStr.charCodeAt(b2) & 0xFF;
-        } catch(err) { console.warn('EXIF write failed', err); }
-      }
-      zip.file(nn, bytes, { binary: true });
+export function startSaveProcess() {
+  S.processedFiles = [];
+  runProcessPipeline(
+    function(bytes, nn, entry) {
       S.processedFiles.push({ name: nn, blob: new Blob([bytes], { type: entry.file.type || 'image/jpeg' }) });
-      completed++; active--;
-      S.progBar.style.width = Math.round((completed / total) * 100) + '%';
-      S.progText.textContent = t('processing_of', {i: completed, n: total});
-      startNext();
-    };
-    reader.readAsArrayBuffer(entry.file);
-  }
-  startNext();
+    },
+    function(p, zip, total) {
+      addContentSheetIfEnabled(S.uploadedFiles, p, zip, S.processedFiles, function() {
+        S.progText.textContent = t('done_processed', {n: total});
+        var spin = S._('progress-spinner'), done = S._('progress-done');
+        if (spin) spin.style.display = 'none'; if (done) done.style.display = 'flex';
+        S.reviewBtn.disabled = false;
+        S.saveCustomOpts();
+        S.saveLastSession();
+        updatePhotoCount(total);
+        showGallery(S.processedFiles, p, zip);
+      });
+    }
+  );
 }
 
 export function showGallery(files, params, zip) {

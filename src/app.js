@@ -31,8 +31,12 @@ document.addEventListener('DOMContentLoaded', function() {
           document.getElementById('admin-panel').style.display = 'block';
           document.getElementById('admin-loading').style.display = 'block';
           document.getElementById('admin-feedback-list').innerHTML = '';
-          fetch('/api/feedback?key=' + encodeURIComponent(savedKey), { cache: 'no-cache' }).then(function(r) { return r.json(); }).then(function(data) {
+          fetch('/api/feedback?key=' + encodeURIComponent(savedKey), { cache: 'no-cache' }).then(function(r) {
+            if (r.status === 401) { document.getElementById('admin-loading').style.display = 'none'; document.getElementById('admin-feedback-list').innerHTML = '<p style="color:var(--text-secondary);">Invalid admin key.</p>'; return null; }
+            return r.json();
+          }).then(function(data) {
             document.getElementById('admin-loading').style.display = 'none';
+            if (!data) return;
             var items = data && data.items ? data.items : data;
             if (!items || !items.length) { document.getElementById('admin-feedback-list').innerHTML = '<p style="color:var(--text-secondary);">No feedback yet.</p>'; return; }
             var h = '';
