@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { toDms, fmtSize, dmsToDecimal, newFilmPrefix, escXml, strToUtf8Binary, toUcs2Binary, injectXmp } from '../../lib/utils.js';
+import { toDms, fmtSize, dmsToDecimal, newFilmPrefix, escXml, strToUtf8Binary, injectXmp, esc } from '../../lib/utils.js';
 
 describe('toDms', () => {
   it('converts positive decimal degrees', () => {
@@ -41,16 +41,6 @@ describe('strToUtf8Binary', () => {
 
   it('handles empty string', () => {
     expect(strToUtf8Binary('')).toBe('');
-  });
-});
-
-describe('toUcs2Binary', () => {
-  it('encodes ASCII to UCS-2 little-endian', () => {
-    var result = toUcs2Binary('AB');
-    expect(result.charCodeAt(0)).toBe(65);
-    expect(result.charCodeAt(1)).toBe(0);
-    expect(result.charCodeAt(2)).toBe(66);
-    expect(result.charCodeAt(3)).toBe(0);
   });
 });
 
@@ -142,5 +132,15 @@ describe('injectXmp', function() {
     expect(result.length).toBeGreaterThan(jpeg.length);
     expect(result.charCodeAt(0)).toBe(0xFF);
     expect(result.charCodeAt(1)).toBe(0xD8);
+  });
+});
+
+describe('esc', () => {
+  it('escapes HTML special characters', () => {
+    expect(esc('<script>alert("xss")</script>')).toBe('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;');
+    expect(esc('safe text')).toBe('safe text');
+    expect(esc('')).toBe('');
+    expect(esc('Tom & Jerry')).toBe('Tom &amp; Jerry');
+    expect(esc('a < b && b > c')).toBe('a &lt; b &amp;&amp; b &gt; c');
   });
 });

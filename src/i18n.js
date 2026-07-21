@@ -40,9 +40,6 @@ window.toggleLang = toggleLang;
 tpl.en = {
   // Header
   "origin": "Origin",
-  "origin_text": "FilmTag started as a CLI tool for myself and a few friends \u2014 I'm a film photography beginner who happens to write code for a living, and I just wanted an easy way to tag my scans with proper metadata. Before a trip, I worried that a lab might send scans back while I was away, so I turned it into a web app I could use from anywhere.",
-  "disclaimer": "Disclaimer",
-  "disclaimer_text": "This tool is shared freely with the film photography community. Commercial use or profiteering is strictly prohibited. Unauthorised commercial use will be subject to legal action.",
 
   // Sections
   "file_setup": "Film Setup",
@@ -68,19 +65,14 @@ tpl.en = {
   "scanner": "Scanner",
   "scanner_placeholder": "Enter custom scanner name",
   "date_time": "Shooting Date & Time",
-  "date_question": "Are all photos from the same date?",
-  "date_yes": "Yes \u2014 all same date",
-  "date_no": "No \u2014 multiple date segments",
   "shoot_date": "Shoot Date",
   "start_time": "Start Time (24h, first photo)",
-  "add_segment": "+ Add Date Segment",
   "signature": "\u{1F60E} Signature",
   "public_label": "Add FilmTag credit to photo description",
 
   // Actions / Status
   "review_summary": "Review Summary",
   "reset_all": "Reset All",
-  "manage_opts": "⚙️ Custom Options",
   "manage_opts_title": "Custom Options",
   "manage_opts_none": "No saved custom options yet. Use the free-text dropdown option to add your own camera, lens, film, lab, and more — they'll be saved here automatically.",
   "hide": "Hide",
@@ -95,10 +87,7 @@ tpl.en = {
 
   // File list / Segments
   "other_free_text": "Other (free text)",
-  "files_range": "Photos {s} \u2013 {e}",
-  "end_file_index": "End photo index",
   "remove": "Remove",
-  "total_uploaded": "Total: {n} photo(s) uploaded",
   "file_count": "{n} photo(s)",
   "clear_all": "Remove all photos",
   "upload_non_jpeg_warn": "{n} non-JPEG file(s) skipped. Only JPEG files are supported.",
@@ -110,8 +99,6 @@ tpl.en = {
   "film_required": "Film stock is required",
   "lab_required": "Lab is required",
   "scanner_required": "Scanner is required",
-  "date_required": "Date is required",
-  "date_error": "Date error",
 
   // Summary
   "settings": "Settings",
@@ -135,7 +122,6 @@ tpl.en = {
   "unselect_all": "Deselect All",
   "search_location": "Search location...",
   "search": "Search",
-  "map_hint": "Select photo(s) above, then click the map or search to set location",
   "clear_selected": "Clear",
 
   "add_range": "+ Add Range",
@@ -171,19 +157,14 @@ tpl.en = {
   "feedback_email_ph": "Email (optional, for follow-up)",
   "feedback_email_invalid": "Invalid email format",
   "feedback_submit": "Submit",
-  "feedback_success": "Thank you! Your feedback has been submitted.",
   "feedback_error": "Failed to submit feedback. Please try again.",
 
   // Contact Sheet
   "content_sheet": "Include Content Sheet",
   "content_sheet_hint": "Content Sheet Included",
   "content_sheet_download": "Download Content Sheet",
-  "content_sheet_generate": "Generate Content Sheet",
   "content_sheet_generating": "Generating content sheet...",
-  "content_sheet_adding": "Adding content sheet to gallery...",
   "content_sheet_done": "Content sheet ready",
-  "content_sheet_lab": "Lab",
-  "content_sheet_footer": "{film} | {camera} + {lens} | {lab} | {dateRange}",
 
   // Feedback success
   "feedback_success_title": "Thank You!",
@@ -222,19 +203,14 @@ tpl.zh = {
   "scanner": "掃描器",
   "scanner_placeholder": "輸入自定義掃描器名稱",
   "date_time": "拍攝日期 & 時間",
-  "date_question": "所有相片是否同一日期？",
-  "date_yes": "是 — 全部同一日期",
-  "date_no": "否 — 多個日期分段",
   "shoot_date": "拍攝日期",
   "start_time": "開始時間 (24小時, 第一張相)",
-  "add_segment": "+ 新增日期分段",
   "signature": "😎 簽名",
   "public_label": "在相片描述中加入 FilmTag 署名",
 
   // Actions / Status
   "review_summary": "檢視摘要",
   "reset_all": "全部重設",
-  "manage_opts": "⚙️ 自訂選項",
   "manage_opts_title": "自訂選項",
   "manage_opts_none": "未有已儲存嘅自訂選項。用下拉選單嘅「其他（自由輸入）」選項加入你嘅相機、鏡頭、菲林、沖曬店等 — 佢哋會自動儲存喺呢度。",
   "hide": "隱藏",
@@ -249,10 +225,7 @@ tpl.zh = {
 
   // File list / Segments
   "other_free_text": "其他（自由輸入）",
-  "files_range": "相片 {s} – {e}",
-  "end_file_index": "結束相片編號",
   "remove": "移除",
-  "total_uploaded": "已上傳：{n} 張相",
   "file_count": "{n} 張相",
   "clear_all": "移除全部相片",
   "upload_non_jpeg_warn": "已略過 {n} 個非 JPEG 檔案。只支援 JPEG 格式。",
@@ -264,8 +237,6 @@ tpl.zh = {
   "film_required": "請填寫菲林",
   "lab_required": "請填寫沖掃工作室",
   "scanner_required": "請填寫掃描器",
-  "date_required": "請選擇日期",
-  "date_error": "日期錯誤",
 
   // Summary
   "settings": "設定",
@@ -289,7 +260,6 @@ tpl.zh = {
   "unselect_all": "取消全選",
   "search_location": "搜尋位置...",
   "search": "搜尋",
-  "map_hint": "選擇上方檔案，然後點擊地圖或搜尋以設定位置",
   "clear_selected": "清除",
 
   "add_range": "+ 新增範圍",
@@ -325,18 +295,14 @@ tpl.zh = {
   "feedback_email_ph": "電郵（選擇性，方便跟進）",
   "feedback_email_invalid": "電郵格式不正確",
   "feedback_submit": "提交",
-  "feedback_success": "多謝你嘅意見！已成功提交。",
   "feedback_error": "提交失敗，請再試一次。",
 
   // Contact Sheet
   "content_sheet": "包含索引樣片",
   "content_sheet_hint": "已包含索引樣片",
   "content_sheet_download": "下載索引樣片",
-  "content_sheet_generate": "只生成索引樣片",
   "content_sheet_generating": "正在生成索引樣片…",
-  "content_sheet_adding": "正在將索引樣片加入圖庫…",
   "content_sheet_done": "索引樣片已準備好",
-  "content_sheet_footer": "{film} | {camera} + {lens} | {lab} | {dateRange}",
 
   // Feedback success
   "feedback_success_title": "多謝你！",

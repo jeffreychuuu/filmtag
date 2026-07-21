@@ -3,7 +3,6 @@ import { esc } from '../lib/utils.js';
 
 var CAMERAS, $, artistSel, artistCust, cameraSel, cameraCust, lensDrop, lensSel, lensCust;
 var filmSel, filmCust, labSel, labCust, ppSel, ppCust, scanSel, scanCust, processSel, processCust;
-var selectedSet, gpsData;
 var DEFAULT_ITEMS = {};
 var HIDDEN_KEY = 'filmtag-hidden-defaults';
 var LENS_HIDDEN_KEY = 'filmtag-hidden-lenses';
@@ -19,8 +18,6 @@ export function initGear(refs) {
   ppSel = refs.ppSel; ppCust = refs.ppCust;
   scanSel = refs.scanSel; scanCust = refs.scanCust;
   processSel = refs.processSel; processCust = refs.processCust;
-  selectedSet = refs.selectedSet;
-  gpsData = refs.gpsData;
 }
 
 // Populate a <select> with option strings
