@@ -183,6 +183,13 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 <details>
 <summary>撳開嚟睇</summary>
 
+**1.10.0 (2026-07-21)** — 每個欄位獨立 ⚙️ 圖示
+
+- ⚙️ 每個下拉選單（Artist、Camera、Lens、Film、Lab、Process、Push/Pull、Scanner）嘅 label 隔籬都有 ⚙️ 圖示
+- 🎯 撳 ⚙️ 直接打開自訂選項，自動展開對應 section — 直接管理該欄位嘅隱藏預設同自訂選項
+- 📖 更新咗 tutorial 說明新嘅 per-field 操作方法
+- 🧠 隱藏/顯示預設、刪除自訂選項全部可以喺同一個 overlay 搞掂
+
 **1.9.0 (2026-07-20)** — 自訂選項：隱藏預設 + 管理已儲存
 
 - ⚙️ Footer「自訂選項」打開 overlay 管理已儲存同內建嘅選項

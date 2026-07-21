@@ -364,7 +364,7 @@ export function deleteCustomOpt(key, value) {
   renderManageOverlay();
 }
 
-export function renderManageOverlay() {
+export function renderManageOverlay(expandKey) {
   var data = loadAllOpts();
   var hidden = loadHidden();
   var body = document.getElementById('manage-body');
@@ -462,10 +462,10 @@ export function renderManageOverlay() {
 
   body.innerHTML = h;
 
-  // Restore open sections
+  // Restore open sections + auto-expand requested key
   body.querySelectorAll('.manage-section-hdr').forEach(function(hdr) {
     var key = hdr.getAttribute('data-key') || '';
-    if (openKeys.indexOf(key) !== -1) {
+    if (openKeys.indexOf(key) !== -1 || key === expandKey) {
       var sectionBody = hdr.nextElementSibling;
       if (sectionBody) {
         sectionBody.style.display = 'block';
