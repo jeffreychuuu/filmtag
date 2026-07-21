@@ -228,19 +228,6 @@ export function removeOne(i) {
   renderRanges();
 }
 
-function rekeyDict(dict, a, b) {
-  var nd = {};
-  for (var k in dict) {
-    if (dict.hasOwnProperty(k)) {
-      var kk = parseInt(k, 10);
-      if (kk === a) nd[b] = dict[k];
-      else if (kk === b) nd[a] = dict[k];
-      else nd[kk] = dict[k];
-    }
-  }
-  return nd;
-}
-
 export function sortFiles(asc) {
   var indices = S.uploadedFiles.map(function(f, i) { return i; });
   indices.sort(function(a, b) {
