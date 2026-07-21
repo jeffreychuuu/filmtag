@@ -161,7 +161,7 @@ tpl.en = {
 
   // Contact Sheet
   "content_sheet": "Include Content Sheet",
-  "content_sheet_hint": "Content Sheet Included",
+  "content_sheet_hint": "* Content Sheet Included",
   "content_sheet_download": "Download Content Sheet",
   "content_sheet_generating": "Generating content sheet...",
   "content_sheet_done": "Content sheet ready",
@@ -299,7 +299,7 @@ tpl.zh = {
 
   // Contact Sheet
   "content_sheet": "包含索引樣片",
-  "content_sheet_hint": "已包含索引樣片",
+  "content_sheet_hint": "* 已包含索引樣片",
   "content_sheet_download": "下載索引樣片",
   "content_sheet_generating": "正在生成索引樣片…",
   "content_sheet_done": "索引樣片已準備好",
