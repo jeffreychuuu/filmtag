@@ -485,12 +485,10 @@ export function rebuildSummaryBody() {
     '</div>' +
     '<div class="summary-footer-row">' +
       '<button class="btn btn-secondary" id="summary-close-btn">' + t('edit_roll') + '</button>' +
-      '<div style="display:flex;flex-direction:column;align-items:center;gap:0.15rem;">' +
-        '<div style="display:flex;gap:0.75rem;">' +
-          '<button class="btn btn-primary" id="confirm-save-btn">💾 ' + t('save_to_album') + '</button>' +
-          '<button class="btn btn-primary" id="confirm-zip-btn">🗃️ ' + t('download_zip') + '</button>' +
-        '</div>' +
-        '<span id="content-sheet-hint" style="font-size:0.65rem;color:var(--text-secondary);font-weight:bold;font-style:italic;visibility:' + (csChecked ? 'visible' : 'hidden') + ';">' + t('content_sheet_hint') + '</span>' +
+      '<div style="position:relative;display:flex;gap:0.75rem;">' +
+        '<button class="btn btn-primary" id="confirm-save-btn">💾 ' + t('save_to_album') + '</button>' +
+        '<button class="btn btn-primary" id="confirm-zip-btn">🗃️ ' + t('download_zip') + '</button>' +
+        '<span id="content-sheet-hint" style="position:absolute;top:100%;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:0.65rem;color:var(--text-secondary);font-weight:bold;font-style:italic;visibility:' + (csChecked ? 'visible' : 'hidden') + ';">' + t('content_sheet_hint') + '</span>' +
       '</div>' +
     '</div>';
   generateSummaryThumbnails();
