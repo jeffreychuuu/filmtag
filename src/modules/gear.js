@@ -6,6 +6,7 @@ var filmSel, filmCust, labSel, labCust, ppSel, ppCust, scanSel, scanCust, proces
 var selectedSet, gpsData;
 var DEFAULT_ITEMS = {};
 var HIDDEN_KEY = 'filmtag-hidden-defaults';
+var LENS_HIDDEN_KEY = 'filmtag-hidden-lenses';
 
 export function initGear(refs) {
   CAMERAS = refs.CAMERAS;
@@ -37,6 +38,14 @@ function loadHidden() {
 
 function saveHidden(data) {
   localStorage.setItem(HIDDEN_KEY, JSON.stringify(data));
+}
+
+function loadHiddenLenses() {
+  try { return JSON.parse(localStorage.getItem(LENS_HIDDEN_KEY) || '{}'); } catch(_) { return {}; }
+}
+
+function saveHiddenLenses(data) {
+  localStorage.setItem(LENS_HIDDEN_KEY, JSON.stringify(data));
 }
 
 // Populate <select> with items + saved custom entries + __custom__ option
@@ -173,8 +182,10 @@ function isCustomCamera() {
 function populateLenses(modelName) {
   var idx = findCameraByModel(modelName);
   if (idx === -1) return;
+  var hiddenLenses = loadHiddenLenses()[modelName] || [];
   lensSel.innerHTML = '';
   CAMERAS[idx].lenses.forEach(function(l, i) {
+    if (hiddenLenses.indexOf(l.name) !== -1) return;
     var o = document.createElement('option'); o.value = i; o.textContent = l.name; lensSel.appendChild(o);
   });
   var savedLenses = loadSavedLensesForCamera(CAMERAS[idx].model);
@@ -345,6 +356,28 @@ export function resetHiddenDefaults() {
   renderManageOverlay();
 }
 
+export function toggleHiddenLens(camera, lensName) {
+  var hidden = loadHiddenLenses();
+  if (!hidden[camera]) hidden[camera] = [];
+  var idx = hidden[camera].indexOf(lensName);
+  if (idx === -1) {
+    hidden[camera].push(lensName);
+  } else {
+    hidden[camera].splice(idx, 1);
+    if (hidden[camera].length === 0) delete hidden[camera];
+  }
+  if (Object.keys(hidden).length === 0) localStorage.removeItem(LENS_HIDDEN_KEY);
+  else saveHiddenLenses(hidden);
+  refreshGearDropdowns();
+  renderManageOverlay();
+}
+
+export function resetHiddenLenses() {
+  localStorage.removeItem(LENS_HIDDEN_KEY);
+  refreshGearDropdowns();
+  renderManageOverlay();
+}
+
 export function resetHiddenDefaultsForField(key) {
   var hidden = loadHidden();
   if (hidden[key]) {
@@ -447,30 +480,61 @@ export function renderManageOverlay(key) {
     h += '</div></div>';
   }
 
-  // Custom lenses (only when key is lensByCamera)
-  if (key === 'lensByCamera' && data.lensByCamera) {
-    var cameras = Object.keys(data.lensByCamera);
-    for (var ci = 0; ci < cameras.length; ci++) {
-      var lenses = data.lensByCamera[cameras[ci]];
-      if (!lenses || lenses.length === 0) continue;
-      any = true;
-      h += '<div style="margin-bottom:0.5rem;">';
-      h += '<div style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);padding:0.3rem 0;">▼ ' + esc(t('lens')) + ' (' + esc(cameras[ci]) + ')</div>';
-      h += '<div style="margin-left:1.2rem;border-left:1px solid var(--border);padding-left:0.75rem;">';
-      h += '<div style="font-size:0.65rem;color:var(--text-secondary);margin-bottom:0.2rem;">' + t('custom') + '</div>';
-      for (var li = 0; li < lenses.length; li++) {
-        var lensName = typeof lenses[li] === 'object' ? lenses[li].name : lenses[li];
-        h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">';
-        h += '<span style="flex:1;">' + esc(lensName) + '</span>';
-        h += '<button class="manage-del-btn" data-key="lensByCamera" data-value=\'' + esc(JSON.stringify({camera: cameras[ci], name: lensName})) + '\' style="background:#c0392b;color:#fff;border:1px solid #c0392b;border-radius:4px;cursor:pointer;font-size:0.7rem;padding:0.1rem 0.4rem;">' + t('remove') + '</button>';
-        h += '</div>';
+  // Lens overlay: show all cameras with default lenses + custom lenses
+  if (key === 'lensByCamera') {
+    var hiddenCams = loadHidden().cameraModel || [];
+    var hiddenLenses = loadHiddenLenses();
+
+    for (var ci2 = 0; ci2 < CAMERAS.length; ci2++) {
+      var cam = CAMERAS[ci2];
+      if (hiddenCams.indexOf(cam.model) !== -1) continue;
+
+      // Default lenses
+      var defLenses = cam.lenses;
+      // Custom lenses
+      var custLenses = [];
+      if (data.lensByCamera && data.lensByCamera[cam.model]) {
+        custLenses = data.lensByCamera[cam.model];
       }
+
+      if (defLenses.length === 0 && custLenses.length === 0) continue;
+      any = true;
+
+      h += '<div style="margin-bottom:0.5rem;">';
+      h += '<div style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);padding:0.3rem 0;">▼ ' + esc(cam.model) + '</div>';
+      h += '<div style="margin-left:1.2rem;border-left:1px solid var(--border);padding-left:0.75rem;">';
+
+      if (defLenses.length > 0) {
+        h += '<div style="font-size:0.65rem;color:var(--text-secondary);margin-bottom:0.2rem;">' + t('default') + '</div>';
+        var hiddenForCam = hiddenLenses[cam.model] || [];
+        for (var dli = 0; dli < defLenses.length; dli++) {
+          var lensIsHidden = hiddenForCam.indexOf(defLenses[dli].name) !== -1;
+          h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">';
+          h += '<span style="flex:1;' + (lensIsHidden ? 'color:var(--text-secondary);text-decoration:line-through;' : '') + '">' + esc(defLenses[dli].name) + '</span>';
+          h += '<button class="manage-toggle-lens-btn" data-camera="' + esc(cam.model) + '" data-value="' + esc(defLenses[dli].name) + '" style="background:none;border:1px solid ' + (lensIsHidden ? 'var(--accent)' : 'var(--border)') + ';border-radius:4px;color:' + (lensIsHidden ? 'var(--accent)' : 'var(--text)') + ';cursor:pointer;font-size:0.65rem;padding:0.1rem 0.35rem;">' + (lensIsHidden ? t('show') : t('hide')) + '</button>';
+          h += '</div>';
+        }
+      }
+
+      if (custLenses.length > 0) {
+        h += '<div style="font-size:0.65rem;color:var(--text-secondary);margin-top:0.3rem;margin-bottom:0.2rem;">' + t('custom') + '</div>';
+        for (var ccli = 0; ccli < custLenses.length; ccli++) {
+          var clName = typeof custLenses[ccli] === 'object' ? custLenses[ccli].name : custLenses[ccli];
+          h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">';
+          h += '<span style="flex:1;">' + esc(clName) + '</span>';
+          h += '<button class="manage-del-btn" data-key="lensByCamera" data-value=\'' + esc(JSON.stringify({camera: cam.model, name: clName})) + '\' style="background:#c0392b;color:#fff;border:1px solid #c0392b;border-radius:4px;cursor:pointer;font-size:0.7rem;padding:0.1rem 0.4rem;">' + t('remove') + '</button>';
+          h += '</div>';
+        }
+      }
+
       h += '</div></div>';
     }
   }
 
   // Show all defaults button
-  var hasHidden = Object.keys(hidden).length > 0;
+  var hasHidden = key === 'lensByCamera'
+    ? Object.keys(loadHiddenLenses()).length > 0
+    : Object.keys(hidden).length > 0;
   h += '<div style="text-align:center;margin-top:0.75rem;">';
   h += '<button class="btn btn-sm btn-primary" id="reset-defaults-btn" style="visibility:' + (hasHidden ? 'visible' : 'hidden') + ';">' + t('reset_defaults') + '</button>';
   h += '</div>';
@@ -483,10 +547,10 @@ export function renderManageOverlay(key) {
 
   body.querySelectorAll('.manage-del-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      var key = this.getAttribute('data-key');
+      var k = this.getAttribute('data-key');
       var raw = this.getAttribute('data-value');
-      var value = key === 'lensByCamera' ? JSON.parse(raw) : raw;
-      deleteCustomOpt(key, value);
+      var value = k === 'lensByCamera' ? JSON.parse(raw) : raw;
+      deleteCustomOpt(k, value);
     });
   });
   body.querySelectorAll('.manage-toggle-btn').forEach(function(btn) {
@@ -494,6 +558,14 @@ export function renderManageOverlay(key) {
       toggleHiddenDefault(this.getAttribute('data-key'), this.getAttribute('data-value'));
     });
   });
+  body.querySelectorAll('.manage-toggle-lens-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      toggleHiddenLens(this.getAttribute('data-camera'), this.getAttribute('data-value'));
+    });
+  });
   var resetBtn = document.getElementById('reset-defaults-btn');
-  if (resetBtn) resetBtn.addEventListener('click', function() { resetHiddenDefaultsForField(key); });
+  if (resetBtn) resetBtn.addEventListener('click', function() {
+    if (key === 'lensByCamera') resetHiddenLenses();
+    else resetHiddenDefaultsForField(key);
+  });
 }
