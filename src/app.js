@@ -364,13 +364,11 @@ document.addEventListener('DOMContentLoaded', function() {
   $('feedback-success-close').addEventListener('click', function() { $('feedback-success-overlay').classList.remove('show'); });
   $('feedback-success-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
   $('admin-close').addEventListener('click', function() { $('admin-overlay').classList.remove('show'); $('admin-panel').style.display = 'none'; $('admin-login').style.display = 'block'; $('admin-error').style.display = 'none'; });
-  function openManageOverlay(key) {
-    renderManageOverlay(key);
-    $('manage-overlay').classList.add('show');
-  }
-  $('manage-btn').addEventListener('click', function() { renderManageOverlay(); $('manage-overlay').classList.add('show'); });
   document.querySelectorAll('.manage-field-btn').forEach(function(el) {
-    el.addEventListener('click', function() { openManageOverlay(this.getAttribute('data-manage')); });
+    el.addEventListener('click', function() {
+      renderManageOverlay(this.getAttribute('data-manage'));
+      $('manage-overlay').classList.add('show');
+    });
   });
   $('manage-close-btn').addEventListener('click', function() { $('manage-overlay').classList.remove('show'); });
   $('manage-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });

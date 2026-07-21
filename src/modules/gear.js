@@ -364,11 +364,28 @@ export function deleteCustomOpt(key, value) {
   renderManageOverlay();
 }
 
-export function renderManageOverlay(expandKey) {
+var _manageKey = null;
+
+function getLabelForManageKey(key) {
+  var map = {artist:'artist', cameraModel:'camera', filmName:'film_stock', lab:'lab', process:'process', pushPull:'push_pull', scanner:'scanner', lensByCamera:'lens', filmStock:'film_stock'};
+  return map[key] || 'manage_opts_title';
+}
+
+export function renderManageOverlay(key) {
+  if (key !== undefined) _manageKey = key;
+  key = _manageKey;
   var data = loadAllOpts();
   var hidden = loadHidden();
   var body = document.getElementById('manage-body');
   if (!body) return;
+
+  // Update overlay title
+  var overlay = body.closest('.overlay-content');
+  if (overlay) {
+    var titleEl = overlay.querySelector('h3');
+    if (titleEl) titleEl.innerHTML = '⚙️ ' + t(getLabelForManageKey(key));
+  }
+
   var keys = [
     {key: 'artist', label: t('artist')},
     {key: 'cameraModel', label: t('camera')},
@@ -382,6 +399,7 @@ export function renderManageOverlay(expandKey) {
   var any = false;
 
   for (var ki = 0; ki < keys.length; ki++) {
+    if (keys[ki].key !== key) continue;
     var defaults = DEFAULT_ITEMS[keys[ki].key];
     var customItems = data[keys[ki].key];
     var hiddenForField = hidden[keys[ki].key] || [];
@@ -391,9 +409,8 @@ export function renderManageOverlay(expandKey) {
     any = true;
 
     h += '<div class="manage-section" style="margin-bottom:0.5rem;">';
-    h += '<div class="manage-section-hdr" style="cursor:pointer;font-size:0.8rem;font-weight:600;color:var(--text-secondary);padding:0.3rem 0;user-select:none;" data-key="' + keys[ki].key + '">';
-    h += '<span class="manage-icon" style="display:inline-block;width:1rem;">▶</span> ' + esc(keys[ki].label) + '</div>';
-    h += '<div class="manage-section-body" style="display:none;margin-left:1.2rem;border-left:1px solid var(--border);padding-left:0.75rem;">';
+    h += '<div style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);padding:0.3rem 0;">▼ ' + esc(keys[ki].label) + '</div>';
+    h += '<div style="margin-left:1.2rem;border-left:1px solid var(--border);padding-left:0.75rem;">';
 
     if (hasDefaults) {
       h += '<div style="font-size:0.65rem;color:var(--text-secondary);margin-bottom:0.2rem;">' + t('default') + '</div>';
@@ -419,17 +436,16 @@ export function renderManageOverlay(expandKey) {
     h += '</div></div>';
   }
 
-  // Custom lenses
-  if (data.lensByCamera) {
+  // Custom lenses (only when key is lensByCamera)
+  if (key === 'lensByCamera' && data.lensByCamera) {
     var cameras = Object.keys(data.lensByCamera);
     for (var ci = 0; ci < cameras.length; ci++) {
       var lenses = data.lensByCamera[cameras[ci]];
       if (!lenses || lenses.length === 0) continue;
       any = true;
-      h += '<div class="manage-section" style="margin-bottom:0.5rem;">';
-      h += '<div class="manage-section-hdr" style="cursor:pointer;font-size:0.8rem;font-weight:600;color:var(--text-secondary);padding:0.3rem 0;user-select:none;">';
-      h += '<span class="manage-icon" style="display:inline-block;width:1rem;">▶</span> ' + esc(t('lens')) + ' (' + esc(cameras[ci]) + ')</div>';
-      h += '<div class="manage-section-body" style="display:none;margin-left:1.2rem;border-left:1px solid var(--border);padding-left:0.75rem;">';
+      h += '<div style="margin-bottom:0.5rem;">';
+      h += '<div style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);padding:0.3rem 0;">▼ ' + esc(t('lens')) + ' (' + esc(cameras[ci]) + ')</div>';
+      h += '<div style="margin-left:1.2rem;border-left:1px solid var(--border);padding-left:0.75rem;">';
       h += '<div style="font-size:0.65rem;color:var(--text-secondary);margin-bottom:0.2rem;">' + t('custom') + '</div>';
       for (var li = 0; li < lenses.length; li++) {
         var lensName = typeof lenses[li] === 'object' ? lenses[li].name : lenses[li];
@@ -452,28 +468,7 @@ export function renderManageOverlay(expandKey) {
     h = '<p style="color:var(--text-secondary);font-size:0.85rem;text-align:center;padding:2rem 0;">' + t('manage_opts_none') + '</p>';
   }
 
-  // Preserve open sections
-  var openKeys = [];
-  body.querySelectorAll('.manage-section-hdr').forEach(function(hdr) {
-    if (hdr.nextElementSibling && hdr.nextElementSibling.style.display !== 'none') {
-      openKeys.push(hdr.getAttribute('data-key') || '');
-    }
-  });
-
   body.innerHTML = h;
-
-  // Restore open sections + auto-expand requested key
-  body.querySelectorAll('.manage-section-hdr').forEach(function(hdr) {
-    var key = hdr.getAttribute('data-key') || '';
-    if (openKeys.indexOf(key) !== -1 || key === expandKey) {
-      var sectionBody = hdr.nextElementSibling;
-      if (sectionBody) {
-        sectionBody.style.display = 'block';
-        var icon = hdr.querySelector('.manage-icon');
-        if (icon) icon.textContent = '▼';
-      }
-    }
-  });
 
   body.querySelectorAll('.manage-del-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -486,15 +481,6 @@ export function renderManageOverlay(expandKey) {
   body.querySelectorAll('.manage-toggle-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       toggleHiddenDefault(this.getAttribute('data-key'), this.getAttribute('data-value'));
-    });
-  });
-  body.querySelectorAll('.manage-section-hdr').forEach(function(hdr) {
-    hdr.addEventListener('click', function() {
-      var sectionBody = this.nextElementSibling;
-      var icon = this.querySelector('.manage-icon');
-      var isOpen = sectionBody.style.display !== 'none';
-      sectionBody.style.display = isOpen ? 'none' : 'block';
-      icon.textContent = isOpen ? '▶' : '▼';
     });
   });
   var resetBtn = document.getElementById('reset-defaults-btn');
