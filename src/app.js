@@ -1,8 +1,7 @@
 import piexif from 'piexifjs';
-import JSZip from 'jszip';
 import DATA from '../data.json';
-import { t, setLang, toggleLang, applyTranslations, lang } from './i18n.js';
-import { toDms, strToUtf8Binary, toUcs2Binary, injectXmp, escXml, esc, fmtSize, dmsToDecimal, newFilmPrefix } from './lib/utils.js';
+import { t, toggleLang, applyTranslations, lang } from './i18n.js';
+import { esc } from './lib/utils.js';
 import { initGear, fillSelect, fillSelectWithCustom, saveCustomOpts, setupCustom, updateLensUI, collect, validate, saveLastSession, restoreLastSession, renderManageOverlay, setDefaultItems } from './modules/gear.js';
 import { initGps, initMap, updateGpsDots, updateGpsSaveBtn, setGpsForSelected, reverseGeocode } from './modules/gps.js';
 import { init as initUi, renderFileList, goToPage, changePageSize, goToSummaryPage, changeSummaryPageSize, clearAll, removeOne, sortFiles, toggleSort, getTotalPages, buildSummaryHtml, generateSummaryThumbnails, rebuildSummaryBody, buildOptions, syncRange, buildSelectedFromRanges } from './modules/ui.js';
