@@ -67,7 +67,7 @@ tpl.en = {
   "date_time": "Shooting Date & Time",
   "shoot_date": "Shoot Date",
   "start_time": "Start Time (24h, first photo)",
-  "signature": "\u{1F60E} Signature",
+  "signature": "😎 Signature",
   "public_label": "Add FilmTag credit to photo description",
 
   // Actions / Status
@@ -136,8 +136,8 @@ tpl.en = {
   "set_gps": "Set GPS Location",
 
   "extracting_exif": "Uploading {n} photos…",
-  "next_roll": "Next Roll 🎞️",
-  "edit_roll": "Edit This Roll ✏️",
+  "next_roll": "🎞️ Next Roll",
+  "edit_roll": "✏️ Edit This Roll",
 
   // Disclaimer acknowledgment
   "disclaimer_title": "Before You Use This Tool",
@@ -274,8 +274,8 @@ tpl.zh = {
   "set_gps": "設定 GPS 位置",
 
   "extracting_exif": "正在上傳 {n} 張相…",
-  "edit_roll": "編輯此卷 ✏️",
-  "next_roll": "下一卷菲林 🎞️",
+  "edit_roll": "✏️ 編輯此卷",
+  "next_roll": "🎞️ 下一卷菲林",
 
   // Disclaimer acknowledgment
   "disclaimer_title": "使用前須知",
