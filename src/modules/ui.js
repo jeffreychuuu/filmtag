@@ -489,7 +489,7 @@ export function rebuildSummaryBody() {
       '<button class="btn btn-primary" id="confirm-zip-btn">🗃️ ' + t('download_zip') + '</button>' +
     '</div>' +
     '<div class="summary-footer-row" style="justify-content:center;">' +
-      '<span id="content-sheet-hint" style="font-size:0.65rem;color:var(--text-secondary);visibility:' + (csChecked ? 'visible' : 'hidden') + ';">' + t('content_sheet_hint') + '</span>' +
+      '<span id="content-sheet-hint" style="font-size:0.65rem;color:var(--text-secondary);font-weight:bold;font-style:italic;visibility:' + (csChecked ? 'visible' : 'hidden') + ';">' + t('content_sheet_hint') + '</span>' +
     '</div>';
   generateSummaryThumbnails();
   S._('confirm-zip-btn').addEventListener('click', S.startZipProcess);
