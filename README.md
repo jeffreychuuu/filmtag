@@ -184,6 +184,13 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 <details>
 <summary>Click to expand</summary>
 
+**1.10.0 (2026-07-21)** — Inline ⚙️ icons per field for Custom Options
+
+- ⚙️ Each dropdown (Artist, Camera, Lens, Film, Lab, Process, Push/Pull, Scanner) has a ⚙️ icon next to its label
+- 🎯 Click ⚙️ to open Custom Options overlay with that section auto-expanded — directly manage that field's hidden defaults and custom entries
+- 📖 Tutorial updated to explain the new per-field access pattern
+- 🧠 Submenu navigation: Hide/Show defaults and Remove custom entries, all inline
+
 **1.9.0 (2026-07-20)** — Custom Options overlay: hide defaults + manage saved entries
 
 - ⚙️ "Custom Options" in footer opens overlay to manage all saved entries + built-in presets

@@ -80,6 +80,7 @@
     .btn-danger { background: transparent; color: #c0392b; border-color: #c0392b; font-size: 0.75rem; padding: 0.35rem 0.75rem; }
     .btn-danger:hover { background: #c0392b; color: #fff; }
     .btn-sm { font-size: 0.75rem; padding: 0.4rem 0.85rem; }
+    .manage-field-btn:hover { opacity:1 !important; }
     .btn:disabled { opacity: 0.45; cursor: not-allowed; }
     .actions { display: flex; gap: 0.75rem; margin-top: 2rem; flex-wrap: wrap; }
     .summary-overlay-inner { display:flex; flex-direction:column; max-height:85vh; overflow:hidden; padding:0; }
@@ -437,7 +438,7 @@
   </div>
 
   <div class="section">
-    <div class="section-header"><span class="section-number">2</span> <span data-i18n="artist">Artist</span></div>
+    <div class="section-header"><span class="section-number">2</span> <span data-i18n="artist">Artist</span><span class="manage-field-btn" data-manage="artist" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:0.3rem;">⚙️</span></div>
     <div class="form-row">
       <select id="artist-select"></select>
       <div class="custom-input" id="artist-custom">
@@ -449,7 +450,7 @@
   <div class="section">
     <div class="section-header"><span class="section-number">3</span> <span data-i18n="camera_lens">Camera & Lens</span></div>
     <div class="form-row">
-      <div><label data-i18n="camera">Camera</label>
+      <div><label data-i18n="camera">Camera</label><span class="manage-field-btn" data-manage="cameraModel" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:0.3rem;">⚙️</span>
         <select id="camera-select"></select>
       </div>
       <div class="custom-input" id="camera-custom">
@@ -459,7 +460,7 @@
         </div>
       </div>
       <div id="lens-dropdown-group">
-        <label data-i18n="lens">Lens</label><select id="lens-select"></select>
+        <label data-i18n="lens">Lens</label><span class="manage-field-btn" data-manage="lensByCamera" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:0.3rem;">⚙️</span><select id="lens-select"></select>
       </div>
       <div class="custom-input" id="lens-custom">
         <div class="field-group"><div><label data-i18n="lens_name">Lens Name</label><input type="text" id="lens-name-custom" placeholder="e.g. Summicron-M 50mm f/2"></div></div>
@@ -472,7 +473,7 @@
   </div>
 
   <div class="section">
-    <div class="section-header"><span class="section-number">4</span> <span data-i18n="film_stock">Film Stock & ISO</span></div>
+    <div class="section-header"><span class="section-number">4</span> <span data-i18n="film_stock">Film Stock & ISO</span><span class="manage-field-btn" data-manage="filmName" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:0.3rem;">⚙️</span></div>
     <div class="form-row">
       <select id="film-select"></select>
       <div class="custom-input" id="film-custom">
@@ -485,7 +486,7 @@
   </div>
 
   <div class="section">
-    <div class="section-header"><span class="section-number">5</span> <span data-i18n="lab">Lab</span></div>
+    <div class="section-header"><span class="section-number">5</span> <span data-i18n="lab">Lab</span><span class="manage-field-btn" data-manage="lab" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:0.3rem;">⚙️</span></div>
     <div class="form-row">
       <select id="lab-select"></select>
       <div class="custom-input" id="lab-custom">
@@ -495,7 +496,7 @@
   </div>
 
   <div class="section">
-    <div class="section-header"><span class="section-number">6</span> <span data-i18n="process">Developing Process</span></div>
+    <div class="section-header"><span class="section-number">6</span> <span data-i18n="process">Developing Process</span><span class="manage-field-btn" data-manage="process" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:0.3rem;">⚙️</span></div>
     <div class="form-row">
       <select id="process-select"></select>
       <div class="custom-input" id="process-custom">
@@ -505,7 +506,7 @@
   </div>
 
   <div class="section">
-    <div class="section-header"><span class="section-number">7</span> <span data-i18n="push_pull">Push / Pull</span></div>
+    <div class="section-header"><span class="section-number">7</span> <span data-i18n="push_pull">Push / Pull</span><span class="manage-field-btn" data-manage="pushPull" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:0.3rem;">⚙️</span></div>
     <div class="form-row">
       <select id="pushpull-select"></select>
       <div class="custom-input" id="pushpull-custom">
@@ -515,7 +516,7 @@
   </div>
 
   <div class="section">
-    <div class="section-header"><span class="section-number">8</span> <span data-i18n="scanner">Scanner</span></div>
+    <div class="section-header"><span class="section-number">8</span> <span data-i18n="scanner">Scanner</span><span class="manage-field-btn" data-manage="scanner" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:0.3rem;">⚙️</span></div>
     <div class="form-row">
       <select id="scanner-select"></select>
       <div class="custom-input" id="scanner-custom">
