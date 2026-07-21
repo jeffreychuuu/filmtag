@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { toDms, fmtSize, dmsToDecimal, newFilmPrefix, escXml, strToUtf8Binary, injectXmp } from '../../lib/utils.js';
+import { toDms, fmtSize, dmsToDecimal, newFilmPrefix, escXml, strToUtf8Binary, injectXmp, esc } from '../../lib/utils.js';
 
 describe('toDms', () => {
   it('converts positive decimal degrees', () => {
@@ -132,5 +132,15 @@ describe('injectXmp', function() {
     expect(result.length).toBeGreaterThan(jpeg.length);
     expect(result.charCodeAt(0)).toBe(0xFF);
     expect(result.charCodeAt(1)).toBe(0xD8);
+  });
+});
+
+describe('esc', () => {
+  it('escapes HTML special characters', () => {
+    expect(esc('<script>alert("xss")</script>')).toBe('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;');
+    expect(esc('safe text')).toBe('safe text');
+    expect(esc('')).toBe('');
+    expect(esc('Tom & Jerry')).toBe('Tom &amp; Jerry');
+    expect(esc('a < b && b > c')).toBe('a &lt; b &amp;&amp; b &gt; c');
   });
 });

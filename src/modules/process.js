@@ -257,7 +257,7 @@ export function showStatus(msg, type) {
   S.statusMsg.textContent = msg; S.statusMsg.className = 'status-msg ' + type; S.statusMsg.style.display = 'block';
 }
 
-function calculateGrid(n, cw, ch, mx, my_t, my_b, cg, rg) {
+export function calculateGrid(n, cw, ch, mx, my_t, my_b, cg, rg) {
   n = Math.min(n, 40);
   if (n <= 0) return [1, 1];
   var uw = Math.max(cw - 2 * mx, 1);

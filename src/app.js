@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
           document.getElementById('admin-loading').style.display = 'block';
           document.getElementById('admin-feedback-list').innerHTML = '';
           fetch('/api/feedback?key=' + encodeURIComponent(savedKey), { cache: 'no-cache' }).then(function(r) {
-            if (r.status === 401) { document.getElementById('admin-loading').style.display = 'none'; document.getElementById('admin-feedback-list').innerHTML = '<p style="color:var(--text-secondary);">Invalid admin key.</p>'; return null; }
+            if (r.status === 401) { document.getElementById('admin-loading').style.display = 'none'; document.getElementById('admin-panel').style.display = 'none'; document.getElementById('admin-login').style.display = 'block'; document.getElementById('admin-key-input').value = ''; document.getElementById('admin-error').textContent = 'Invalid admin key.'; document.getElementById('admin-error').style.display = 'block'; localStorage.removeItem('filmtag-admin-key'); return null; }
             return r.json();
           }).then(function(data) {
             document.getElementById('admin-loading').style.display = 'none';
