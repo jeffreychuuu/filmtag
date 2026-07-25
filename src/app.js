@@ -321,6 +321,21 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   applyTranslations();
 
+  (function() {
+    var saved = localStorage.getItem('filmtag-theme');
+    if (saved === 'light') document.documentElement.classList.add('light');
+    var themeBtn = $('theme-float-btn');
+    function updateThemeBtn() {
+      themeBtn.textContent = document.documentElement.classList.contains('light') ? '🌙' : '☀️';
+    }
+    updateThemeBtn();
+    themeBtn.addEventListener('click', function() {
+      document.documentElement.classList.toggle('light');
+      var isLight = document.documentElement.classList.contains('light');
+      localStorage.setItem('filmtag-theme', isLight ? 'light' : 'dark');
+      updateThemeBtn();
+    });
+  })();
   $('lang-float-btn').addEventListener('click', function() {
     toggleLang();
     document.querySelectorAll('select option[value="__custom__"]').forEach(function(o) { o.textContent = t('other_free_text'); });
