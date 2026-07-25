@@ -184,6 +184,13 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 <details>
 <summary>Click to expand</summary>
 
+**1.11.0 (2026-07-25)** — Light Mode
+
+- ☀️ Light mode toggle — floating button switches between dark & light themes
+- 🎨 All CSS variables re-themed: backgrounds, text, borders, accents, success/error states
+- 💾 Theme preference saved to localStorage, persists across sessions
+- 🔍 Hardcoded colors (`#fff`, `#000`, `#888`, `#111`, etc.) replaced with CSS variables — consistent theming throughout
+
 **1.10.0 (2026-07-21)** — Inline ⚙️ icons per field for Custom Options
 
 - ⚙️ Each dropdown (Artist, Camera, Lens, Film, Lab, Process, Push/Pull, Scanner) has a ⚙️ icon next to its label
