@@ -323,16 +323,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
   (function() {
     var saved = localStorage.getItem('filmtag-theme');
-    if (saved === 'light') document.documentElement.classList.add('light');
+    var prefersLight = window.matchMedia('(prefers-color-scheme: light)');
+    var isLight = saved ? saved === 'light' : prefersLight.matches;
+    document.documentElement.classList.toggle('light', isLight);
     var themeBtn = $('theme-float-btn');
     function updateThemeBtn() {
       themeBtn.textContent = document.documentElement.classList.contains('light') ? '🌙' : '☀️';
     }
     updateThemeBtn();
+    prefersLight.addEventListener('change', function(e) {
+      if (!localStorage.getItem('filmtag-theme')) {
+        document.documentElement.classList.toggle('light', e.matches);
+        updateThemeBtn();
+      }
+    });
     themeBtn.addEventListener('click', function() {
       document.documentElement.classList.toggle('light');
-      var isLight = document.documentElement.classList.contains('light');
-      localStorage.setItem('filmtag-theme', isLight ? 'light' : 'dark');
+      var nowLight = document.documentElement.classList.contains('light');
+      localStorage.setItem('filmtag-theme', nowLight ? 'light' : 'dark');
       updateThemeBtn();
     });
   })();
