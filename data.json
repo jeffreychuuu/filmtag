@@ -13,6 +13,14 @@
       ]
     },
     {
+      "make": "Minolta",
+      "model": "Minolta Prod 20'S",
+      "shutter": null,
+      "lenses": [
+        { "name": "Minolta Lens 35mm F/4.5", "focal": "35", "aperture": "4.5" }
+      ]
+    },
+    {
       "make": "Olympus",
       "model": "Olympus OM-2Sp",
       "shutter": null,
