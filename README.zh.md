@@ -35,15 +35,15 @@ Upload 你嘅 scans，揀你嘅 gear 同菲林，set 拍攝日期——佢會喺
 
 ### 重點功能
 
-| 功能 | 說明 |
-|------|------|
-| 📷 相機 & 鏡頭 | 內建 Leica MP、Olympus OM-2Sp 等，亦支援完全自訂相機型號、鏡頭焦距同最大光圈 |
-| 🎞️ 底片 & ISO | 內建 23 款常見菲林（Kodak、Fujifilm、CineStill、Ilford 等），揀菲林會自動帶入 ISO |
-| 🧪 沖掃紀錄 | 內建香港主流沖掃工作室：DOT-WELL、Megatoni、TrueFace Pro Lab 金鈿、Photo Garden 金藝、HK Camera、Showa、Colorluxe 彩圖麗——仲支援記錄 Push/Pull 同掃描器型號 |
-| 🕐 時間排序（最正嗰個功能） | 每張相片自動遞增 1 分鐘，時區強制寫入 +08:00。一卷菲林跨唔同日子拍？可以分段設定日期同起始時間，Google Photos 就會完美排好順序 |
-| 🌐 多語言 | 英文 & 繁體中文，透過浮動按鈕一鍵切換。所有介面文字均已翻譯 |
-| 🗺️ GPS 拍攝位置 | 內建 Leaflet + OpenStreetMap 地圖。選擇檔案後搜尋地址或點擊地圖落針，GPS 坐標寫入 EXIF。逆向地理編碼顯示街道名稱喺每張檔旁邊 |
-| ☑ Contact Sheet | 儲存或下載 ZIP 時自動生成 Contact Sheet — 可按 toggle 開關，支援獨立下載，底部 footer 顯示菲林/相機/lab/日期範圍 |
+| 功能                        | 說明                                                                                                                                                        |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 📷 相機 & 鏡頭              | 內建 Leica MP、Olympus OM-2Sp 等，亦支援完全自訂相機型號、鏡頭焦距同最大光圈                                                                                |
+| 🎞️ 底片 & ISO               | 內建 23 款常見菲林（Kodak、Fujifilm、CineStill、Ilford 等），揀菲林會自動帶入 ISO                                                                           |
+| 🧪 沖掃紀錄                 | 內建香港主流沖掃工作室：DOT-WELL、Megatoni、TrueFace Pro Lab 金鈿、Photo Garden 金藝、HK Camera、Showa、Colorluxe 彩圖麗——仲支援記錄 Push/Pull 同掃描器型號 |
+| 🕐 時間排序（最正嗰個功能） | 每張相片自動遞增 1 分鐘，時區強制寫入 +08:00。一卷菲林跨唔同日子拍？可以分段設定日期同起始時間，Google Photos 就會完美排好順序                              |
+| 🌐 多語言                   | 英文 & 繁體中文，透過浮動按鈕一鍵切換。所有介面文字均已翻譯                                                                                                 |
+| 🗺️ GPS 拍攝位置             | 內建 Leaflet + OpenStreetMap 地圖。選擇檔案後搜尋地址或點擊地圖落針，GPS 坐標寫入 EXIF。逆向地理編碼顯示街道名稱喺每張檔旁邊                                |
+| ☑ Contact Sheet             | 儲存或下載 ZIP 時自動生成 Contact Sheet — 可按 toggle 開關，支援獨立下載，底部 footer 顯示菲林/相機/lab/日期範圍                                            |
 
 成品效果 👇
 
@@ -75,6 +75,7 @@ Upload 你嘅 scans，揀你嘅 gear 同菲林，set 拍攝日期——佢會喺
 ## 技術
 
 ### 技術棧
+
 - **piexifjs** — 瀏覽器端 EXIF 讀寫
 - **JSZip** — 用戶端 ZIP 打包
 - **esbuild** — 打包工具
@@ -179,7 +180,7 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 本專案採用 **PolyForm Noncommercial License 1.0.0** 許可證。你可以自由非商業用途地使用、修改及分享，但嚴禁任何商業或謀利用途。詳情請參閱 `LICENSE` 檔案。
 
 ## 新功能
- 
+
 <details>
 <summary>撳開嚟睇</summary>
 
@@ -212,11 +213,13 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 - 🧠 所有 in-memory state（檔案、GPS、日期、選擇）原封不動 — 改完設定可以再處理過
 
 **1.6.0 (2026-07-20)** — EXIF 自動填入
+
 - 🎯 上傳相片後自動讀取 EXIF，Artist、Camera、Lens、ISO、Process 自動填入對應欄位
 - 🔍 將 EXIF 值匹配內建選項 — 匹配到就自動揀，匹配唔到就設為自訂值
 - 📐 焦距同光圈值亦會從 EXIF 自動填入
 
 **1.5.0 (2026-07-20)** — Contact Sheet 生成功能
+
 - ☑ Review Summary 加入 Contact Sheet toggle — 預設開啟，自動 save 去 localStorage
 - 📸「只生成 CS」按鈕 — 獨立下載 Contact Sheet
 - 🎞️ 儲存相簿或下載 ZIP 時，如 toggle 開啟則自動生成 Contact Sheet
@@ -224,24 +227,27 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 - 📋 Footer：菲林 + ISO、相機 + 鏡頭、沖掃工作室、日期範圍
 
 **1.4.0 (2026-06-29)** — 意見回饋系統 · 免責聲明 overlay · 教學 About 重組
+
 - 💬 浮動意見回饋按鈕，支援 Bug Report / Suggestion 表格 — 提交至 Upstash KV
 - ⚠️ 首次使用 overlay 而家需要 tick 2 個 checkbox（AI 工具確認 + 非商業用途同意）先可以繼續
 - 📖 Origin 搬咗去教學 About tab 嘅第一步
 - 🎯 浮動按鈕重新排序：🇭🇰 Language → ❓ Help → 💬 Feedback → 🐈 Easter egg
 
 **1.3.0 (2026-06-29)** — 上次設定自動還原 · 教學 · 排序切換 · Range UX · 瀏覽計數
+
 - 🔄 所有設定（gear、菲林、lab、沖洗方式、scanner、簽名）而家會喺下次開頁面時自動還原 — 唔使再逐個揀過
 - 📖 第一次用嗰陣會自動 show 教學，之後可以㩒 ❓ button 隨時睇返 — 覆蓋上傳、gear、排序、日期、GPS、檢閱、EXIF 詳細、Google Photos 排序原理同私隱（所有資料只留喺 localStorage，唔會上 server）
 - 🔤 排序按鈕簡化為單一切換 — ▼ A→Z / ▲ Z→A
 - 🤚 Drag & drop 係唯一排序方法（▲/▼ button 已移除）
 - ✅ 完成處理時 spinner 會變 tick icon
 - 📄 拖到分頁最底會插入該頁最後位置，唔係全卷最尾
-- 🛠️ 還原設定時優先 match dropdown 選項，唔係直接 set __custom__
+- 🛠️ 還原設定時優先 match dropdown 選項，唔係直接 set **custom**
 - ✕ 範圍刪除按鈕只在多個範圍時顯示
 - 🚫 全選時 Add Range 按鈕會 disabled
 - 👁 瀏覽次數 & 🖼 已處理相片數量顯示喺 header（經 Upstash KV 儲存）
 
 **1.2.0 (2026-06-28)** — 沖洗方式自訂輸入 + ZIP 下載後 Next Roll + 檔案排序
+
 - ✏️ 沖洗方式而家支援自訂輸入 — 可以自由輸入任何沖洗方式（C-41、ECN-2、E-6 等）
 - 💾 自訂嘅沖洗方式會自動儲存到瀏覽器，下次開返會見到
 - 🎞️ Download ZIP 完成後都會有「Next Roll 🎞️」制 — 唔使 reload 就可以開新一卷
@@ -249,16 +255,19 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 - 🤚 亦可以直接用 Drag & drop 拖到任何位置
 
 **1.1.3 (2026-06-14)** — 修正 Add Range + Clear GPS 按鈕
+
 - 🐛 修正：模組重構後「Add Range」按鈕失靈
 - ✏️ 「Clear Selected GPS」改為「清除」並搬移到地圖下面
 - 🖼️ 上傳限制為只接受 `.jpg` / `.jpeg`（TIFF/DNG/PNG 會被拒絕）
 
 **1.1.2 (2026-06-14)** — 限制上傳只接受 JPEG
+
 - 🖼️ 上傳過濾：只接受 `.jpg` / `.jpeg`；TIFF/DNG/PNG 會被拒絕並顯示警告
 - 📝 File input `accept` 屬性 & UI 文字同步更新
 - 🔧 `handleFiles` 而家會 reject 非 JPEG 檔案並顯示 status message
 
 **1.1.1 (2026-06-14)** — 程式碼模組化、Vitest 57 個測試
+
 - 🧩 `app.js` 由 1505 行拆為 6 個 modules（而家 249 行）
 - 🧪 加入 Vitest + happy-dom 測試框架（57 個測試），支援 TDD
 - 🏷️ 用字更新：「Author」全面改為「Artist」（code、DOM、data.json、翻譯）
@@ -267,55 +276,65 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 - ⚠️ 免責聲明：撳 Disagree 後會封鎖頁面，需要 refresh 先用到
 
 **1.0.1 (2026-06-14)** — README 重寫、版號顯示、發佈流程
+
 - 📝 README 改寫：敘事式開場、HK presets、serverless 說明
 - 🚀 App 底部顯示版號、Release Workflow 文件化
 - 📦 更新日誌改用 details 摺疊 + version heading
 
 **2026-06-12** — 預設日期改用檔案 modified time
+
 - 🕐 冇 EXIF 拍攝日期時，改用第一張相嘅 `lastModified` 做基準，每張 +1 分鐘（唔再係硬食今日 12:00）
 - 📍 GPS Save 制而家會 apply 地圖 marker 位置俾 selected files；冇 marker 時 disable
 - 🎨 用字更新：「Author」→「Artist」、「file」→「photo / 相 / 菲林」
 
 **2026-06-12** — Summary & Gallery 改為 modal overlay
+
 - 📋 Review Summary 而家係 modal overlay，有 Close/Save/Download 按鈕
 - 📸 處理完成後顯示 Gallery overlay —「Next Roll 🎞️」重置全部並 fade-out 捲回頁頂
 - ⏳ Processing progress bar 而家係 modal overlay，顯示喺 summary 上面
 
 **2026-06-12** — UI 翻新：日期/GPS modal & 操作按鈕
+
 - 🎯 Select 檔案後顯示兩個操作按鈕：「設定日期時間」同「設定 GPS 位置」
 - 📅 日期時間編輯搬去 modal overlay，有 Save/Cancel
 - 🗺️ GPS 編輯搬去 modal overlay，有地圖、搜尋、Save/Cancel
 - 🔲 Overlay 只可以由 Save/Cancel 關閉，唔會意外 backdrop dismiss
 
 **2026-06-12** — 背景預載 & 順序載入
+
 - ⚡ Thumbnail prefetch — page 1 thumbnail 完成後，背景 decode 之後嘅頁面（concurrency=2），切頁即時顯示
 - ⚡ 順序啟動 — EXIF 提取先 run，完成後先開始 thumbnail generation，唔會爭 I/O
 - ⏳ 上傳 loading overlay — block 畫面直到第一頁 EXIF + thumbnail ready，先 release 俾 user 操作
 - 🐛 修正：上傳後 Review Summary 按鈕冇正常啟用
 
 **2026-06-12** — 並行處理 & 地理編碼節流
+
 - ⚡ Zip/Save 而家 4 張相同時處理，36 張加快約 3 倍
 - 🗺️ Reverse geocode 限制 1 req/s + 快取重複座標，唔會再因為 rate limit 而 lost address
 - 🖼️ Summary 縮圖同樣加入 concurrency limit
 
 **2026-06-12** — 分頁顯示 & 縮圖快取
+
 - 📄 檔案列表分頁 — default 每頁 5 張，可選 5/10/25/50/全部；上下頁切換
 - 📋 Review Summary 分頁 — 檔案表格同樣支援分頁
 - ⚡ 縮圖快取 — thumbnail 首次 render 後 cache 做 data URL；切頁後即時顯示唔使重新 decode
 - 🗺️ 「清除已選 GPS 位置」按鈕搬去搜尋列獨立一行，UX 更清晰
 
 **2026-06-12** — 大量上傳效能翻新
+
 - ⚡ 批次 `renderFileList()` — 而家等所有 EXIF 讀完先 render 一次，唔會每張相都 rebuild 成個 list
 - ⚡ 快取 byte-to-string 轉換 — 每張相喺 EXIF 提取時只轉一次，zip/save 時重用，唔使 loop 幾千萬次
 - 🖼️ 縮圖生成加 concurrency limit — 最多同時 decode 6 張，唔會因為太多相而 freeze 瀏覽器
 - 💨 Blob URL 記憶體管理 — 所有 `createObjectURL` 用完即 revoke，杜絕 memory leak
 
 **2026-06-12** — Google AdSense 整合
+
 - 📢 加入 AdSense script 同 meta tag 以便放送廣告
 - 📄 網站根目錄放置 `ads.txt` 供廣告網絡驗證
 - 🔧 Build script 更新，自動複製 `ads.txt` 到 dist/
 
 **2026-06-11** — 相機-鏡頭關聯同儲存修正
+
 - 📸 自訂鏡頭而家按相機儲存——每部相機只會顯示屬於佢嘅鏡頭
 - 💾 焦距同最大光圈會同鏡頭名稱一齊儲存
 - 🐛 修正：相機揀自訂時鏡頭資料冇儲存到 localStorage
@@ -323,6 +342,7 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 - 🐛 修正：已儲存嘅自訂相機會顯示之前嘅鏡頭選項，而唔係空白
 
 **2026-06-11** — GPS + 多語言更新
+
 - 🌐 英文 & 繁體中文（香港），浮動按鈕一鍵切換，所有介面已翻譯
 - 🗺️ GPS 拍攝位置 — Leaflet + OpenStreetMap 地圖，搜尋地址或點擊落針，坐標寫入 EXIF
 - 📍 逆向地理編碼 — 設定位置後顯示街道名稱於每張檔旁邊
@@ -330,6 +350,7 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 - 🔄 多選檔案批次設定 GPS 位置
 
 **2026-06-11** — 檔案設定 + 日期時間 + 摘要檢視翻新
+
 - 📅 日期時間合併入檔案設定區域 — 揀選檔案後更改日期時間即時生效
 - 🗓️ 上傳時自動抽取 EXIF 內原有日期；無日期則預設今日 12:00
 - 📍 上傳時自動抽取 EXIF 內 GPS 坐標，同時逆向地理編碼獲取地址
