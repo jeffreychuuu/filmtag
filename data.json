@@ -35,6 +35,15 @@
       "lenses": [
         { "name": "Plastic Lens 35mm F/9", "focal": "35", "aperture": "9" }
       ]
+    },
+    {
+      "make": "Fuji",
+      "model": "Fuji Cardia Travel Mini Dual-P",
+      "shutter": null,
+      "lenses": [
+        { "name": "Fujinon 28mm F/3.5", "focal": "28", "aperture": "3.5" },
+        { "name": "Fujinon 45mm F/5.6", "focal": "45", "aperture": "5.6" }
+      ]
     }
   ],
   "films": [
