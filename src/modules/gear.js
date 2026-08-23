@@ -6,15 +6,42 @@ var filmSel, filmCust, labSel, labCust, ppSel, ppCust, scanSel, scanCust, proces
 var DEFAULT_ITEMS = {};
 var HIDDEN_KEY = 'filmtag-hidden-defaults';
 var LENS_HIDDEN_KEY = 'filmtag-hidden-lenses';
-var LENS_DEFAULT_KEY = 'filmtag-last-lens';
+var LENS_BY_CAMERA_KEY = 'filmtag-default-lens-by-camera';
 var S;
 
-function saveDefaultLens() {
-  try { localStorage.setItem(LENS_DEFAULT_KEY, JSON.stringify(S.defaultLens)); } catch(_) {}
+function loadDefaultLensByCamera() {
+  try { return JSON.parse(localStorage.getItem(LENS_BY_CAMERA_KEY) || '{}'); } catch(_) { return {}; }
 }
 
-function loadDefaultLens() {
-  try { return JSON.parse(localStorage.getItem(LENS_DEFAULT_KEY)); } catch(_) { return null; }
+function saveDefaultLensByCamera(data) {
+  try { localStorage.setItem(LENS_BY_CAMERA_KEY, JSON.stringify(data)); } catch(_) {}
+}
+
+// The default lens for a camera: last-used for that camera, else first preset lens, else first saved custom
+function getCameraDefaultLens(model) {
+  var byCam = loadDefaultLensByCamera();
+  if (byCam[model] && byCam[model].name) return byCam[model];
+  var idx = findCameraByModel(model);
+  if (idx !== -1) {
+    var hidden = loadHiddenLenses()[model] || [];
+    for (var i = 0; i < CAMERAS[idx].lenses.length; i++) {
+      var l = CAMERAS[idx].lenses[i];
+      if (hidden.indexOf(l.name) === -1) return { name: l.name, focal: l.focal, aperture: l.aperture };
+    }
+  }
+  var saved = loadSavedLensesForCamera(model);
+  if (saved.length) {
+    var s = saved[0];
+    return typeof s === 'object' ? { name: s.name, focal: s.focal, aperture: s.aperture } : { name: s, focal: '', aperture: '' };
+  }
+  return null;
+}
+
+function setCameraDefaultLens(model, lens) {
+  if (!model || !lens || !lens.name) return;
+  var byCam = loadDefaultLensByCamera();
+  byCam[model] = { name: lens.name, focal: lens.focal || '', aperture: lens.aperture || '' };
+  saveDefaultLensByCamera(byCam);
 }
 
 export function initGear(refs) {
@@ -140,7 +167,6 @@ export function saveLastSession() {
   var session = {
     artist: fv(artistSel, $('artist-custom-input')),
     camera: fv(cameraSel, $('camera-model-custom')), cameraMake: $('camera-make-custom').value.trim(),
-    defaultLens: S.defaultLens,
     film: fv(filmSel, $('film-name-custom')), filmIso: $('film-iso-custom').value.trim(),
     lab: fv(labSel, $('lab-custom-input')), process: fv(processSel, $('process-custom-input')),
     pushpull: fv(ppSel, $('pushpull-custom-input')), scanner: fv(scanSel, $('scanner-custom-input')),
@@ -160,8 +186,6 @@ export function restoreLastSession() {
   try { data = JSON.parse(localStorage.getItem('filmtag-last-session')); } catch(_) {}
   if (!data) return;
   if (data.camera && !selByText(cameraSel, data.camera)) { setCust(cameraSel, $('camera-model-custom'), data.camera); if (data.cameraMake) $('camera-make-custom').value = data.cameraMake; }
-  var dl = (data.defaultLens) || loadDefaultLens();
-  if (dl) S.defaultLens = dl;
   [{sel:artistSel,inp:$('artist-custom-input'),val:data.artist},{sel:labSel,inp:$('lab-custom-input'),val:data.lab},{sel:processSel,inp:$('process-custom-input'),val:data.process},{sel:ppSel,inp:$('pushpull-custom-input'),val:data.pushpull},{sel:scanSel,inp:$('scanner-custom-input'),val:data.scanner}].forEach(function(f) { if (f.val && !selByText(f.sel, f.val)) setCust(f.sel, f.inp, f.val); });
   if (data.film && !selByText(filmSel, data.film)) { setCust(filmSel, $('film-name-custom'), data.film); if (data.filmIso) $('film-iso-custom').value = data.filmIso; }
   if (data.publicDesc !== undefined) $('public-checkbox').checked = data.publicDesc;
@@ -244,18 +268,25 @@ export function updateLensUI() {
 // Read the lens currently selected in the lens overlay (used for apply)
 export function readLens() { return lensInfo(); }
 
-// Record + persist the roll default lens (= the last lens the user picked)
+// Record + persist the roll default lens for the current camera (= last used as base)
 export function setDefaultLens(lens) {
   if (!lens || !lens.name) return;
   S.defaultLens = { name: lens.name, focal: lens.focal || '', aperture: lens.aperture || '' };
-  saveDefaultLens();
+  setCameraDefaultLens(currentCameraModel(), S.defaultLens);
   updateLensSummary();
 }
 
-// Set the roll default lens (persisted = last picked) and clear per-file exceptions
+// Set the roll default lens (per-camera, persisted) and clear per-file exceptions
 export function applyLensToAll(lens) {
   if (!lens || !lens.name) return;
   setDefaultLens(lens);
+  S.lensByFile = {};
+  updateLensSummary();
+}
+
+// Sync the roll default lens to the currently selected camera's default lens
+export function syncDefaultLensToCamera() {
+  S.defaultLens = getCameraDefaultLens(currentCameraModel());
   S.lensByFile = {};
   updateLensSummary();
 }

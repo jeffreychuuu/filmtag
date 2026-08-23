@@ -14,6 +14,7 @@ import {
   clearLensForSelected,
   readLens,
   updateLensSummary,
+  syncDefaultLensToCamera,
   selByText,
   collect,
   validate,
@@ -445,7 +446,10 @@ document.addEventListener("DOMContentLoaded", function () {
   setupCustom(scanSel, scanCust);
   setupCustom(processSel, processCust);
   setupCustom(filmSel, filmCust);
-  cameraSel.addEventListener("change", updateLensUI);
+  cameraSel.addEventListener("change", function () {
+    updateLensUI();
+    syncDefaultLensToCamera();
+  });
   lensSel.addEventListener("change", function () {
     if (cameraSel.value === "__custom__") return;
     lensCust.classList.toggle("show", lensSel.value === "__custom__");
@@ -692,6 +696,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   updateLensUI();
   restoreLastSession();
+  syncDefaultLensToCamera();
   updateLensSummary();
   (function () {
     if (!localStorage.getItem("filmtag-tutorial-seen")) showTutorial();
