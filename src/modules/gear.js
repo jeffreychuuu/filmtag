@@ -333,7 +333,7 @@ export function updateLensSummary() {
   if (legend.count <= 1) { el.textContent = '🔭 ' + legend.names[0]; return; }
   var html = '🔭 ';
   for (var n = 0; n < legend.names.length; n++) {
-    html += esc(legend.letterByName[legend.names[n]] + ' = ' + legend.names[n]);
+    html += esc(legend.letterByName[legend.names[n]] + ' · ' + legend.names[n]);
     if (n < legend.names.length - 1) html += '<br>';
   }
   el.innerHTML = html;
