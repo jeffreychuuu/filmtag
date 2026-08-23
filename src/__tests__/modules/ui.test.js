@@ -13,6 +13,7 @@ beforeEach(function() {
     summaryPageSize: 5,
     selectedSet: {},
     gpsData: {},
+    lensByFile: {},
     thumbnailCache: {},
     geocodeCache: {},
     fileDates: {},
@@ -102,12 +103,15 @@ describe('removeOne', function() {
   it('removes file and reindexes state', function() {
     S.uploadedFiles = [{ file: {} }, { file: {} }, { file: {} }];
     S.gpsData = { 0: { lat: 22 }, 2: { lat: 33 } };
+    S.lensByFile = { 0: { name: 'A' }, 2: { name: 'B' } };
     S.selectedSet = { 0: true };
     S.thumbnailCache = { 1: 'data:1' };
     removeOne(1);
     expect(S.uploadedFiles.length).toBe(2);
     expect(S.gpsData[0]).toBeDefined();
     expect(S.gpsData[1]).toBeDefined();
+    expect(S.lensByFile[0].name).toBe('A');
+    expect(S.lensByFile[1].name).toBe('B');
     expect(S.selectedSet[0]).toBe(true);
     expect(S.thumbnailCache[1]).toBeUndefined();
   });

@@ -111,9 +111,7 @@ function autoFillFromFirstFile() {
     // Camera + Lens pair: auto-fill only if both model and lens are present
     var make = exifObj['0th'][piexif.ImageIFD.Make] || '';
     var model = exifObj['0th'][piexif.ImageIFD.Model] || '';
-    var lens = exifObj['Exif'][piexif.ExifIFD.LensModel];
-
-    if (model && lens) {
+    if (model) {
       var matched = false;
       for (var ci = 0; ci < S.CAMERAS.length; ci++) {
         if (S.CAMERAS[ci].model === model) {
@@ -126,18 +124,6 @@ function autoFillFromFirstFile() {
       if (!matched && !selByText(S.cameraSel, model)) {
         setCust(S.cameraSel, S.cameraCust, model);
         if (make) S.$('camera-make-custom').value = make;
-      }
-
-      if (!selByText(S.lensSel, lens)) setCust(S.lensSel, S.lensCust, lens);
-      var focal = exifObj['Exif'][piexif.ExifIFD.FocalLength];
-      if (focal) {
-        var fv = Array.isArray(focal) ? (focal[0] / focal[1]) : focal;
-        S.$('lens-focal').value = String(Math.round(fv));
-      }
-      var aperture = exifObj['Exif'][piexif.ExifIFD.FNumber];
-      if (aperture) {
-        var av = Array.isArray(aperture) ? (aperture[0] / aperture[1]) : aperture;
-        S.$('lens-aperture').value = av.toFixed(1);
       }
     }
 

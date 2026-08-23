@@ -33,6 +33,11 @@ export function init(refs) {
   S = refs;
 }
 
+// Resolve the lens for a single file: per-file exception wins, else the roll default
+export function resolveLensForFile(idx, lensByFile, defaultLens) {
+  return (lensByFile && lensByFile[idx]) || defaultLens;
+}
+
 function addContentSheetIfEnabled(files, params, zip, processedFiles, onDone) {
   var toggle = document.getElementById("content-sheet-toggle");
   if (!toggle || !toggle.checked) {
@@ -59,6 +64,8 @@ function processFileCommon(idx, p, zip, onFileDone) {
     ext = entry.file.name.split(".").pop().toLowerCase();
   var fd = S.getFileDate(idx);
   var nn = S.newFName(p.film.name, ext, idx);
+  var lens = resolveLensForFile(idx, S.lensByFile, p.lens) || { name: '', focal: '', aperture: '' };
+  var pf = Object.assign({}, p, { lens: lens });
   var reader = new FileReader();
   reader.onload = function (e) {
     var bytes = new Uint8Array(e.target.result);
@@ -98,15 +105,15 @@ function processFileCommon(idx, p, zip, onFileDone) {
         exifObj["Exif"][piexif.ExifIFD.DateTimeDigitized] = dt;
         exifObj["Exif"][piexif.ExifIFD.ISOSpeedRatings] =
           parseInt(p.film.iso, 10) || 400;
-        exifObj["Exif"][piexif.ExifIFD.LensModel] = p.lens.name;
-        if (p.lens.focal) {
-          var fl = parseFloat(p.lens.focal);
+        exifObj["Exif"][piexif.ExifIFD.LensModel] = lens.name;
+        if (lens.focal) {
+          var fl = parseFloat(lens.focal);
           exifObj["Exif"][piexif.ExifIFD.FocalLength] = Number.isInteger(fl)
             ? [fl, 1]
             : [Math.round(fl * 100), 100];
         }
-        if (p.lens.aperture) {
-          var ap = Math.round(parseFloat(p.lens.aperture) * 100);
+        if (lens.aperture) {
+          var ap = Math.round(parseFloat(lens.aperture) * 100);
           exifObj["Exif"][piexif.ExifIFD.FNumber] = [ap, 100];
           exifObj["Exif"][piexif.ExifIFD.MaxApertureValue] = [ap, 100];
           exifObj["Exif"][piexif.ExifIFD.ApertureValue] = [ap, 100];
@@ -124,10 +131,10 @@ function processFileCommon(idx, p, zip, onFileDone) {
             ];
           }
         }
-        exifObj["Exif"][piexif.ExifIFD.UserComment] = fmtUserComment(p);
+        exifObj["Exif"][piexif.ExifIFD.UserComment] = fmtUserComment(pf);
         exifObj["Exif"][0x828d] = fmtInstructions(p.process, p.pushpull);
         exifObj["0th"][piexif.ImageIFD.ImageDescription] = fmtImageDescription(
-          p,
+          pf,
           S._("public-checkbox").checked,
         );
         exifObj["0th"][piexif.ImageIFD.Copyright] = fmtCopyright(
@@ -147,9 +154,9 @@ function processFileCommon(idx, p, zip, onFileDone) {
         }
         var exifBytes = piexif.dump(exifObj);
         var newStr = piexif.insert(exifBytes, jpegStr);
-        p.dateTime = dt;
-        p.publicDesc = S._("public-checkbox").checked;
-        newStr = injectXmp(newStr, p, p.lab, p.process, p.scanner);
+        pf.dateTime = dt;
+        pf.publicDesc = S._("public-checkbox").checked;
+        newStr = injectXmp(newStr, pf, pf.lab, pf.process, pf.scanner);
         bytes = new Uint8Array(newStr.length);
         for (var b2 = 0; b2 < newStr.length; b2++)
           bytes[b2] = newStr.charCodeAt(b2) & 0xff;
@@ -462,11 +469,18 @@ export function generateContentSheet(files, params, onComplete) {
       lp,
       footerY + fSize + 4,
     );
+    var lensNames = [];
+    for (var ci = 0; ci < files.length; ci++) {
+      var fl2 = resolveLensForFile(ci, S.lensByFile, params.lens);
+      if (fl2 && fl2.name && lensNames.indexOf(fl2.name) === -1) lensNames.push(fl2.name);
+    }
     var camLens =
-      params.camera.make + " " + params.camera.model + " + " + params.lens.name;
-    if (params.lens.focal) camLens += " (" + params.lens.focal + "mm)";
-    if (params.lens.aperture) camLens += " f/" + params.lens.aperture;
-    ctx.fillText("\uD83D\uDCF7 " + camLens, lp, footerY + fSize * 2 + 10);
+      params.camera.make + " " + params.camera.model + " + " + (lensNames.length ? lensNames.join(" · ") : (params.lens.name || "—"));
+    var camLensStr = "\uD83D\uDCF7 " + camLens;
+    var fitSz = fSize, maxW = cw - 2 * lp;
+    ctx.font = "bold " + fitSz + "px sans-serif";
+    while (ctx.measureText(camLensStr).width > maxW && fitSz > 11) { fitSz -= 1; ctx.font = "bold " + fitSz + "px sans-serif"; }
+    ctx.fillText(camLensStr, lp, footerY + fSize * 2 + 10);
     var minD = null,
       maxD = null;
     for (var di = 0; di < files.length; di++) {

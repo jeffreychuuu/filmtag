@@ -117,7 +117,7 @@
     .upload-status-msg.error { display: block; background: var(--error-bg); color: var(--red); }
 
     .file-list { margin-top: 1rem; }
-    .file-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+    .file-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; row-gap: 0.35rem; }
     .file-list-header span { font-size: 0.8rem; color: var(--text-secondary); }
     .select-toolbar { display: flex; gap: 0.5rem; margin-top: 0.5rem; margin-bottom: 0.75rem; flex-direction: column; }
     .range-rows { display: flex; flex-direction: column; gap: 0.35rem; }
@@ -139,6 +139,11 @@
     }
     .file-item .fname { flex: 1; min-width: 0; color: var(--text); word-break: break-all; font-family: monospace; font-size: 0.75rem; }
     .file-item .fsize { color: var(--text-secondary); font-size: 0.7rem; flex-shrink: 0; }
+    .file-item .lens-dot {
+      flex: 0 0 auto; font-size: 0.68rem; color: var(--accent);
+      max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .file-item .lens-dot.lens-unset { color: var(--red); }
     .file-item .remove-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1rem; padding: 0 0.2rem; flex-shrink: 0; }
     .file-item .remove-btn:hover { color: var(--red); }
     .sort-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 0.8rem; padding: 0.2rem 0.4rem; border-radius: 4px; flex-shrink: 0; }
@@ -198,14 +203,14 @@
         display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
         text-align: center;
       }
-      .file-item .date-dot {
-        flex: 1 1 35%; min-width: 50px; max-width: 110px;
-        overflow: hidden; font-size: 0.5rem;
-        text-overflow: ellipsis; white-space: nowrap;
-        text-align: center;
-      }
-      .file-item .gps-addr { max-width: 100%; }
+    .file-item .date-dot {
+      flex: 1 1 35%; min-width: 50px; max-width: 110px;
+      overflow: hidden; font-size: 0.5rem;
+      text-overflow: ellipsis; white-space: nowrap;
+      text-align: center;
     }
+    .file-item .gps-addr { max-width: 100%; }
+  }
 
     .gallery-item {
       background: var(--surface2); border: 1px solid var(--border);
@@ -387,6 +392,8 @@
       background: rgba(0,0,0,0.85); z-index: 2000;
       align-items: center; justify-content: center;
     }
+    .overlay#lens-overlay { z-index: 2100; }
+    .overlay#manage-overlay { z-index: 2200; }
     .overlay.show { display: flex; }
     .overlay-content {
       background: var(--surface); border: 1px solid var(--border);
@@ -447,40 +454,29 @@
     <div class="file-actions" id="file-actions" style="display:none;">
       <button class="btn btn-primary" id="edit-date-btn">📅 <span data-i18n="set_date_time">Set Date & Time</span></button>
       <button class="btn btn-primary" id="edit-gps-btn">📍 <span data-i18n="set_gps">Set GPS Location</span></button>
+      <button class="btn btn-primary" id="edit-lens-btn">🔭 <span data-i18n="set_lens">Set Lens</span></button>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-header"><span class="section-number">2</span> <span data-i18n="artist">Artist</span><span class="manage-field-btn" data-manage="artist" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:0.3rem;">⚙️</span></div>
+    <div class="section-header"><span class="section-number">2</span> <span data-i18n="camera">Camera</span><span class="manage-field-btn" data-manage="cameraModel" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:0.3rem;">⚙️</span></div>
     <div class="form-row">
-      <select id="artist-select"></select>
-      <div class="custom-input" id="artist-custom">
-        <input type="text" id="artist-custom-input" data-i18n-placeholder="artist_placeholder" placeholder="Enter custom artist name">
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-header"><span class="section-number">3</span> <span data-i18n="camera_lens">Camera & Lens</span></div>
-    <div class="form-row">
-      <div><label><span data-i18n="camera">Camera</span> <span class="manage-field-btn" data-manage="cameraModel" style="cursor:pointer;font-size:0.8rem;opacity:0.5;">⚙️</span></label>
-        <select id="camera-select"></select>
-      </div>
+      <div><select id="camera-select"></select></div>
       <div class="custom-input" id="camera-custom">
         <div class="field-group">
           <div><label data-i18n="make">Make</label><input type="text" id="camera-make-custom" placeholder="e.g. Fujifilm"></div>
           <div><label data-i18n="model">Model</label><input type="text" id="camera-model-custom" placeholder="e.g. GA645"></div>
         </div>
       </div>
-      <div id="lens-dropdown-group">
-        <label><span data-i18n="lens">Lens</span> <span class="manage-field-btn" data-manage="lensByCamera" style="cursor:pointer;font-size:0.8rem;opacity:0.5;">⚙️</span></label><select id="lens-select"></select>
-      </div>
-      <div class="custom-input" id="lens-custom">
-        <div class="field-group"><div><label data-i18n="lens_name">Lens Name</label><input type="text" id="lens-name-custom" placeholder="e.g. Summicron-M 50mm f/2"></div></div>
-        <div class="field-group" style="margin-top:0.5rem;">
-          <div><label data-i18n="focal_length">Focal Length (mm)</label><input type="text" id="lens-focal" placeholder="e.g. 50"></div>
-          <div><label data-i18n="max_aperture">Max Aperture</label><input type="text" id="lens-aperture" placeholder="e.g. 2.0"></div>
-        </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-number">3</span> <span data-i18n="artist">Artist</span><span class="manage-field-btn" data-manage="artist" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:0.3rem;">⚙️</span></div>
+    <div class="form-row">
+      <select id="artist-select"></select>
+      <div class="custom-input" id="artist-custom">
+        <input type="text" id="artist-custom-input" data-i18n-placeholder="artist_placeholder" placeholder="Enter custom artist name">
       </div>
     </div>
   </div>
@@ -636,6 +632,30 @@
     <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:0.75rem;">
       <button class="btn btn-sm btn-secondary" id="gps-cancel-btn" data-i18n="cancel">Cancel</button>
       <button class="btn btn-sm btn-primary" id="gps-save-btn" data-i18n="save">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="lens-overlay">
+  <div class="overlay-content">
+    <h3 style="margin-bottom:1rem;">🔭 <span data-i18n="lens_overlay_title">Choose Lens</span></h3>
+    <div id="lens-dropdown-group">
+      <label><span data-i18n="lens">Lens</span> <span class="manage-field-btn" data-manage="lensByCamera" style="cursor:pointer;font-size:0.8rem;opacity:0.5;">⚙️</span></label>
+      <select id="lens-select"></select>
+    </div>
+    <div class="custom-input" id="lens-custom">
+      <div class="field-group"><div><label data-i18n="lens_name">Lens Name</label><input type="text" id="lens-name-custom" placeholder="e.g. Summicron-M 50mm f/2"></div></div>
+      <div class="field-group" style="margin-top:0.5rem;">
+        <div><label data-i18n="focal_length">Focal Length (mm)</label><input type="text" id="lens-focal" placeholder="e.g. 50"></div>
+        <div><label data-i18n="max_aperture">Max Aperture</label><input type="text" id="lens-aperture" placeholder="e.g. 2.0"></div>
+      </div>
+    </div>
+    <p id="lens-overlay-hint" class="hint" style="margin:0.75rem 0;"></p>
+    <div style="display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:flex-end;margin-top:0.75rem;">
+      <button class="btn btn-sm btn-secondary" id="lens-clear-btn" style="display:none;" data-i18n="lens_clear">Reset to Default</button>
+      <button class="btn btn-sm btn-secondary" id="lens-cancel-btn" data-i18n="cancel">Cancel</button>
+      <button class="btn btn-sm btn-primary" id="lens-apply-selected-btn" data-i18n="lens_apply_selected">Apply to Selected</button>
+      <button class="btn btn-sm btn-primary" id="lens-apply-all-btn" data-i18n="lens_apply_all">Apply to All</button>
     </div>
   </div>
 </div>

@@ -6,8 +6,46 @@ var filmSel, filmCust, labSel, labCust, ppSel, ppCust, scanSel, scanCust, proces
 var DEFAULT_ITEMS = {};
 var HIDDEN_KEY = 'filmtag-hidden-defaults';
 var LENS_HIDDEN_KEY = 'filmtag-hidden-lenses';
+var LENS_BY_CAMERA_KEY = 'filmtag-default-lens-by-camera';
+var S;
+
+function loadDefaultLensByCamera() {
+  try { return JSON.parse(localStorage.getItem(LENS_BY_CAMERA_KEY) || '{}'); } catch(_) { return {}; }
+}
+
+function saveDefaultLensByCamera(data) {
+  try { localStorage.setItem(LENS_BY_CAMERA_KEY, JSON.stringify(data)); } catch(_) {}
+}
+
+// The default lens for a camera: last-used for that camera, else first preset lens, else first saved custom
+function getCameraDefaultLens(model) {
+  var byCam = loadDefaultLensByCamera();
+  if (byCam[model] && byCam[model].name) return byCam[model];
+  var idx = findCameraByModel(model);
+  if (idx !== -1) {
+    var hidden = loadHiddenLenses()[model] || [];
+    for (var i = 0; i < CAMERAS[idx].lenses.length; i++) {
+      var l = CAMERAS[idx].lenses[i];
+      if (hidden.indexOf(l.name) === -1) return { name: l.name, focal: l.focal, aperture: l.aperture };
+    }
+  }
+  var saved = loadSavedLensesForCamera(model);
+  if (saved.length) {
+    var s = saved[0];
+    return typeof s === 'object' ? { name: s.name, focal: s.focal, aperture: s.aperture } : { name: s, focal: '', aperture: '' };
+  }
+  return null;
+}
+
+function setCameraDefaultLens(model, lens) {
+  if (!model || !lens || !lens.name) return;
+  var byCam = loadDefaultLensByCamera();
+  byCam[model] = { name: lens.name, focal: lens.focal || '', aperture: lens.aperture || '' };
+  saveDefaultLensByCamera(byCam);
+}
 
 export function initGear(refs) {
+  S = refs;
   CAMERAS = refs.CAMERAS;
   $ = refs.$;
   artistSel = refs.artistSel; artistCust = refs.artistCust;
@@ -129,7 +167,6 @@ export function saveLastSession() {
   var session = {
     artist: fv(artistSel, $('artist-custom-input')),
     camera: fv(cameraSel, $('camera-model-custom')), cameraMake: $('camera-make-custom').value.trim(),
-    lensName: fv(lensSel, $('lens-name-custom')), lensFocal: $('lens-focal').value.trim(), lensAperture: $('lens-aperture').value.trim(),
     film: fv(filmSel, $('film-name-custom')), filmIso: $('film-iso-custom').value.trim(),
     lab: fv(labSel, $('lab-custom-input')), process: fv(processSel, $('process-custom-input')),
     pushpull: fv(ppSel, $('pushpull-custom-input')), scanner: fv(scanSel, $('scanner-custom-input')),
@@ -149,7 +186,6 @@ export function restoreLastSession() {
   try { data = JSON.parse(localStorage.getItem('filmtag-last-session')); } catch(_) {}
   if (!data) return;
   if (data.camera && !selByText(cameraSel, data.camera)) { setCust(cameraSel, $('camera-model-custom'), data.camera); if (data.cameraMake) $('camera-make-custom').value = data.cameraMake; }
-  if (data.lensName && !selByText(lensSel, data.lensName)) { setCust(lensSel, $('lens-name-custom'), data.lensName); if (data.lensFocal) $('lens-focal').value = data.lensFocal; if (data.lensAperture) $('lens-aperture').value = data.lensAperture; }
   [{sel:artistSel,inp:$('artist-custom-input'),val:data.artist},{sel:labSel,inp:$('lab-custom-input'),val:data.lab},{sel:processSel,inp:$('process-custom-input'),val:data.process},{sel:ppSel,inp:$('pushpull-custom-input'),val:data.pushpull},{sel:scanSel,inp:$('scanner-custom-input'),val:data.scanner}].forEach(function(f) { if (f.val && !selByText(f.sel, f.val)) setCust(f.sel, f.inp, f.val); });
   if (data.film && !selByText(filmSel, data.film)) { setCust(filmSel, $('film-name-custom'), data.film); if (data.filmIso) $('film-iso-custom').value = data.filmIso; }
   if (data.publicDesc !== undefined) $('public-checkbox').checked = data.publicDesc;
@@ -178,7 +214,7 @@ function isCustomCamera() {
 // Populate lens dropdown for a built-in camera preset
 function populateLenses(modelName) {
   var idx = findCameraByModel(modelName);
-  if (idx === -1) return;
+  if (idx === -1) { lensSel.innerHTML = ''; return; }
   var hiddenLenses = loadHiddenLenses()[modelName] || [];
   lensSel.innerHTML = '';
   CAMERAS[idx].lenses.forEach(function(l, i) {
@@ -229,6 +265,81 @@ export function updateLensUI() {
   }
 }
 
+// Read the lens currently selected in the lens overlay (used for apply)
+export function readLens() { return lensInfo(); }
+
+// Record + persist the roll default lens for the current camera (= last used as base)
+export function setDefaultLens(lens) {
+  if (!lens || !lens.name) return;
+  S.defaultLens = { name: lens.name, focal: lens.focal || '', aperture: lens.aperture || '' };
+  setCameraDefaultLens(currentCameraModel(), S.defaultLens);
+  updateLensSummary();
+}
+
+// Set the roll default lens (per-camera, persisted) and clear per-file exceptions
+export function applyLensToAll(lens) {
+  if (!lens || !lens.name) return;
+  setDefaultLens(lens);
+  S.lensByFile = {};
+  updateLensSummary();
+}
+
+// Sync the roll default lens to the currently selected camera's default lens
+export function syncDefaultLensToCamera() {
+  S.defaultLens = getCameraDefaultLens(currentCameraModel());
+  S.lensByFile = {};
+  updateLensSummary();
+}
+
+// Set a per-file lens exception for all currently selected files
+export function applyLensToSelected(lens) {
+  if (!lens || !lens.name) return;
+  var keys = Object.keys(S.selectedSet || {});
+  for (var i = 0; i < keys.length; i++) S.lensByFile[keys[i]] = { name: lens.name, focal: lens.focal || '', aperture: lens.aperture || '' };
+  setCameraDefaultLens(currentCameraModel(), lens);
+  updateLensSummary();
+}
+
+// Remove per-file lens exceptions (revert to default) for selected files
+export function clearLensForSelected() {
+  var keys = Object.keys(S.selectedSet || {});
+  for (var i = 0; i < keys.length; i++) delete S.lensByFile[keys[i]];
+  updateLensSummary();
+}
+
+// Build the lens legend for the current roll: letter (A, B, C…) per distinct lens
+export function buildLensLegend() {
+  var files = S.uploadedFiles || [];
+  var letterByName = {}, names = [], unset = 0;
+  for (var i = 0; i < files.length; i++) {
+    var l = S.lensByFile[i] || S.defaultLens;
+    if (l && l.name) {
+      if (letterByName[l.name] === undefined) {
+        letterByName[l.name] = String.fromCharCode(65 + names.length);
+        names.push(l.name);
+      }
+    } else unset++;
+  }
+  return { letterByName: letterByName, names: names, count: names.length, unset: unset };
+}
+
+// Update the lens legend line in the file list header
+export function updateLensSummary() {
+  var el = S.$ && S.$('lens-status');
+  if (!el) return;
+  var files = S.uploadedFiles || [];
+  if (!files.length) { el.textContent = ''; return; }
+  var legend = buildLensLegend();
+  if (legend.unset > 0) { el.textContent = '⚠️ ' + t('lens_unset_count', { n: legend.unset }); return; }
+  if (legend.count <= 1) { el.textContent = '🔭 ' + legend.names[0]; return; }
+  var html = '';
+  for (var n = 0; n < legend.names.length; n++) {
+    html += '🔭 ' + esc(legend.letterByName[legend.names[n]] + ' · ' + legend.names[n]);
+    if (n < legend.names.length - 1) html += '<br>';
+  }
+  el.innerHTML = html;
+}
+
 // Get selected option text from a <select>
 function selText(sel) { return sel.options[sel.selectedIndex].text; }
 
@@ -277,7 +388,7 @@ function filmInfo() {
 // Collect all gear/params into a single params object for processing
 export function collect() {
   return {
-    artist: getVal(artistSel, $('artist-custom-input')), camera: camInfo(), lens: lensInfo(),
+    artist: getVal(artistSel, $('artist-custom-input')), camera: camInfo(), lens: S.defaultLens || { name: '', focal: '', aperture: '' },
     film: filmInfo(), lab: getVal(labSel, $('lab-custom-input')),     process: getVal(processSel, $('process-custom-input')),
     pushpull: getVal(ppSel, $('pushpull-custom-input')), scanner: getVal(scanSel, $('scanner-custom-input'))
   };
@@ -285,9 +396,19 @@ export function collect() {
 
 // Validate that all required fields are filled, return error message or null
 export function validate(p) {
-  if (!p.artist) return t('artist_required'); if (!p.lens.name) return t('lens_required');
-  if (!p.film.name) return t('film_required'); if (!p.lab) return t('lab_required');
-  if (!p.scanner) return t('scanner_required'); return null;
+  if (!p.artist) return t('artist_required');
+  if (!p.film.name) return t('film_required');
+  if (!p.lab) return t('lab_required');
+  if (!p.scanner) return t('scanner_required');
+  var files = S.uploadedFiles || [];
+  if (files.length > 0) {
+    for (var i = 0; i < files.length; i++) {
+      if (!S.lensByFile[i] && (!S.defaultLens || !S.defaultLens.name)) {
+        return t('lens_coverage');
+      }
+    }
+  }
+  return null;
 }
 
 function loadAllOpts() {
@@ -477,38 +598,28 @@ export function renderManageOverlay(key) {
     h += '</div></div>';
   }
 
-  // Lens overlay: show all cameras with default lenses + custom lenses
+  // Lens overlay: show only the currently selected camera's lenses
   if (key === 'lensByCamera') {
-    var hiddenCams = loadHidden().cameraModel || [];
     var hiddenLenses = loadHiddenLenses();
+    var camModel2 = currentCameraModel();
+    var camIdx = findCameraByModel(camModel2);
+    var defLenses = camIdx !== -1 ? CAMERAS[camIdx].lenses : [];
+    var custLenses = (data.lensByCamera && data.lensByCamera[camModel2]) || [];
 
-    for (var ci2 = 0; ci2 < CAMERAS.length; ci2++) {
-      var cam = CAMERAS[ci2];
-      if (hiddenCams.indexOf(cam.model) !== -1) continue;
-
-      // Default lenses
-      var defLenses = cam.lenses;
-      // Custom lenses
-      var custLenses = [];
-      if (data.lensByCamera && data.lensByCamera[cam.model]) {
-        custLenses = data.lensByCamera[cam.model];
-      }
-
-      if (defLenses.length === 0 && custLenses.length === 0) continue;
+    if (defLenses.length > 0 || custLenses.length > 0) {
       any = true;
-
       h += '<div style="margin-bottom:0.5rem;">';
-      h += '<div style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);padding:0.3rem 0;">▼ ' + esc(cam.model) + '</div>';
+      h += '<div style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);padding:0.3rem 0;">▼ ' + esc(camModel2) + '</div>';
       h += '<div style="margin-left:1.2rem;border-left:1px solid var(--border);padding-left:0.75rem;">';
 
       if (defLenses.length > 0) {
         h += '<div style="font-size:0.65rem;color:var(--text-secondary);margin-bottom:0.2rem;">' + t('default') + '</div>';
-        var hiddenForCam = hiddenLenses[cam.model] || [];
+        var hiddenForCam = hiddenLenses[camModel2] || [];
         for (var dli = 0; dli < defLenses.length; dli++) {
           var lensIsHidden = hiddenForCam.indexOf(defLenses[dli].name) !== -1;
           h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">';
           h += '<span style="flex:1;' + (lensIsHidden ? 'color:var(--text-secondary);text-decoration:line-through;' : '') + '">' + esc(defLenses[dli].name) + '</span>';
-          h += '<button class="manage-toggle-lens-btn" data-camera="' + esc(cam.model) + '" data-value="' + esc(defLenses[dli].name) + '" style="background:none;border:1px solid ' + (lensIsHidden ? 'var(--accent)' : 'var(--border)') + ';border-radius:4px;color:' + (lensIsHidden ? 'var(--accent)' : 'var(--text)') + ';cursor:pointer;font-size:0.65rem;padding:0.1rem 0.35rem;">' + (lensIsHidden ? t('show') : t('hide')) + '</button>';
+          h += '<button class="manage-toggle-lens-btn" data-camera="' + esc(camModel2) + '" data-value="' + esc(defLenses[dli].name) + '" style="background:none;border:1px solid ' + (lensIsHidden ? 'var(--accent)' : 'var(--border)') + ';border-radius:4px;color:' + (lensIsHidden ? 'var(--accent)' : 'var(--text)') + ';cursor:pointer;font-size:0.65rem;padding:0.1rem 0.35rem;">' + (lensIsHidden ? t('show') : t('hide')) + '</button>';
           h += '</div>';
         }
       }
@@ -519,7 +630,7 @@ export function renderManageOverlay(key) {
           var clName = typeof custLenses[ccli] === 'object' ? custLenses[ccli].name : custLenses[ccli];
           h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">';
           h += '<span style="flex:1;">' + esc(clName) + '</span>';
-          h += '<button class="manage-del-btn" data-key="lensByCamera" data-value=\'' + esc(JSON.stringify({camera: cam.model, name: clName})) + '\' style="background:#c0392b;color:#fff;border:1px solid #c0392b;border-radius:4px;cursor:pointer;font-size:0.7rem;padding:0.1rem 0.4rem;">' + t('remove') + '</button>';
+          h += '<button class="manage-del-btn" data-key="lensByCamera" data-value=\'' + esc(JSON.stringify({camera: camModel2, name: clName})) + '\' style="background:#c0392b;color:#fff;border:1px solid #c0392b;border-radius:4px;cursor:pointer;font-size:0.7rem;padding:0.1rem 0.4rem;">' + t('remove') + '</button>';
           h += '</div>';
         }
       }
@@ -530,7 +641,7 @@ export function renderManageOverlay(key) {
 
   // Show all defaults button
   var hasHidden = key === 'lensByCamera'
-    ? Object.keys(loadHiddenLenses()).length > 0
+    ? (loadHiddenLenses()[currentCameraModel()] || []).length > 0
     : Object.keys(hidden).length > 0;
   h += '<div style="text-align:center;margin-top:0.75rem;">';
   h += '<button class="btn btn-sm btn-primary" id="reset-defaults-btn" style="visibility:' + (hasHidden ? 'visible' : 'hidden') + ';">' + t('reset_defaults') + '</button>';
