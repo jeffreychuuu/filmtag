@@ -449,6 +449,7 @@ document.addEventListener("DOMContentLoaded", function () {
   cameraSel.addEventListener("change", function () {
     updateLensUI();
     syncDefaultLensToCamera();
+    S.renderFileList();
   });
   lensSel.addEventListener("change", function () {
     if (cameraSel.value === "__custom__") return;
