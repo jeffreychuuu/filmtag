@@ -15,7 +15,6 @@ import {
   readLens,
   updateLensSummary,
   syncDefaultLensToCamera,
-  selByText,
   collect,
   validate,
   saveLastSession,
@@ -589,8 +588,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.target === this) this.classList.remove("show");
   });
   editLensBtn.addEventListener("click", function () {
+    $("manage-overlay").classList.remove("show");
     updateLensUI();
-    if (S.defaultLens && S.defaultLens.name) selByText($("lens-select"), S.defaultLens.name);
     var n = Object.keys(S.selectedSet).length;
     var hint = $("lens-overlay-hint");
     if (hint) hint.textContent = t("lens_apply_to", { n: n });
