@@ -37,7 +37,7 @@ Upload 你嘅 scans，揀你嘅 gear 同菲林，set 拍攝日期——佢會喺
 
 | 功能                        | 說明                                                                                                                                                        |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 📷 相機 & 鏡頭              | 內建 Leica MP、Olympus OM-2Sp 等，亦支援完全自訂相機型號、鏡頭焦距同最大光圈                                                                                |
+| 📷 相機 & 鏡頭              | 內建 Leica MP、Olympus OM-2Sp 等，亦支援完全自訂相機型號、鏡頭焦距同最大光圈 — 仲可以同卷同機用唔同鏡頭，每部相機記住上次用嗰支做 default                                                              |
 | 🎞️ 底片 & ISO               | 內建 23 款常見菲林（Kodak、Fujifilm、CineStill、Ilford 等），揀菲林會自動帶入 ISO                                                                           |
 | 🧪 沖掃紀錄                 | 內建香港主流沖掃工作室：DOT-WELL、Megatoni、TrueFace Pro Lab 金鈿、Photo Garden 金藝、HK Camera、Showa、Colorluxe 彩圖麗——仲支援記錄 Push/Pull 同掃描器型號 |
 | 🕐 時間排序（最正嗰個功能） | 每張相片自動遞增 1 分鐘，時區強制寫入 +08:00。一卷菲林跨唔同日子拍？可以分段設定日期同起始時間，Google Photos 就會完美排好順序                              |
@@ -59,7 +59,7 @@ Upload 你嘅 scans，揀你嘅 gear 同菲林，set 拍攝日期——佢會喺
 ## 功能
 
 - 支援拖放上傳 JPEG 相片
-- 透過下拉選單設定相機、鏡頭、菲林、ISO、沖掃工作室、沖洗方式、Push/Pull、掃描器
+- 透過下拉選單設定相機、菲林、ISO、沖掃工作室、沖洗方式、Push/Pull、掃描器；鏡頭就揀選相後逐張設定（同機可以一卷用唔同鏡頭）
 - 支援多個日期分段，各自設定起始時間
 - 處理前可預覽檔案重新命名摘要
 - 寫入 EXIF 標籤：Make、Model、Artist、ISO、LensModel、DateTime、FocalLength、FNumber、Aperture、Shutter、UserComment、ImageDescription、Copyright、Instructions
@@ -183,6 +183,13 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 
 <details>
 <summary>撳開嚟睇</summary>
+
+**1.12.0 (2026-08-23)** — 同卷同機、可以唔同鏡頭
+
+- 🔭 揀選相後逐張設定鏡頭（同 Date/GPS 同一層）— 套用至所選或全部
+- 🅰️ 一卷多過一支鏡頭時 file list 用 A/B/C 標示，header 圖例顯示全名
+- 🧠 每部相機記住上次用嗰支做 default，跟相機切換
+- 🖼️ Summary 同 Contact Sheet 顯示每張 resolve 後嘅鏡頭
 
 **1.10.0 (2026-07-21)** — 每個欄位獨立 ⚙️ 圖示
 

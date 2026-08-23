@@ -37,7 +37,7 @@ One thing worth knowing: local storage is tied to your browser. Clear your data,
 
 | Feature                         | Description                                                                                                                                                                                  |
 | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Camera & Lens                   | Built-in presets (Leica MP, Olympus OM-2Sp, etc.) plus full custom model, focal length, and max aperture support                                                                             |
+| Camera & Lens                   | Built-in presets (Leica MP, Olympus OM-2Sp, etc.) plus full custom model, focal length, and max aperture — with per-file lens (multiple lenses on one roll) and a per-camera remembered default |
 | Film Stock & ISO                | 23 built-in film stocks (Kodak, Fujifilm, CineStill, Ilford, etc.) — selecting a film auto-fills ISO                                                                                         |
 | Lab Records                     | Hong Kong lab presets: DOT-WELL, Megatoni, TrueFace Pro Lab, Photo Garden, HK Camera, Showa, Colorluxe — with Push/Pull and scanner model tracking                                           |
 | Time Sequencing (the best part) | Auto-increments +1 minute per photo, timezone forced to +08:00. Shot a roll across multiple days? Set up date segments with individual start times — Google Photos will order them perfectly |
@@ -59,7 +59,7 @@ The final result 👇
 ## Features
 
 - Upload JPEG photos via drag & drop
-- Set camera, lens, film stock, ISO, lab, process, push/pull, scanner via dropdowns
+- Set camera, film stock, ISO, lab, process, push/pull, scanner via dropdowns; set the lens per selected file (same camera can use different lenses on one roll)
 - Multiple date segments with individual start times
 - Review summary with file rename preview before processing
 - Writes EXIF tags: Make, Model, Artist, ISO, LensModel, DateTime, FocalLength, FNumber, Aperture, Shutter, UserComment, ImageDescription, Copyright, Instructions
@@ -183,6 +183,13 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 
 <details>
 <summary>Click to expand</summary>
+
+**1.12.0 (2026-08-23)** — Multiple lenses per roll (same camera)
+
+- 🔭 Set a lens per selected file (same layer as Date/GPS) — apply to selected files or the whole roll
+- 🅰️ Multiple lenses on one roll are labelled A/B/C in the file list; full names shown in a wrapping header legend
+- 🧠 Per-camera default lens is remembered (last used) and follows camera selection
+- 🖼️ Summary table and Content Sheet show the resolved lens per frame
 
 **1.11.0 (2026-07-25)** — Light Mode
 

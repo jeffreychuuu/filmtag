@@ -214,7 +214,7 @@ function isCustomCamera() {
 // Populate lens dropdown for a built-in camera preset
 function populateLenses(modelName) {
   var idx = findCameraByModel(modelName);
-  if (idx === -1) return;
+  if (idx === -1) { lensSel.innerHTML = ''; return; }
   var hiddenLenses = loadHiddenLenses()[modelName] || [];
   lensSel.innerHTML = '';
   CAMERAS[idx].lenses.forEach(function(l, i) {
