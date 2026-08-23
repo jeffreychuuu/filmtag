@@ -179,8 +179,9 @@ describe('lens legend', function() {
     S.defaultLens = { name: '50mm' };
     S.lensByFile = { 1: { name: '35mm' } };
     updateLensSummary();
-    expect(el.textContent).toContain('A · 50mm');
-    expect(el.textContent).toContain('B · 35mm');
+    expect(el.textContent).toContain('A = 50mm');
+    expect(el.textContent).toContain('B = 35mm');
+    expect(el.innerHTML).toContain('<br>');
     document.body.innerHTML = '';
   });
 });
