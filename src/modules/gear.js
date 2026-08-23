@@ -296,6 +296,7 @@ export function applyLensToSelected(lens) {
   if (!lens || !lens.name) return;
   var keys = Object.keys(S.selectedSet || {});
   for (var i = 0; i < keys.length; i++) S.lensByFile[keys[i]] = { name: lens.name, focal: lens.focal || '', aperture: lens.aperture || '' };
+  setCameraDefaultLens(currentCameraModel(), lens);
   updateLensSummary();
 }
 

@@ -40,6 +40,7 @@ beforeEach(function() {
 
 afterEach(function() {
   document.body.innerHTML = '';
+  localStorage.clear();
 });
 
 describe('validate', function() {
@@ -146,6 +147,17 @@ describe('lens apply functions', function() {
     clearLensForSelected();
     expect(S.lensByFile[0]).toBeUndefined();
     expect(S.lensByFile[1].name).toBe('B');
+  });
+
+  it('applyLensToSelected stores the last-picked lens as the per-camera default', function() {
+    var opt = document.createElement('option');
+    opt.value = 'MP'; opt.textContent = 'MP';
+    S.cameraSel.appendChild(opt);
+    S.cameraSel.value = 'MP';
+    S.selectedSet = { 0: true };
+    applyLensToSelected({ name: '35mm', focal: '35', aperture: '2' });
+    var byCam = JSON.parse(localStorage.getItem('filmtag-default-lens-by-camera') || '{}');
+    expect(byCam.MP.name).toBe('35mm');
   });
 });
 
