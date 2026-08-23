@@ -476,7 +476,11 @@ export function generateContentSheet(files, params, onComplete) {
     }
     var camLens =
       params.camera.make + " " + params.camera.model + " + " + (lensNames.length ? lensNames.join(" · ") : (params.lens.name || "—"));
-    ctx.fillText("\uD83D\uDCF7 " + camLens, lp, footerY + fSize * 2 + 10);
+    var camLensStr = "\uD83D\uDCF7 " + camLens;
+    var fitSz = fSize, maxW = cw - 2 * lp;
+    ctx.font = "bold " + fitSz + "px sans-serif";
+    while (ctx.measureText(camLensStr).width > maxW && fitSz > 11) { fitSz -= 1; ctx.font = "bold " + fitSz + "px sans-serif"; }
+    ctx.fillText(camLensStr, lp, footerY + fSize * 2 + 10);
     var minD = null,
       maxD = null;
     for (var di = 0; di < files.length; di++) {

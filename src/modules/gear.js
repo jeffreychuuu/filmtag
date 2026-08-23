@@ -306,19 +306,34 @@ export function clearLensForSelected() {
   updateLensSummary();
 }
 
-// Update the lens status line in the file list header
+// Build the lens legend for the current roll: letter (A, B, C…) per distinct lens
+export function buildLensLegend() {
+  var files = S.uploadedFiles || [];
+  var letterByName = {}, names = [], unset = 0;
+  for (var i = 0; i < files.length; i++) {
+    var l = S.lensByFile[i] || S.defaultLens;
+    if (l && l.name) {
+      if (letterByName[l.name] === undefined) {
+        letterByName[l.name] = String.fromCharCode(65 + names.length);
+        names.push(l.name);
+      }
+    } else unset++;
+  }
+  return { letterByName: letterByName, names: names, count: names.length, unset: unset };
+}
+
+// Update the lens legend line in the file list header
 export function updateLensSummary() {
   var el = S.$ && S.$('lens-status');
   if (!el) return;
   var files = S.uploadedFiles || [];
   if (!files.length) { el.textContent = ''; return; }
-  var unset = 0, names = [];
-  for (var i = 0; i < files.length; i++) {
-    var l = S.lensByFile[i] || S.defaultLens;
-    if (l && l.name) { if (names.indexOf(l.name) === -1) names.push(l.name); } else unset++;
-  }
-  if (unset > 0) { el.textContent = '⚠️ ' + t('lens_unset_count', { n: unset }); return; }
-  el.textContent = '🔭 ' + names.join(' · ');
+  var legend = buildLensLegend();
+  if (legend.unset > 0) { el.textContent = '⚠️ ' + t('lens_unset_count', { n: legend.unset }); return; }
+  if (legend.count <= 1) { el.textContent = '🔭 ' + legend.names[0]; return; }
+  var parts = [];
+  for (var n = 0; n < legend.names.length; n++) parts.push(legend.letterByName[legend.names[n]] + ' · ' + legend.names[n]);
+  el.textContent = '🔭 ' + parts.join(' · ');
 }
 
 // Get selected option text from a <select>

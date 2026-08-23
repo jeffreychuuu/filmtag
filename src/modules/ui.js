@@ -1,6 +1,6 @@
 import { t } from '../i18n.js';
 import { esc, fmtSize, newFilmPrefix } from '../lib/utils.js';
-import { updateLensSummary } from './gear.js';
+import { updateLensSummary, buildLensLegend } from './gear.js';
 
 var S;
 
@@ -51,18 +51,13 @@ export function renderFileList(skipThumbs) {
   var hasS = Object.keys(S.selectedSet).length > 0;
   S.fileActions.style.display = hasS ? 'flex' : 'none';
   var h = '<div class="file-list-header"><span>' + t('file_count', {n: S.uploadedFiles.length}) + '</span>' +
-    '<span id="lens-status" class="lens-status" style="flex:1;text-align:center;font-size:0.72rem;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>' +
+    '<span id="lens-status" class="lens-status" style="flex:1 1 100%;order:3;text-align:left;font-size:0.72rem;color:var(--text-secondary);line-height:1.4;word-break:break-word;"></span>' +
     '<div>' +
     '<button class="sort-btn" onclick="toggleSort()">' + (S.sortAsc ? '\u25BC A\u2192Z' : '\u25B2 Z\u2192A') + '</button> ' +
     '<button class="btn btn-sm btn-danger" onclick="clearAll()">' + t('clear_all') + '</button></div></div>';
   var start = S.pageSize === 0 ? 0 : (S.currentPage - 1) * S.pageSize;
   var end = S.pageSize === 0 ? S.uploadedFiles.length : Math.min(start + S.pageSize, S.uploadedFiles.length);
-  var lensNamesMap = {};
-  for (var dci = 0; dci < S.uploadedFiles.length; dci++) {
-    var dl = S.lensByFile[dci] || S.defaultLens;
-    if (dl && dl.name) lensNamesMap[dl.name] = 1;
-  }
-  var hasMultipleLenses = Object.keys(lensNamesMap).length > 1;
+  var legend = buildLensLegend();
   for (var i = start; i < end; i++) {
     var f = S.uploadedFiles[i];
     var sel = S.selectedSet[i] ? ' selected' : '';
@@ -74,7 +69,7 @@ export function renderFileList(skipThumbs) {
     var resolvedLens = S.lensByFile[i] || S.defaultLens;
     var lensTag = '';
     if (resolvedLens && resolvedLens.name) {
-      if (hasMultipleLenses) lensTag = '<span class="lens-dot">🔭 ' + esc(resolvedLens.name) + '</span>';
+      if (legend.count > 1) lensTag = '<span class="lens-dot" title="' + esc(resolvedLens.name) + '">🔭 ' + esc(legend.letterByName[resolvedLens.name]) + '</span>';
     } else lensTag = '<span class="lens-dot lens-unset">⚠️</span>';
     h += '<div class="file-item' + sel + '" data-idx="' + i + '" draggable="true">' +
       '<canvas class="file-thumb" data-idx="' + i + '" width="40" height="40"></canvas>' +
@@ -484,7 +479,7 @@ export function buildSummaryHtml(p) {
     var dateCell2 = dateInfo2 ? '<span class="date-dot">\uD83D\uDCC5 ' + dateInfo2.date + ' ' + dateInfo2.time + '</span>' : '<img src="no_date.png" class="no-date-icon">';
     var rl2 = S.lensByFile[j] || p.lens;
     var lensCell = (rl2 && rl2.name) ? esc(rl2.name) : '—';
-    html += '<tr><td><canvas class="summary-thumb" width="40" height="40" data-idx="' + j + '"></canvas></td><td style="color:#555;">' + (j + 1) + '</td><td class="old-name">' + esc(S.uploadedFiles[j].file.name) + '</td><td class="new-name">' + esc(nn) + '</td><td style="text-align:center;font-size:0.65rem;">' + gpsLoc + '</td><td style="text-align:center;font-size:0.65rem;">' + dateCell2 + '</td><td style="text-align:center;font-size:0.65rem;">' + lensCell + '</td></tr>';
+    html += '<tr><td><canvas class="summary-thumb" width="40" height="40" data-idx="' + j + '"></canvas></td><td style="color:#555;">' + (j + 1) + '</td><td class="old-name">' + esc(S.uploadedFiles[j].file.name) + '</td><td class="new-name">' + esc(nn) + '</td><td style="text-align:center;font-size:0.65rem;">' + gpsLoc + '</td><td style="text-align:center;font-size:0.65rem;">' + dateCell2 + '</td><td style="text-align:center;font-size:0.65rem;word-break:break-word;max-width:140px;">' + lensCell + '</td></tr>';
   }
   html += '</table>';
   var tp = getSummaryTotalPages();

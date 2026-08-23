@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { initGear, fillSelect, fillSelectWithCustom, collect, validate, applyLensToAll, applyLensToSelected, clearLensForSelected } from '../../modules/gear.js';
+import { initGear, fillSelect, fillSelectWithCustom, collect, validate, applyLensToAll, applyLensToSelected, clearLensForSelected, buildLensLegend, updateLensSummary } from '../../modules/gear.js';
 
 var S;
 var selectEl, customEl, customInput;
@@ -146,5 +146,41 @@ describe('lens apply functions', function() {
     clearLensForSelected();
     expect(S.lensByFile[0]).toBeUndefined();
     expect(S.lensByFile[1].name).toBe('B');
+  });
+});
+
+describe('lens legend', function() {
+  it('assigns A/B letters in order of first occurrence', function() {
+    S.uploadedFiles = [{}, {}, {}, {}];
+    S.defaultLens = { name: '50mm' };
+    S.lensByFile = { 1: { name: '35mm' }, 3: { name: '28mm' } };
+    var legend = buildLensLegend();
+    expect(legend.count).toBe(3);
+    expect(legend.letterByName['50mm']).toBe('A');
+    expect(legend.letterByName['35mm']).toBe('B');
+    expect(legend.letterByName['28mm']).toBe('C');
+    expect(legend.unset).toBe(0);
+  });
+
+  it('counts unset files', function() {
+    S.uploadedFiles = [{}, {}];
+    S.defaultLens = null;
+    S.lensByFile = { 0: { name: '50mm' } };
+    var legend = buildLensLegend();
+    expect(legend.count).toBe(1);
+    expect(legend.unset).toBe(1);
+  });
+
+  it('updateLensSummary renders the letter + full-name legend', function() {
+    var el = document.createElement('span');
+    el.id = 'lens-status';
+    document.body.appendChild(el);
+    S.uploadedFiles = [{}, {}, {}];
+    S.defaultLens = { name: '50mm' };
+    S.lensByFile = { 1: { name: '35mm' } };
+    updateLensSummary();
+    expect(el.textContent).toContain('A · 50mm');
+    expect(el.textContent).toContain('B · 35mm');
+    document.body.innerHTML = '';
   });
 });
