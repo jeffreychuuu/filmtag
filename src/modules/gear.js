@@ -6,8 +6,19 @@ var filmSel, filmCust, labSel, labCust, ppSel, ppCust, scanSel, scanCust, proces
 var DEFAULT_ITEMS = {};
 var HIDDEN_KEY = 'filmtag-hidden-defaults';
 var LENS_HIDDEN_KEY = 'filmtag-hidden-lenses';
+var LENS_DEFAULT_KEY = 'filmtag-last-lens';
+var S;
+
+function saveDefaultLens() {
+  try { localStorage.setItem(LENS_DEFAULT_KEY, JSON.stringify(S.defaultLens)); } catch(_) {}
+}
+
+function loadDefaultLens() {
+  try { return JSON.parse(localStorage.getItem(LENS_DEFAULT_KEY)); } catch(_) { return null; }
+}
 
 export function initGear(refs) {
+  S = refs;
   CAMERAS = refs.CAMERAS;
   $ = refs.$;
   artistSel = refs.artistSel; artistCust = refs.artistCust;
@@ -129,7 +140,7 @@ export function saveLastSession() {
   var session = {
     artist: fv(artistSel, $('artist-custom-input')),
     camera: fv(cameraSel, $('camera-model-custom')), cameraMake: $('camera-make-custom').value.trim(),
-    lensName: fv(lensSel, $('lens-name-custom')), lensFocal: $('lens-focal').value.trim(), lensAperture: $('lens-aperture').value.trim(),
+    defaultLens: S.defaultLens,
     film: fv(filmSel, $('film-name-custom')), filmIso: $('film-iso-custom').value.trim(),
     lab: fv(labSel, $('lab-custom-input')), process: fv(processSel, $('process-custom-input')),
     pushpull: fv(ppSel, $('pushpull-custom-input')), scanner: fv(scanSel, $('scanner-custom-input')),
@@ -149,7 +160,8 @@ export function restoreLastSession() {
   try { data = JSON.parse(localStorage.getItem('filmtag-last-session')); } catch(_) {}
   if (!data) return;
   if (data.camera && !selByText(cameraSel, data.camera)) { setCust(cameraSel, $('camera-model-custom'), data.camera); if (data.cameraMake) $('camera-make-custom').value = data.cameraMake; }
-  if (data.lensName && !selByText(lensSel, data.lensName)) { setCust(lensSel, $('lens-name-custom'), data.lensName); if (data.lensFocal) $('lens-focal').value = data.lensFocal; if (data.lensAperture) $('lens-aperture').value = data.lensAperture; }
+  var dl = (data.defaultLens) || loadDefaultLens();
+  if (dl) S.defaultLens = dl;
   [{sel:artistSel,inp:$('artist-custom-input'),val:data.artist},{sel:labSel,inp:$('lab-custom-input'),val:data.lab},{sel:processSel,inp:$('process-custom-input'),val:data.process},{sel:ppSel,inp:$('pushpull-custom-input'),val:data.pushpull},{sel:scanSel,inp:$('scanner-custom-input'),val:data.scanner}].forEach(function(f) { if (f.val && !selByText(f.sel, f.val)) setCust(f.sel, f.inp, f.val); });
   if (data.film && !selByText(filmSel, data.film)) { setCust(filmSel, $('film-name-custom'), data.film); if (data.filmIso) $('film-iso-custom').value = data.filmIso; }
   if (data.publicDesc !== undefined) $('public-checkbox').checked = data.publicDesc;
@@ -229,6 +241,55 @@ export function updateLensUI() {
   }
 }
 
+// Read the lens currently selected in the lens overlay (used for apply)
+export function readLens() { return lensInfo(); }
+
+// Record + persist the roll default lens (= the last lens the user picked)
+export function setDefaultLens(lens) {
+  if (!lens || !lens.name) return;
+  S.defaultLens = { name: lens.name, focal: lens.focal || '', aperture: lens.aperture || '' };
+  saveDefaultLens();
+  updateLensSummary();
+}
+
+// Set the roll default lens (persisted = last picked) and clear per-file exceptions
+export function applyLensToAll(lens) {
+  if (!lens || !lens.name) return;
+  setDefaultLens(lens);
+  S.lensByFile = {};
+  updateLensSummary();
+}
+
+// Set a per-file lens exception for all currently selected files
+export function applyLensToSelected(lens) {
+  if (!lens || !lens.name) return;
+  var keys = Object.keys(S.selectedSet || {});
+  for (var i = 0; i < keys.length; i++) S.lensByFile[keys[i]] = { name: lens.name, focal: lens.focal || '', aperture: lens.aperture || '' };
+  updateLensSummary();
+}
+
+// Remove per-file lens exceptions (revert to default) for selected files
+export function clearLensForSelected() {
+  var keys = Object.keys(S.selectedSet || {});
+  for (var i = 0; i < keys.length; i++) delete S.lensByFile[keys[i]];
+  updateLensSummary();
+}
+
+// Update the lens status line in the file list header
+export function updateLensSummary() {
+  var el = S.$ && S.$('lens-status');
+  if (!el) return;
+  var files = S.uploadedFiles || [];
+  if (!files.length) { el.textContent = ''; return; }
+  var unset = 0, names = [];
+  for (var i = 0; i < files.length; i++) {
+    var l = S.lensByFile[i] || S.defaultLens;
+    if (l && l.name) { if (names.indexOf(l.name) === -1) names.push(l.name); } else unset++;
+  }
+  if (unset > 0) { el.textContent = '⚠️ ' + t('lens_unset_count', { n: unset }); return; }
+  el.textContent = '🔭 ' + names.join(' · ');
+}
+
 // Get selected option text from a <select>
 function selText(sel) { return sel.options[sel.selectedIndex].text; }
 
@@ -277,7 +338,7 @@ function filmInfo() {
 // Collect all gear/params into a single params object for processing
 export function collect() {
   return {
-    artist: getVal(artistSel, $('artist-custom-input')), camera: camInfo(), lens: lensInfo(),
+    artist: getVal(artistSel, $('artist-custom-input')), camera: camInfo(), lens: S.defaultLens || { name: '', focal: '', aperture: '' },
     film: filmInfo(), lab: getVal(labSel, $('lab-custom-input')),     process: getVal(processSel, $('process-custom-input')),
     pushpull: getVal(ppSel, $('pushpull-custom-input')), scanner: getVal(scanSel, $('scanner-custom-input'))
   };
@@ -285,9 +346,19 @@ export function collect() {
 
 // Validate that all required fields are filled, return error message or null
 export function validate(p) {
-  if (!p.artist) return t('artist_required'); if (!p.lens.name) return t('lens_required');
-  if (!p.film.name) return t('film_required'); if (!p.lab) return t('lab_required');
-  if (!p.scanner) return t('scanner_required'); return null;
+  if (!p.artist) return t('artist_required');
+  if (!p.film.name) return t('film_required');
+  if (!p.lab) return t('lab_required');
+  if (!p.scanner) return t('scanner_required');
+  var files = S.uploadedFiles || [];
+  if (files.length > 0) {
+    for (var i = 0; i < files.length; i++) {
+      if (!S.lensByFile[i] && (!S.defaultLens || !S.defaultLens.name)) {
+        return t('lens_coverage');
+      }
+    }
+  }
+  return null;
 }
 
 function loadAllOpts() {

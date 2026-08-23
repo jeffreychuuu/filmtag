@@ -9,6 +9,12 @@ import {
   saveCustomOpts,
   setupCustom,
   updateLensUI,
+  applyLensToAll,
+  applyLensToSelected,
+  clearLensForSelected,
+  readLens,
+  updateLensSummary,
+  selByText,
   collect,
   validate,
   saveLastSession,
@@ -224,6 +230,8 @@ document.addEventListener("DOMContentLoaded", function () {
   S.clearedDates = {};
   S.thumbnailCache = {};
   S.gpsData = {};
+  S.lensByFile = {};
+  S.defaultLens = null;
   S.selectedSet = {};
   S.geocodeCache = {};
   S.geocodeQueue = [];
@@ -276,7 +284,8 @@ document.addEventListener("DOMContentLoaded", function () {
     mapSearchBtn = $("map-search-btn");
   var fileActions = $("file-actions"),
     editDateBtn = $("edit-date-btn"),
-    editGpsBtn = $("edit-gps-btn");
+    editGpsBtn = $("edit-gps-btn"),
+    editLensBtn = $("edit-lens-btn");
   var dateOverlay = $("date-overlay"),
     gpsOverlay = $("gps-overlay");
   var dateSaveBtn = $("date-save-btn"),
@@ -574,6 +583,38 @@ document.addEventListener("DOMContentLoaded", function () {
   gpsOverlay.addEventListener("click", function (e) {
     if (e.target === this) this.classList.remove("show");
   });
+  editLensBtn.addEventListener("click", function () {
+    updateLensUI();
+    if (S.defaultLens && S.defaultLens.name) selByText($("lens-select"), S.defaultLens.name);
+    var n = Object.keys(S.selectedSet).length;
+    var hint = $("lens-overlay-hint");
+    if (hint) hint.textContent = t("lens_apply_to", { n: n });
+    var clearBtn = $("lens-clear-btn");
+    var hasOv = Object.keys(S.selectedSet).some(function (k) { return S.lensByFile[k]; });
+    if (clearBtn) clearBtn.style.display = hasOv ? "inline-block" : "none";
+    $("lens-overlay").classList.add("show");
+  });
+  $("lens-cancel-btn").addEventListener("click", function () {
+    $("lens-overlay").classList.remove("show");
+  });
+  $("lens-apply-selected-btn").addEventListener("click", function () {
+    applyLensToSelected(readLens());
+    $("lens-overlay").classList.remove("show");
+    S.renderFileList();
+  });
+  $("lens-apply-all-btn").addEventListener("click", function () {
+    applyLensToAll(readLens());
+    $("lens-overlay").classList.remove("show");
+    S.renderFileList();
+  });
+  $("lens-clear-btn").addEventListener("click", function () {
+    clearLensForSelected();
+    $("lens-overlay").classList.remove("show");
+    S.renderFileList();
+  });
+  $("lens-overlay").addEventListener("click", function (e) {
+    if (e.target === this) this.classList.remove("show");
+  });
   mapSearchBtn.addEventListener("click", function () {
     var q = mapSearchInput.value.trim();
     if (!q || !S.map) return;
@@ -616,6 +657,8 @@ document.addEventListener("DOMContentLoaded", function () {
     S.gpsData = {};
     S.selectedSet = {};
     S.fileDates = {};
+    S.lensByFile = {};
+    S.defaultLens = null;
     summaryPanel.classList.remove("show");
     summaryBody.innerHTML = "";
     summaryFooter.innerHTML = "";
@@ -643,11 +686,13 @@ document.addEventListener("DOMContentLoaded", function () {
       us.className = "upload-status-msg";
     }
     updateLensUI();
+    updateLensSummary();
     refreshSegments();
   });
 
   updateLensUI();
   restoreLastSession();
+  updateLensSummary();
   (function () {
     if (!localStorage.getItem("filmtag-tutorial-seen")) showTutorial();
   })();

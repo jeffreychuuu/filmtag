@@ -1,5 +1,6 @@
 import { t } from '../i18n.js';
 import { esc, fmtSize, newFilmPrefix } from '../lib/utils.js';
+import { updateLensSummary } from './gear.js';
 
 var S;
 
@@ -49,11 +50,19 @@ export function renderFileList(skipThumbs) {
   S.selectToolbar.style.display = 'flex';
   var hasS = Object.keys(S.selectedSet).length > 0;
   S.fileActions.style.display = hasS ? 'flex' : 'none';
-  var h = '<div class="file-list-header"><span>' + t('file_count', {n: S.uploadedFiles.length}) + '</span><div>' +
+  var h = '<div class="file-list-header"><span>' + t('file_count', {n: S.uploadedFiles.length}) + '</span>' +
+    '<span id="lens-status" class="lens-status" style="flex:1;text-align:center;font-size:0.72rem;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>' +
+    '<div>' +
     '<button class="sort-btn" onclick="toggleSort()">' + (S.sortAsc ? '\u25BC A\u2192Z' : '\u25B2 Z\u2192A') + '</button> ' +
     '<button class="btn btn-sm btn-danger" onclick="clearAll()">' + t('clear_all') + '</button></div></div>';
   var start = S.pageSize === 0 ? 0 : (S.currentPage - 1) * S.pageSize;
   var end = S.pageSize === 0 ? S.uploadedFiles.length : Math.min(start + S.pageSize, S.uploadedFiles.length);
+  var lensNamesMap = {};
+  for (var dci = 0; dci < S.uploadedFiles.length; dci++) {
+    var dl = S.lensByFile[dci] || S.defaultLens;
+    if (dl && dl.name) lensNamesMap[dl.name] = 1;
+  }
+  var hasMultipleLenses = Object.keys(lensNamesMap).length > 1;
   for (var i = start; i < end; i++) {
     var f = S.uploadedFiles[i];
     var sel = S.selectedSet[i] ? ' selected' : '';
@@ -62,6 +71,11 @@ export function renderFileList(skipThumbs) {
     var dot = hasGps ? '\uD83D\uDCCD' + addrTxt : '<img src="no_gps.png" class="no-gps-icon">';
     var dateInfo = S.computeDateForFile(i + 1);
     var dateDot = dateInfo ? '<span class="date-dot">\uD83D\uDCC5 ' + dateInfo.date + ' ' + dateInfo.time + '</span>' : '<img src="no_date.png" class="no-date-icon">';
+    var resolvedLens = S.lensByFile[i] || S.defaultLens;
+    var lensTag = '';
+    if (resolvedLens && resolvedLens.name) {
+      if (hasMultipleLenses) lensTag = '<span class="lens-dot">🔭 ' + esc(resolvedLens.name) + '</span>';
+    } else lensTag = '<span class="lens-dot lens-unset">⚠️</span>';
     h += '<div class="file-item' + sel + '" data-idx="' + i + '" draggable="true">' +
       '<canvas class="file-thumb" data-idx="' + i + '" width="40" height="40"></canvas>' +
       '<div class="fidx">#' + String(i + 1).padStart(2, '0') + '</div>' +
@@ -69,6 +83,7 @@ export function renderFileList(skipThumbs) {
       '<div class="fsize">' + fmtSize(f.file.size) + '</div>' +
       '<span class="file-gps-dot">' + dot + '</span>' +
       dateDot +
+      lensTag +
       '<button class="remove-btn" onclick="removeOne(' + i + ')">\u2715</button>' +
       '</div>';
   }
@@ -86,6 +101,7 @@ export function renderFileList(skipThumbs) {
       '<option value="0"' + (S.pageSize === 0 ? ' selected' : '') + '>' + t('all') + '</option>' +
     '</select></div>';
   S.fileListEl.innerHTML = h;
+  updateLensSummary();
   if (!skipThumbs) {
     generateThumbnails(function() {
       S.loadingEl.classList.remove('show');
@@ -207,7 +223,7 @@ function fileItemClick(e) {
 
 export function clearAll() {
   S.uploadedFiles = [];
-  S.gpsData = {}; S.selectedSet = {}; S.thumbnailCache = {}; S.geocodeCache = {}; S.fileDates = {}; S.clearedDates = {};
+  S.gpsData = {}; S.selectedSet = {}; S.thumbnailCache = {}; S.geocodeCache = {}; S.fileDates = {}; S.clearedDates = {}; S.lensByFile = {};
   S.currentPage = 1;
   if (S.mapMarker) { S.map.removeLayer(S.mapMarker); S.mapMarker = null; }
   S.refreshSegments();
@@ -215,14 +231,15 @@ export function clearAll() {
 
 export function removeOne(i) {
   S.uploadedFiles.splice(i, 1);
-  var newGps = {}, newSel = {}, newCache = {};
+  var newGps = {}, newSel = {}, newCache = {}, newLens = {};
   for (var j = 0; j < S.uploadedFiles.length; j++) {
     var oldIdx = j < i ? j : j + 1;
     if (S.gpsData[oldIdx]) newGps[j] = S.gpsData[oldIdx];
     if (S.selectedSet[oldIdx]) newSel[j] = true;
     if (S.thumbnailCache[oldIdx]) newCache[j] = S.thumbnailCache[oldIdx];
+    if (S.lensByFile[oldIdx]) newLens[j] = S.lensByFile[oldIdx];
   }
-  S.gpsData = newGps; S.selectedSet = newSel; S.thumbnailCache = newCache;
+  S.gpsData = newGps; S.selectedSet = newSel; S.thumbnailCache = newCache; S.lensByFile = newLens;
   if (S.currentPage > getTotalPages()) S.currentPage = getTotalPages();
   S.refreshSegments();
   renderRanges();
@@ -233,7 +250,7 @@ export function sortFiles(asc) {
   indices.sort(function(a, b) {
     return asc ? S.uploadedFiles[a].file.name.localeCompare(S.uploadedFiles[b].file.name) : S.uploadedFiles[b].file.name.localeCompare(S.uploadedFiles[a].file.name);
   });
-  var newFiles = [], newGps = {}, newSel = {}, newCache = {}, newFileDates = {}, newClearedDates = {};
+  var newFiles = [], newGps = {}, newSel = {}, newCache = {}, newFileDates = {}, newClearedDates = {}, newLens = {};
   for (var ni = 0; ni < indices.length; ni++) {
     var oi = indices[ni];
     newFiles.push(S.uploadedFiles[oi]);
@@ -242,10 +259,12 @@ export function sortFiles(asc) {
     if (S.thumbnailCache[oi]) newCache[ni] = S.thumbnailCache[oi];
     if (S.fileDates[oi]) newFileDates[ni] = S.fileDates[oi];
     if (S.clearedDates[oi]) newClearedDates[ni] = S.clearedDates[oi];
+    if (S.lensByFile[oi]) newLens[ni] = S.lensByFile[oi];
   }
   S.uploadedFiles = newFiles;
   S.gpsData = newGps; S.selectedSet = newSel; S.thumbnailCache = newCache;
   S.fileDates = newFileDates; S.clearedDates = newClearedDates;
+  S.lensByFile = newLens;
   S.refreshSegments();
   renderRanges();
   S.renderFileList();
@@ -283,6 +302,7 @@ function moveItem(fromIdx, toIdx) {
   S.thumbnailCache = rebuildDict(S.thumbnailCache);
   S.fileDates = rebuildDict(S.fileDates);
   S.clearedDates = rebuildDict(S.clearedDates);
+  S.lensByFile = rebuildDict(S.lensByFile);
   S.refreshSegments();
   renderRanges();
   S.renderFileList();
@@ -432,17 +452,28 @@ export function syncRange() {
 export function buildSummaryHtml(p) {
   var html = '';
   html += '<div class="summary-section"><h3>' + t('settings') + '</h3>';
+  var lensList = [];
+  var lensUnset = 0;
+  for (var li = 0; li < S.uploadedFiles.length; li++) {
+    var rl = S.lensByFile[li] || p.lens;
+    var nm = rl && rl.name ? rl.name : '';
+    if (nm) { if (lensList.indexOf(nm) === -1) lensList.push(nm); }
+    else lensUnset++;
+  }
+  var lensRow = lensList.length ? lensList.join(' · ') : ((p.lens && p.lens.name) ? p.lens.name : '—');
   var rows = [
     [t('artist'), p.artist], [t('camera'), p.camera.make + ' ' + p.camera.model],
-    [t('lens'), p.lens.name + (p.lens.focal ? ' (' + p.lens.focal + 'mm)' : '') + (p.lens.aperture ? ' F/' + p.lens.aperture : '')],
+    [t('lens'), lensRow],
     [t('film_stock'), p.film.name + ' (ISO ' + p.film.iso + ')'], [t('lab'), p.lab],
     [t('process'), p.process + ' (' + p.pushpull + ')'], [t('scanner'), p.scanner]
   ];
   if (p.camera.shutter) rows.push([t('shutter'), p.camera.shutter]);
   for (var i = 0; i < rows.length; i++) html += '<div class="summary-row"><span class="k">' + rows[i][0] + '</span><span class="v">' + esc(rows[i][1]) + '</span></div>';
+  if (lensUnset > 0) html += '<div class="hint" style="margin-top:0.5rem;color:var(--red);">' + t('lens_unset_count', {n: lensUnset}) + '</div>';
+  else if (lensList.length > 1) html += '<div class="hint" style="margin-top:0.5rem;">' + t('lens_multiple_note', {n: lensList.length}) + '</div>';
   html += '</div>';
   html += '<div class="summary-section"><h3>' + t('files_header', {n: S.uploadedFiles.length}) + '</h3>';
-  html += '<table class="rename-table"><tr><th></th><th>' + t('col_index') + '</th><th>' + t('col_original') + '</th><th>' + t('col_new_name') + '</th><th>\uD83D\uDCCD ' + t('col_location') + '</th><th>\uD83D\uDCC5 ' + t('col_date') + '</th></tr>';
+  html += '<table class="rename-table"><tr><th></th><th>' + t('col_index') + '</th><th>' + t('col_original') + '</th><th>' + t('col_new_name') + '</th><th>\uD83D\uDCCD ' + t('col_location') + '</th><th>\uD83D\uDCC5 ' + t('col_date') + '</th><th>🔭 ' + t('col_lens') + '</th></tr>';
   var start = S.summaryPageSize === 0 ? 0 : (S.summaryPage - 1) * S.summaryPageSize;
   var end = S.summaryPageSize === 0 ? S.uploadedFiles.length : Math.min(start + S.summaryPageSize, S.uploadedFiles.length);
   for (var j = start; j < end; j++) {
@@ -451,7 +482,9 @@ export function buildSummaryHtml(p) {
     var gpsLoc = S.gpsData[j] && S.gpsData[j].addr ? '\uD83D\uDCCD ' + esc(S.gpsData[j].addr) : '<img src="no_gps.png" class="no-gps-icon">';
     var dateInfo2 = S.computeDateForFile(j + 1);
     var dateCell2 = dateInfo2 ? '<span class="date-dot">\uD83D\uDCC5 ' + dateInfo2.date + ' ' + dateInfo2.time + '</span>' : '<img src="no_date.png" class="no-date-icon">';
-    html += '<tr><td><canvas class="summary-thumb" width="40" height="40" data-idx="' + j + '"></canvas></td><td style="color:#555;">' + (j + 1) + '</td><td class="old-name">' + esc(S.uploadedFiles[j].file.name) + '</td><td class="new-name">' + esc(nn) + '</td><td style="text-align:center;font-size:0.65rem;">' + gpsLoc + '</td><td style="text-align:center;font-size:0.65rem;">' + dateCell2 + '</td></tr>';
+    var rl2 = S.lensByFile[j] || p.lens;
+    var lensCell = (rl2 && rl2.name) ? esc(rl2.name) : '—';
+    html += '<tr><td><canvas class="summary-thumb" width="40" height="40" data-idx="' + j + '"></canvas></td><td style="color:#555;">' + (j + 1) + '</td><td class="old-name">' + esc(S.uploadedFiles[j].file.name) + '</td><td class="new-name">' + esc(nn) + '</td><td style="text-align:center;font-size:0.65rem;">' + gpsLoc + '</td><td style="text-align:center;font-size:0.65rem;">' + dateCell2 + '</td><td style="text-align:center;font-size:0.65rem;">' + lensCell + '</td></tr>';
   }
   html += '</table>';
   var tp = getSummaryTotalPages();

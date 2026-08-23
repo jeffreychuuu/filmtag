@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { initGear, fillSelect, fillSelectWithCustom, collect, validate } from '../../modules/gear.js';
+import { initGear, fillSelect, fillSelectWithCustom, collect, validate, applyLensToAll, applyLensToSelected, clearLensForSelected } from '../../modules/gear.js';
 
 var S;
 var selectEl, customEl, customInput;
@@ -30,19 +30,11 @@ beforeEach(function() {
     scanSel: document.createElement('select'),
     scanCust: document.createElement('div'),
     selectedSet: {},
-    gpsData: {}
+    gpsData: {},
+    uploadedFiles: [],
+    lensByFile: {},
+    defaultLens: null,
   };
-  // Append to document so querySelector works
-  selectEl.id = 'artist-select';
-  customInput.id = 'artist-custom-input';
-  document.body.appendChild(selectEl);
-  document.body.appendChild(customInput);
-  document.body.appendChild(S.cameraSel);
-  document.body.appendChild(S.labSel);
-  document.body.appendChild(S.ppSel);
-  document.body.appendChild(S.scanSel);
-  document.body.appendChild(S.filmSel);
-
   initGear(S);
 });
 
@@ -58,11 +50,6 @@ describe('validate', function() {
 
   it('returns error when artist is missing', function() {
     var p = { artist: '', lens: { name: '50mm' }, film: { name: 'Portra' }, lab: 'Lab', scanner: 'Scanner' };
-    expect(validate(p)).toBeTruthy();
-  });
-
-  it('returns error when lens is missing', function() {
-    var p = { artist: 'Jeff', lens: { name: '' }, film: { name: 'Portra' }, lab: 'Lab', scanner: 'Scanner' };
     expect(validate(p)).toBeTruthy();
   });
 
@@ -105,5 +92,59 @@ describe('fillSelectWithCustom', function() {
     // Should have A, B, and custom option (when key is null, no saved items loaded)
     expect(sel.children.length).toBe(3);
     expect(sel.children[2].value).toBe('__custom__');
+  });
+});
+
+describe('validate lens coverage', function() {
+  function baseP() {
+    return { artist: 'Jeff', lens: { name: '50mm' }, film: { name: 'Portra' }, lab: 'Lab', scanner: 'Scanner' };
+  }
+
+  it('passes when a roll default lens is set', function() {
+    S.uploadedFiles = [{ file: {} }, { file: {} }];
+    S.defaultLens = { name: '50mm', focal: '50', aperture: '1.4' };
+    S.lensByFile = {};
+    expect(validate(baseP())).toBeNull();
+  });
+
+  it('passes when every file has a lens exception and no default is set', function() {
+    S.uploadedFiles = [{ file: {} }, { file: {} }];
+    S.defaultLens = null;
+    S.lensByFile = { 0: { name: 'A' }, 1: { name: 'B' } };
+    expect(validate(baseP())).toBeNull();
+  });
+
+  it('errors when a file has neither an exception nor a default lens', function() {
+    S.uploadedFiles = [{ file: {} }, { file: {} }];
+    S.defaultLens = null;
+    S.lensByFile = { 0: { name: 'A' } };
+    expect(validate(baseP())).toBeTruthy();
+  });
+});
+
+describe('lens apply functions', function() {
+  it('applyLensToAll sets the roll default and clears exceptions', function() {
+    S.uploadedFiles = [{ file: {} }, { file: {} }];
+    S.defaultLens = null;
+    S.lensByFile = { 0: { name: 'A' } };
+    applyLensToAll({ name: '50mm', focal: '50', aperture: '1.4' });
+    expect(S.defaultLens.name).toBe('50mm');
+    expect(Object.keys(S.lensByFile).length).toBe(0);
+  });
+
+  it('applyLensToSelected writes exceptions for selected files', function() {
+    S.selectedSet = { 0: true, 2: true };
+    applyLensToSelected({ name: '28mm', focal: '28', aperture: '2.8' });
+    expect(S.lensByFile[0].name).toBe('28mm');
+    expect(S.lensByFile[2].name).toBe('28mm');
+    expect(S.lensByFile[1]).toBeUndefined();
+  });
+
+  it('clearLensForSelected removes exceptions for selected files', function() {
+    S.selectedSet = { 0: true };
+    S.lensByFile = { 0: { name: 'A' }, 1: { name: 'B' } };
+    clearLensForSelected();
+    expect(S.lensByFile[0]).toBeUndefined();
+    expect(S.lensByFile[1].name).toBe('B');
   });
 });
