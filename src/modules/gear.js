@@ -598,38 +598,28 @@ export function renderManageOverlay(key) {
     h += '</div></div>';
   }
 
-  // Lens overlay: show all cameras with default lenses + custom lenses
+  // Lens overlay: show only the currently selected camera's lenses
   if (key === 'lensByCamera') {
-    var hiddenCams = loadHidden().cameraModel || [];
     var hiddenLenses = loadHiddenLenses();
+    var camModel2 = currentCameraModel();
+    var camIdx = findCameraByModel(camModel2);
+    var defLenses = camIdx !== -1 ? CAMERAS[camIdx].lenses : [];
+    var custLenses = (data.lensByCamera && data.lensByCamera[camModel2]) || [];
 
-    for (var ci2 = 0; ci2 < CAMERAS.length; ci2++) {
-      var cam = CAMERAS[ci2];
-      if (hiddenCams.indexOf(cam.model) !== -1) continue;
-
-      // Default lenses
-      var defLenses = cam.lenses;
-      // Custom lenses
-      var custLenses = [];
-      if (data.lensByCamera && data.lensByCamera[cam.model]) {
-        custLenses = data.lensByCamera[cam.model];
-      }
-
-      if (defLenses.length === 0 && custLenses.length === 0) continue;
+    if (defLenses.length > 0 || custLenses.length > 0) {
       any = true;
-
       h += '<div style="margin-bottom:0.5rem;">';
-      h += '<div style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);padding:0.3rem 0;">▼ ' + esc(cam.model) + '</div>';
+      h += '<div style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);padding:0.3rem 0;">▼ ' + esc(camModel2) + '</div>';
       h += '<div style="margin-left:1.2rem;border-left:1px solid var(--border);padding-left:0.75rem;">';
 
       if (defLenses.length > 0) {
         h += '<div style="font-size:0.65rem;color:var(--text-secondary);margin-bottom:0.2rem;">' + t('default') + '</div>';
-        var hiddenForCam = hiddenLenses[cam.model] || [];
+        var hiddenForCam = hiddenLenses[camModel2] || [];
         for (var dli = 0; dli < defLenses.length; dli++) {
           var lensIsHidden = hiddenForCam.indexOf(defLenses[dli].name) !== -1;
           h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">';
           h += '<span style="flex:1;' + (lensIsHidden ? 'color:var(--text-secondary);text-decoration:line-through;' : '') + '">' + esc(defLenses[dli].name) + '</span>';
-          h += '<button class="manage-toggle-lens-btn" data-camera="' + esc(cam.model) + '" data-value="' + esc(defLenses[dli].name) + '" style="background:none;border:1px solid ' + (lensIsHidden ? 'var(--accent)' : 'var(--border)') + ';border-radius:4px;color:' + (lensIsHidden ? 'var(--accent)' : 'var(--text)') + ';cursor:pointer;font-size:0.65rem;padding:0.1rem 0.35rem;">' + (lensIsHidden ? t('show') : t('hide')) + '</button>';
+          h += '<button class="manage-toggle-lens-btn" data-camera="' + esc(camModel2) + '" data-value="' + esc(defLenses[dli].name) + '" style="background:none;border:1px solid ' + (lensIsHidden ? 'var(--accent)' : 'var(--border)') + ';border-radius:4px;color:' + (lensIsHidden ? 'var(--accent)' : 'var(--text)') + ';cursor:pointer;font-size:0.65rem;padding:0.1rem 0.35rem;">' + (lensIsHidden ? t('show') : t('hide')) + '</button>';
           h += '</div>';
         }
       }
@@ -640,7 +630,7 @@ export function renderManageOverlay(key) {
           var clName = typeof custLenses[ccli] === 'object' ? custLenses[ccli].name : custLenses[ccli];
           h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">';
           h += '<span style="flex:1;">' + esc(clName) + '</span>';
-          h += '<button class="manage-del-btn" data-key="lensByCamera" data-value=\'' + esc(JSON.stringify({camera: cam.model, name: clName})) + '\' style="background:#c0392b;color:#fff;border:1px solid #c0392b;border-radius:4px;cursor:pointer;font-size:0.7rem;padding:0.1rem 0.4rem;">' + t('remove') + '</button>';
+          h += '<button class="manage-del-btn" data-key="lensByCamera" data-value=\'' + esc(JSON.stringify({camera: camModel2, name: clName})) + '\' style="background:#c0392b;color:#fff;border:1px solid #c0392b;border-radius:4px;cursor:pointer;font-size:0.7rem;padding:0.1rem 0.4rem;">' + t('remove') + '</button>';
           h += '</div>';
         }
       }
@@ -651,7 +641,7 @@ export function renderManageOverlay(key) {
 
   // Show all defaults button
   var hasHidden = key === 'lensByCamera'
-    ? Object.keys(loadHiddenLenses()).length > 0
+    ? (loadHiddenLenses()[currentCameraModel()] || []).length > 0
     : Object.keys(hidden).length > 0;
   h += '<div style="text-align:center;margin-top:0.75rem;">';
   h += '<button class="btn btn-sm btn-primary" id="reset-defaults-btn" style="visibility:' + (hasHidden ? 'visible' : 'hidden') + ';">' + t('reset_defaults') + '</button>';
