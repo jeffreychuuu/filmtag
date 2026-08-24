@@ -268,22 +268,6 @@ export function updateLensUI() {
 // Read the lens currently selected in the lens overlay (used for apply)
 export function readLens() { return lensInfo(); }
 
-// Record + persist the roll default lens for the current camera (= last used as base)
-export function setDefaultLens(lens) {
-  if (!lens || !lens.name) return;
-  S.defaultLens = { name: lens.name, focal: lens.focal || '', aperture: lens.aperture || '' };
-  setCameraDefaultLens(currentCameraModel(), S.defaultLens);
-  updateLensSummary();
-}
-
-// Set the roll default lens (per-camera, persisted) and clear per-file exceptions
-export function applyLensToAll(lens) {
-  if (!lens || !lens.name) return;
-  setDefaultLens(lens);
-  S.lensByFile = {};
-  updateLensSummary();
-}
-
 // Sync the roll default lens to the currently selected camera's default lens
 export function syncDefaultLensToCamera() {
   S.defaultLens = getCameraDefaultLens(currentCameraModel());

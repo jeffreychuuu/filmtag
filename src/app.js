@@ -9,7 +9,6 @@ import {
   saveCustomOpts,
   setupCustom,
   updateLensUI,
-  applyLensToAll,
   applyLensToSelected,
   readLens,
   updateLensSummary,
@@ -591,19 +590,16 @@ document.addEventListener("DOMContentLoaded", function () {
     updateLensUI();
     var n = Object.keys(S.selectedSet).length;
     var hint = $("lens-overlay-hint");
-    if (hint) hint.textContent = t("lens_apply_to", { n: n });
+    if (hint) hint.textContent = (n > 0 && n === S.uploadedFiles.length)
+      ? t("lens_apply_all_photos", { n: n })
+      : t("lens_apply_to", { n: n });
     $("lens-overlay").classList.add("show");
   });
   $("lens-cancel-btn").addEventListener("click", function () {
     $("lens-overlay").classList.remove("show");
   });
-  $("lens-apply-selected-btn").addEventListener("click", function () {
+  $("lens-apply-btn").addEventListener("click", function () {
     applyLensToSelected(readLens());
-    $("lens-overlay").classList.remove("show");
-    S.renderFileList();
-  });
-  $("lens-apply-all-btn").addEventListener("click", function () {
-    applyLensToAll(readLens());
     $("lens-overlay").classList.remove("show");
     S.renderFileList();
   });
