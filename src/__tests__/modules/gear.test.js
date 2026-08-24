@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { initGear, fillSelect, fillSelectWithCustom, collect, validate, applyLensToAll, applyLensToSelected, clearLensForSelected, buildLensLegend, updateLensSummary } from '../../modules/gear.js';
+import { initGear, fillSelect, fillSelectWithCustom, collect, validate, applyLensToAll, applyLensToSelected, buildLensLegend, updateLensSummary } from '../../modules/gear.js';
 
 var S;
 var selectEl, customEl, customInput;
@@ -139,14 +139,6 @@ describe('lens apply functions', function() {
     expect(S.lensByFile[0].name).toBe('28mm');
     expect(S.lensByFile[2].name).toBe('28mm');
     expect(S.lensByFile[1]).toBeUndefined();
-  });
-
-  it('clearLensForSelected removes exceptions for selected files', function() {
-    S.selectedSet = { 0: true };
-    S.lensByFile = { 0: { name: 'A' }, 1: { name: 'B' } };
-    clearLensForSelected();
-    expect(S.lensByFile[0]).toBeUndefined();
-    expect(S.lensByFile[1].name).toBe('B');
   });
 
   it('applyLensToSelected stores the last-picked lens as the per-camera default', function() {

@@ -300,13 +300,6 @@ export function applyLensToSelected(lens) {
   updateLensSummary();
 }
 
-// Remove per-file lens exceptions (revert to default) for selected files
-export function clearLensForSelected() {
-  var keys = Object.keys(S.selectedSet || {});
-  for (var i = 0; i < keys.length; i++) delete S.lensByFile[keys[i]];
-  updateLensSummary();
-}
-
 // Build the lens legend for the current roll: letter (A, B, C…) per distinct lens
 export function buildLensLegend() {
   var files = S.uploadedFiles || [];
