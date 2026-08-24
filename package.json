@@ -1,6 +1,6 @@
 {
   "name": "filmtag",
-  "version": "1.12.0",
+  "version": "1.12.1",
   "private": true,
   "scripts": {
     "build": "esbuild src/app.js --bundle --outfile=dist/bundle.js --define:FILMTAG_VERSION=$(node -e \"var v=require('./package.json').version;process.stdout.write(JSON.stringify(v + (process.env.VERCEL_ENV === 'production' ? '' : process.env.VERCEL === '1' ? '-dev' : '-local')))\") && cp public/index.html dist/index.html && cp public/favicon-*.png public/toro.jpg public/mallow.jpg public/no_gps.png public/no_date.png ads.txt dist/ && cp -r img dist/",
