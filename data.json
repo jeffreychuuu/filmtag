@@ -44,6 +44,14 @@
         { "name": "Fujinon 28mm F/3.5", "focal": "28", "aperture": "3.5" },
         { "name": "Fujinon 45mm F/5.6", "focal": "45", "aperture": "5.6" }
       ]
+    },
+    {
+      "make": "Yashica",
+      "model": "Yashica T3 Super",
+      "shutter": null,
+      "lenses": [
+        { "name": "Carl Zeiss Tessar T* 35mm F/2.8", "focal": "35", "aperture": "2.8" }
+      ]
     }
   ],
   "films": [
