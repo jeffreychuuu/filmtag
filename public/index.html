@@ -64,6 +64,14 @@
       display: flex; align-items: center; gap: 0.5rem;
       margin-bottom: 0.75rem; font-size: 0.9rem; font-weight: 600; color: var(--heading);
     }
+    .gear-row {
+      display: flex; align-items: flex-end; gap: 0.75rem; flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .gear-row .gear-group { margin-top: 0; flex: 1 1 auto; padding: 0.75rem; }
+    .gear-row .gear-group-header { margin-bottom: 0.5rem; }
+    #camera-select { max-width: 260px; }
+    .gear-row .file-actions { margin-top: 0; align-items: center; }
     .metadata-group .metadata-lock { font-weight: 500; }
     .section-inner { display: flex; flex-direction: column; gap: 1rem; }
     .field-block {
@@ -477,22 +485,24 @@
         <button class="btn btn-sm btn-secondary" id="select-all-btn" data-i18n="select_all">Select All</button>
       </div>
     </div>
-    <div class="gear-group" id="camera-group">
-      <div class="gear-group-header"><span class="section-icon">📷</span> <span data-i18n="camera">Camera</span><span class="manage-field-btn" data-manage="cameraModel" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:auto;">⚙️</span></div>
-      <div class="form-row">
-        <div><select id="camera-select"></select></div>
-        <div class="custom-input" id="camera-custom">
-          <div class="field-group">
-            <div><label data-i18n="make">Make</label><input type="text" id="camera-make-custom" placeholder="e.g. Fujifilm"></div>
-            <div><label data-i18n="model">Model</label><input type="text" id="camera-model-custom" placeholder="e.g. GA645"></div>
+    <div class="gear-row">
+      <div class="gear-group" id="camera-group">
+        <div class="gear-group-header"><span class="section-icon">📷</span> <span data-i18n="camera">Camera</span><span class="manage-field-btn" data-manage="cameraModel" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:auto;">⚙️</span></div>
+        <div class="form-row">
+          <div><select id="camera-select"></select></div>
+          <div class="custom-input" id="camera-custom">
+            <div class="field-group">
+              <div><label data-i18n="make">Make</label><input type="text" id="camera-make-custom" placeholder="e.g. Fujifilm"></div>
+              <div><label data-i18n="model">Model</label><input type="text" id="camera-model-custom" placeholder="e.g. GA645"></div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="file-actions" id="file-actions" style="display:none;">
-      <button class="btn btn-primary" id="edit-date-btn">📅 <span data-i18n="set_date_time">Set Date & Time</span></button>
-      <button class="btn btn-primary" id="edit-gps-btn">📍 <span data-i18n="set_gps">Set GPS Location</span></button>
-      <button class="btn btn-primary" id="edit-lens-btn">🔭 <span data-i18n="set_lens">Set Lens</span></button>
+      <div class="file-actions" id="file-actions" style="display:none;">
+        <button class="btn btn-primary" id="edit-date-btn">📅 <span data-i18n="set_date_time">Set Date & Time</span></button>
+        <button class="btn btn-primary" id="edit-gps-btn">📍 <span data-i18n="set_gps">Set GPS Location</span></button>
+        <button class="btn btn-primary" id="edit-lens-btn">🔭 <span data-i18n="set_lens">Set Lens</span></button>
+      </div>
     </div>
   </div>
 
