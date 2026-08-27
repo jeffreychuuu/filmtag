@@ -71,7 +71,7 @@
     .gear-row .gear-group { margin-top: 0; flex: 1 1 auto; padding: 0.75rem; }
     .gear-row .gear-group-header { margin-bottom: 0.5rem; }
     #camera-select { max-width: 260px; }
-    .gear-row .file-actions { margin-top: 0; align-items: center; }
+    .lens-action-wrap { display: flex; align-items: flex-end; padding-bottom: 0.75rem; }
     .metadata-group .metadata-lock { font-weight: 500; }
     .section-inner { display: flex; flex-direction: column; gap: 1rem; }
     .field-block {
@@ -498,11 +498,13 @@
           </div>
         </div>
       </div>
-      <div class="file-actions" id="file-actions" style="display:none;">
-        <button class="btn btn-primary" id="edit-date-btn">📅 <span data-i18n="set_date_time">Set Date & Time</span></button>
-        <button class="btn btn-primary" id="edit-gps-btn">📍 <span data-i18n="set_gps">Set GPS Location</span></button>
+      <div class="lens-action-wrap">
         <button class="btn btn-primary" id="edit-lens-btn">🔭 <span data-i18n="set_lens">Set Lens</span></button>
       </div>
+    </div>
+    <div class="file-actions" id="file-actions" style="display:none;">
+      <button class="btn btn-primary" id="edit-date-btn">📅 <span data-i18n="set_date_time">Set Date & Time</span></button>
+      <button class="btn btn-primary" id="edit-gps-btn">📍 <span data-i18n="set_gps">Set GPS Location</span></button>
     </div>
   </div>
 
