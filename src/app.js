@@ -13,6 +13,7 @@ import {
   readLens,
   updateLensSummary,
   syncDefaultLensToCamera,
+  countAssignedLensNames,
   collect,
   validate,
   saveLastSession,
@@ -386,8 +387,8 @@ document.addEventListener("DOMContentLoaded", function () {
   S.startContentSheet = startContentSheet;
   S.showStatus = showStatus;
   S.initMap = initMap;
-  window.clearAll = clearAll;
-  window.removeOne = removeOne;
+  window.clearAll = function () { clearAll(); unlockMetadata(); };
+  window.removeOne = function (i) { removeOne(i); unlockMetadata(); };
   window.sortFiles = sortFiles;
   window.toggleSort = toggleSort;
   window.goToPage = goToPage;
@@ -461,6 +462,7 @@ document.addEventListener("DOMContentLoaded", function () {
   fileInp.addEventListener("change", function (e) {
     handleFiles(e.target.files);
     fileInp.value = "";
+    unlockMetadata();
   });
   uploadWrap.addEventListener("dragover", function (e) {
     e.preventDefault();
@@ -473,6 +475,7 @@ document.addEventListener("DOMContentLoaded", function () {
     e.preventDefault();
     uploadWrap.classList.remove("dragover");
     handleFiles(e.dataTransfer.files);
+    unlockMetadata();
   });
 
   S.addRangeBtn.addEventListener("click", function () {
@@ -585,15 +588,64 @@ document.addEventListener("DOMContentLoaded", function () {
   gpsOverlay.addEventListener("click", function (e) {
     if (e.target === this) this.classList.remove("show");
   });
+  function fillLensCameraSelect() {
+    var lensCamSel = $("lens-camera-select");
+    if (!lensCamSel) return;
+    lensCamSel.innerHTML = "";
+    for (var i = 0; i < cameraSel.options.length; i++) {
+      var o = cameraSel.options[i];
+      var opt = document.createElement("option");
+      opt.textContent = o.textContent;
+      opt.value = o.value;
+      if (i === cameraSel.selectedIndex) opt.selected = true;
+      lensCamSel.appendChild(opt);
+    }
+  }
   editLensBtn.addEventListener("click", function () {
     $("manage-overlay").classList.remove("show");
     updateLensUI();
+    fillLensCameraSelect();
     var n = Object.keys(S.selectedSet).length;
     var hint = $("lens-overlay-hint");
     if (hint) hint.textContent = (n > 0 && n === S.uploadedFiles.length)
       ? t("lens_apply_all_photos", { n: n })
       : t("lens_apply_to", { n: n });
     $("lens-overlay").classList.add("show");
+  });
+  var _pendingLensCamera = null;
+  $("lens-camera-select").addEventListener("change", function () {
+    // If the selected camera is the same as the main page one, nothing to do.
+    var changed = this.value !== cameraSel.value;
+    if (!changed) { updateLensUI(); return; }
+    var names = countAssignedLensNames();
+    if (names.length > 1) {
+      _pendingLensCamera = this.value;
+      $("lens-change-msg").textContent = t("lens_change_confirm", { n: names.length });
+      $("lens-change-overlay").classList.add("show");
+    } else {
+      applyLensCameraSwitch(this.value);
+    }
+  });
+  function applyLensCameraSwitch(value) {
+    if (value === "__custom__") { cameraSel.value = "__custom__"; }
+    else { cameraSel.value = value; }
+    cameraSel.dispatchEvent(new Event("change"));
+    fillLensCameraSelect();
+    updateLensUI();
+  }
+  $("lens-change-cancel").addEventListener("click", function () {
+    _pendingLensCamera = null;
+    $("lens-change-overlay").classList.remove("show");
+    fillLensCameraSelect();
+  });
+  $("lens-change-ok").addEventListener("click", function () {
+    var v = _pendingLensCamera;
+    _pendingLensCamera = null;
+    $("lens-change-overlay").classList.remove("show");
+    if (v) applyLensCameraSwitch(v);
+  });
+  $("lens-change-overlay").addEventListener("click", function (e) {
+    if (e.target === this) { _pendingLensCamera = null; this.classList.remove("show"); fillLensCameraSelect(); }
   });
   $("lens-cancel-btn").addEventListener("click", function () {
     $("lens-overlay").classList.remove("show");
@@ -631,6 +683,15 @@ document.addEventListener("DOMContentLoaded", function () {
   mapSearchInput.addEventListener("keydown", function (e) {
     if (e.key === "Enter") mapSearchBtn.click();
   });
+
+  function unlockMetadata() {
+    var group = $("metadata-group");
+    if (!group) return;
+    var lock = $("metadata-lock");
+    var hasFiles = S.uploadedFiles.length > 0;
+    group.classList.toggle("locked", !hasFiles);
+    if (lock) lock.textContent = hasFiles ? "" : t("metadata_locked");
+  }
 
   $("reset-btn").addEventListener("click", function () {
     document.querySelectorAll("select").forEach(function (s, i, a) {
@@ -679,12 +740,14 @@ document.addEventListener("DOMContentLoaded", function () {
     updateLensUI();
     updateLensSummary();
     refreshSegments();
+    unlockMetadata();
   });
 
   updateLensUI();
   restoreLastSession();
   syncDefaultLensToCamera();
   updateLensSummary();
+  unlockMetadata();
   (function () {
     if (!localStorage.getItem("filmtag-tutorial-seen")) showTutorial();
   })();

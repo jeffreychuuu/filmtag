@@ -51,6 +51,30 @@
       width: 24px; height: 24px; background: var(--accent); color: #000;
       border-radius: 50%; font-size: 0.7rem; font-weight: 700; flex-shrink: 0; color: var(--heading);
     }
+    .section-icon {
+      width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; flex-shrink: 0; line-height: 1;
+    }
+    .gear-group {
+      margin-top: 1rem; padding: 1rem; border: 1px dashed var(--border);
+      border-radius: var(--radius); background: var(--surface2);
+    }
+    .gear-group-header {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 0.75rem; font-size: 0.9rem; font-weight: 600; color: var(--heading);
+    }
+    .metadata-group .metadata-lock { font-weight: 500; }
+    .section-inner { display: flex; flex-direction: column; gap: 1rem; }
+    .field-block {
+      padding: 0.85rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface);
+    }
+    .field-block-label {
+      display: flex; align-items: center; gap: 0.4rem;
+      font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;
+    }
+    .metadata-group.locked #metadata-body { display: none; }
+    .metadata-group.locked { opacity: 0.6; }
+    .metadata-group.locked .metadata-lock::before { content: "🔒 "; }
 
     .form-row { display: flex; flex-direction: column; gap: 0.75rem; }
     label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; display: block; margin-bottom: 0.3rem; }
@@ -393,6 +417,7 @@
       align-items: center; justify-content: center;
     }
     .overlay#lens-overlay { z-index: 2100; }
+    .overlay#lens-change-overlay { z-index: 2150; }
     .overlay#manage-overlay { z-index: 2200; }
     .overlay.show { display: flex; }
     .overlay-content {
@@ -433,7 +458,7 @@
   </header>
 
   <div class="section">
-    <div class="section-header"><span class="section-number">1</span> <span data-i18n="file_setup">File Setup</span></div>
+    <div class="section-header"><span class="section-icon">📷</span> <span data-i18n="photo_gear">Photos &amp; Gear</span></div>
     <div class="upload-wrap" id="upload-wrap">
       <input type="file" id="file-input" multiple accept="image/jpeg,.jpg,.jpeg">
       <div class="upload-zone">
@@ -456,91 +481,77 @@
       <button class="btn btn-primary" id="edit-gps-btn">📍 <span data-i18n="set_gps">Set GPS Location</span></button>
       <button class="btn btn-primary" id="edit-lens-btn">🔭 <span data-i18n="set_lens">Set Lens</span></button>
     </div>
-  </div>
-
-  <div class="section">
-    <div class="section-header"><span class="section-number">2</span> <span data-i18n="camera">Camera</span><span class="manage-field-btn" data-manage="cameraModel" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:0.3rem;">⚙️</span></div>
-    <div class="form-row">
-      <div><select id="camera-select"></select></div>
-      <div class="custom-input" id="camera-custom">
-        <div class="field-group">
-          <div><label data-i18n="make">Make</label><input type="text" id="camera-make-custom" placeholder="e.g. Fujifilm"></div>
-          <div><label data-i18n="model">Model</label><input type="text" id="camera-model-custom" placeholder="e.g. GA645"></div>
+    <div class="gear-group">
+      <div class="gear-group-header"><span class="section-icon">🎥</span> <span data-i18n="camera_lens">Camera &amp; Lens</span><span class="manage-field-btn" data-manage="cameraModel" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:auto;">⚙️</span></div>
+      <div class="form-row">
+        <div><select id="camera-select"></select></div>
+        <div class="custom-input" id="camera-custom">
+          <div class="field-group">
+            <div><label data-i18n="make">Make</label><input type="text" id="camera-make-custom" placeholder="e.g. Fujifilm"></div>
+            <div><label data-i18n="model">Model</label><input type="text" id="camera-model-custom" placeholder="e.g. GA645"></div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="section">
-    <div class="section-header"><span class="section-number">3</span> <span data-i18n="artist">Artist</span><span class="manage-field-btn" data-manage="artist" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:0.3rem;">⚙️</span></div>
-    <div class="form-row">
-      <select id="artist-select"></select>
-      <div class="custom-input" id="artist-custom">
-        <input type="text" id="artist-custom-input" data-i18n-placeholder="artist_placeholder" placeholder="Enter custom artist name">
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-header"><span class="section-number">4</span> <span data-i18n="film_stock">Film Stock & ISO</span><span class="manage-field-btn" data-manage="filmName" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:0.3rem;">⚙️</span></div>
-    <div class="form-row">
-      <select id="film-select"></select>
-      <div class="custom-input" id="film-custom">
-        <div class="field-group">
-          <div><label data-i18n="film_name">Film Stock Name</label><input type="text" id="film-name-custom" placeholder="e.g. Tri-X 400"></div>
-          <div><label data-i18n="iso">ISO</label><input type="number" id="film-iso-custom" placeholder="e.g. 400"></div>
+  <div class="section metadata-group" id="metadata-group">
+    <div class="section-header"><span class="section-icon">🏷️</span> <span data-i18n="metadata">Metadata</span><span class="metadata-lock" id="metadata-lock" style="margin-left:auto;font-size:0.7rem;color:var(--text-secondary);"></span></div>
+    <div id="metadata-body">
+      <div class="section-inner">
+        <div class="field-block">
+          <div class="field-block-label"><span data-i18n="artist">Artist</span><span class="manage-field-btn" data-manage="artist" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:auto;">⚙️</span></div>
+          <select id="artist-select"></select>
+          <div class="custom-input" id="artist-custom">
+            <input type="text" id="artist-custom-input" data-i18n-placeholder="artist_placeholder" placeholder="Enter custom artist name">
+          </div>
+        </div>
+        <div class="field-block">
+          <div class="field-block-label"><span data-i18n="film_stock">Film Stock &amp; ISO</span><span class="manage-field-btn" data-manage="filmName" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:auto;">⚙️</span></div>
+          <select id="film-select"></select>
+          <div class="custom-input" id="film-custom">
+            <div class="field-group">
+              <div><label data-i18n="film_name">Film Stock Name</label><input type="text" id="film-name-custom" placeholder="e.g. Tri-X 400"></div>
+              <div><label data-i18n="iso">ISO</label><input type="number" id="film-iso-custom" placeholder="e.g. 400"></div>
+            </div>
+          </div>
+        </div>
+        <div class="field-block">
+          <div class="field-block-label"><span data-i18n="lab">Lab</span><span class="manage-field-btn" data-manage="lab" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:auto;">⚙️</span></div>
+          <select id="lab-select"></select>
+          <div class="custom-input" id="lab-custom">
+            <input type="text" id="lab-custom-input" data-i18n-placeholder="lab_placeholder" placeholder="Enter custom lab name">
+          </div>
+        </div>
+        <div class="field-block">
+          <div class="field-block-label"><span data-i18n="process">Developing Process</span><span class="manage-field-btn" data-manage="process" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:auto;">⚙️</span></div>
+          <select id="process-select"></select>
+          <div class="custom-input" id="process-custom">
+            <input type="text" id="process-custom-input" placeholder="e.g. C-41">
+          </div>
+        </div>
+        <div class="field-block">
+          <div class="field-block-label"><span data-i18n="push_pull">Push / Pull</span><span class="manage-field-btn" data-manage="pushPull" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:auto;">⚙️</span></div>
+          <select id="pushpull-select"></select>
+          <div class="custom-input" id="pushpull-custom">
+            <input type="text" id="pushpull-custom-input" placeholder="e.g. Push +1.5">
+          </div>
+        </div>
+        <div class="field-block">
+          <div class="field-block-label"><span data-i18n="scanner">Scanner</span><span class="manage-field-btn" data-manage="scanner" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:auto;">⚙️</span></div>
+          <select id="scanner-select"></select>
+          <div class="custom-input" id="scanner-custom">
+            <input type="text" id="scanner-custom-input" data-i18n-placeholder="scanner_placeholder" placeholder="Enter custom scanner name">
+          </div>
+        </div>
+        <div class="field-block">
+          <div class="field-block-label"><span data-i18n="signature">😎 Signature</span></div>
+          <label style="font-size:0.85rem;color:var(--text);display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+            <input type="checkbox" id="public-checkbox" checked style="width:auto;accent-color:var(--accent);">
+            <span data-i18n="public_label">Add FilmTag credit to photo description</span>
+          </label>
         </div>
       </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-header"><span class="section-number">5</span> <span data-i18n="lab">Lab</span><span class="manage-field-btn" data-manage="lab" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:0.3rem;">⚙️</span></div>
-    <div class="form-row">
-      <select id="lab-select"></select>
-      <div class="custom-input" id="lab-custom">
-        <input type="text" id="lab-custom-input" data-i18n-placeholder="lab_placeholder" placeholder="Enter custom lab name">
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-header"><span class="section-number">6</span> <span data-i18n="process">Developing Process</span><span class="manage-field-btn" data-manage="process" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:0.3rem;">⚙️</span></div>
-    <div class="form-row">
-      <select id="process-select"></select>
-      <div class="custom-input" id="process-custom">
-        <input type="text" id="process-custom-input" placeholder="e.g. C-41">
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-header"><span class="section-number">7</span> <span data-i18n="push_pull">Push / Pull</span><span class="manage-field-btn" data-manage="pushPull" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:0.3rem;">⚙️</span></div>
-    <div class="form-row">
-      <select id="pushpull-select"></select>
-      <div class="custom-input" id="pushpull-custom">
-        <input type="text" id="pushpull-custom-input" placeholder="e.g. Push +1.5">
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-header"><span class="section-number">8</span> <span data-i18n="scanner">Scanner</span><span class="manage-field-btn" data-manage="scanner" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:0.3rem;">⚙️</span></div>
-    <div class="form-row">
-      <select id="scanner-select"></select>
-      <div class="custom-input" id="scanner-custom">
-        <input type="text" id="scanner-custom-input" data-i18n-placeholder="scanner_placeholder" placeholder="Enter custom scanner name">
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-header"><span class="section-number">9</span> <span data-i18n="signature">😎 Signature</span></div>
-    <div class="form-row">
-      <label style="font-size:0.85rem;color:var(--text);display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
-        <input type="checkbox" id="public-checkbox" checked style="width:auto;accent-color:var(--accent);">
-        <span data-i18n="public_label">Add FilmTag credit to photo description</span>
-      </label>
     </div>
   </div>
 
@@ -639,6 +650,10 @@
 <div class="overlay" id="lens-overlay">
   <div class="overlay-content">
     <h3 style="margin-bottom:1rem;">🔭 <span data-i18n="lens_overlay_title">Choose Lens</span></h3>
+    <div style="margin-bottom:0.75rem;">
+      <label><span data-i18n="camera">Camera</span></label>
+      <select id="lens-camera-select"></select>
+    </div>
     <div id="lens-dropdown-group">
       <label><span data-i18n="lens">Lens</span> <span class="manage-field-btn" data-manage="lensByCamera" style="cursor:pointer;font-size:0.8rem;opacity:0.5;">⚙️</span></label>
       <select id="lens-select"></select>
@@ -654,6 +669,17 @@
     <div style="display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:flex-end;margin-top:0.75rem;">
       <button class="btn btn-sm btn-secondary" id="lens-cancel-btn" data-i18n="cancel">Cancel</button>
       <button class="btn btn-sm btn-primary" id="lens-apply-btn" data-i18n="lens_apply">Apply</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="lens-change-overlay">
+  <div class="overlay-content" style="max-width:440px;text-align:center;">
+    <h3 style="margin-bottom:1rem;">🔭 <span data-i18n="lens_change_title">Change Camera</span></h3>
+    <p id="lens-change-msg" style="color:var(--text);font-size:0.85rem;line-height:1.6;margin-bottom:1.25rem;"></p>
+    <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-sm btn-secondary" id="lens-change-cancel" data-i18n="cancel">Cancel</button>
+      <button class="btn btn-sm btn-primary" id="lens-change-ok" data-i18n="lens_change_continue">Continue, change camera</button>
     </div>
   </div>
 </div>

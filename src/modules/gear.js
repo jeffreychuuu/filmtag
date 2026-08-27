@@ -284,6 +284,17 @@ export function applyLensToSelected(lens) {
   updateLensSummary();
 }
 
+// Count distinct lens names currently assigned per-file (ignoring the roll default)
+export function countAssignedLensNames() {
+  var files = S.uploadedFiles || [];
+  var names = [];
+  for (var i = 0; i < files.length; i++) {
+    var l = S.lensByFile[i];
+    if (l && l.name && names.indexOf(l.name) === -1) names.push(l.name);
+  }
+  return names;
+}
+
 // Build the lens legend for the current roll: letter (A, B, C…) per distinct lens
 export function buildLensLegend() {
   var files = S.uploadedFiles || [];
