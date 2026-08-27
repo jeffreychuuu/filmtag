@@ -71,7 +71,8 @@
     .gear-row .gear-group { margin-top: 0; flex: 1 1 auto; padding: 0.75rem; }
     .gear-row .gear-group-header { margin-bottom: 0.5rem; }
     #camera-select { max-width: 260px; }
-    .lens-action-wrap { display: flex; align-items: flex-end; padding-bottom: 0.75rem; }
+    .lens-action-wrap { display: none; align-items: flex-end; padding-bottom: 0.75rem; }
+    .lens-action-wrap.show { display: flex; }
     .metadata-group .metadata-lock { font-weight: 500; }
     .section-inner { display: flex; flex-direction: column; gap: 1rem; }
     .field-block {
@@ -498,7 +499,7 @@
           </div>
         </div>
       </div>
-      <div class="lens-action-wrap">
+      <div class="lens-action-wrap" id="lens-action-wrap">
         <button class="btn btn-primary" id="edit-lens-btn">🔭 <span data-i18n="set_lens">Set Lens</span></button>
       </div>
     </div>

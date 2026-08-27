@@ -284,7 +284,8 @@ document.addEventListener("DOMContentLoaded", function () {
   var fileActions = $("file-actions"),
     editDateBtn = $("edit-date-btn"),
     editGpsBtn = $("edit-gps-btn"),
-    editLensBtn = $("edit-lens-btn");
+    editLensBtn = $("edit-lens-btn"),
+    lensActionWrap = $("lens-action-wrap");
   var dateOverlay = $("date-overlay"),
     gpsOverlay = $("gps-overlay");
   var dateSaveBtn = $("date-save-btn"),
@@ -341,6 +342,7 @@ document.addEventListener("DOMContentLoaded", function () {
   S.mapSearchInput = mapSearchInput;
   S.mapSearchBtn = mapSearchBtn;
   S.fileActions = fileActions;
+  S.lensActionWrap = lensActionWrap;
   S.editDateBtn = editDateBtn;
   S.editGpsBtn = editGpsBtn;
   S.dateOverlay = dateOverlay;

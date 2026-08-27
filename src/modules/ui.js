@@ -45,11 +45,13 @@ export function renderFileList(skipThumbs) {
     S.fileListEl.innerHTML = ''; S.reviewBtn.disabled = true;
     S.selectToolbar.style.display = 'none';
     S.fileActions.style.display = 'none';
+    setLensActionVisible(false);
     return;
   }
   S.selectToolbar.style.display = 'flex';
   var hasS = Object.keys(S.selectedSet).length > 0;
   S.fileActions.style.display = hasS ? 'flex' : 'none';
+  setLensActionVisible(hasS);
   var h = '<div class="file-list-header"><span>' + t('file_count', {n: S.uploadedFiles.length}) + '</span>' +
     '<span id="lens-status" class="lens-status" style="flex:1 1 100%;order:3;text-align:left;font-size:0.72rem;color:var(--text-secondary);line-height:1.4;word-break:break-word;"></span>' +
     '<div>' +
@@ -109,6 +111,12 @@ export function renderFileList(skipThumbs) {
   renderRanges();
   S.selectAllBtn.textContent = Object.keys(S.selectedSet).length > 0 ? t('unselect_all') : t('select_all');
   S.fileActions.style.display = hasS ? 'flex' : 'none';
+  setLensActionVisible(hasS);
+}
+
+function setLensActionVisible(show) {
+  if (!S.lensActionWrap) return;
+  S.lensActionWrap.classList.toggle('show', show);
 }
 
 function generateThumbnails(onDone) {
@@ -213,6 +221,7 @@ function fileItemClick(e) {
   S.selectAllBtn.textContent = Object.keys(S.selectedSet).length > 0 ? t('unselect_all') : t('select_all');
   var ct = Object.keys(S.selectedSet).length;
   S.fileActions.style.display = ct ? 'flex' : 'none';
+  setLensActionVisible(ct > 0);
   renderRanges();
 }
 
