@@ -37,7 +37,7 @@ One thing worth knowing: local storage is tied to your browser. Clear your data,
 
 | Feature                         | Description                                                                                                                                                                                  |
 | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Camera & Lens                   | Built-in presets (Leica MP, Olympus OM-2Sp, etc.) plus full custom model, focal length, and max aperture — with per-file lens (multiple lenses on one roll) and a per-camera remembered default |
+| Camera & Lens                   | Camera is per-roll (set once, above upload) — built-in presets (Leica MP, Olympus OM-2Sp, etc.) plus full custom model, focal length, and max aperture. Lens is per-photo: the lens modal only lists the chosen camera's lenses, so a roll can mix different lenses on the same camera |
 | Film Stock & ISO                | 23 built-in film stocks (Kodak, Fujifilm, CineStill, Ilford, etc.) — selecting a film auto-fills ISO                                                                                         |
 | Lab Records                     | Hong Kong lab presets: DOT-WELL, Megatoni, TrueFace Pro Lab, Photo Garden, HK Camera, Showa, Colorluxe — with Push/Pull and scanner model tracking                                           |
 | Time Sequencing (the best part) | Auto-increments +1 minute per photo, timezone forced to +08:00. Shot a roll across multiple days? Set up date segments with individual start times — Google Photos will order them perfectly |
@@ -59,7 +59,8 @@ The final result 👇
 ## Features
 
 - Upload JPEG photos via drag & drop
-- Set camera, film stock, ISO, lab, process, push/pull, scanner via dropdowns; set the lens per selected file (same camera can use different lenses on one roll)
+- Camera (per roll) is set above the upload area; film stock, ISO, lab, process, push/pull, scanner via dropdowns — each metadata field unlocks after upload
+- Lens is per photo: the lens modal only shows the selected camera's lenses, and a roll can use different lenses on the same camera (changing camera with multiple lenses prompts a confirmation)
 - Multiple date segments with individual start times
 - Review summary with file rename preview before processing
 - Writes EXIF tags: Make, Model, Artist, ISO, LensModel, DateTime, FocalLength, FNumber, Aperture, Shutter, UserComment, ImageDescription, Copyright, Instructions
@@ -183,6 +184,14 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 
 <details>
 <summary>Click to expand</summary>
+
+**1.13.0 (2026-08-27)** — Streamlined roll workflow & redesigned gear/metadata layout
+
+- 🧭 Camera is now per-roll and placed **above the upload area** — pick your body first, then drop your scans
+- 📷 Lens is treated as per-photo: the Set Lens modal only shows the selected camera's lenses (previously it also let you switch cameras inline)
+- 🗂️ UI regrouped into two visual blocks: **Photos & Gear** (upload, file list, camera) and **Metadata** (artist, film, lab, process, push/pull, scanner, signature) with an icon group header
+- 🔓 Metadata fields are progressively revealed — locked until you upload photos, then unlocked automatically (re-locked when you clear/remove files)
+- ⚠️ Changing the camera when a roll already uses multiple lenses now prompts a confirmation popup, instead of silently resetting every lens
 
 **1.12.0 (2026-08-23)** — Multiple lenses per roll (same camera)
 

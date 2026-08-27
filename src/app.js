@@ -13,6 +13,7 @@ import {
   readLens,
   updateLensSummary,
   syncDefaultLensToCamera,
+  countAssignedLensNames,
   collect,
   validate,
   saveLastSession,
@@ -386,8 +387,8 @@ document.addEventListener("DOMContentLoaded", function () {
   S.startContentSheet = startContentSheet;
   S.showStatus = showStatus;
   S.initMap = initMap;
-  window.clearAll = clearAll;
-  window.removeOne = removeOne;
+  window.clearAll = function () { clearAll(); unlockMetadata(); };
+  window.removeOne = function (i) { removeOne(i); unlockMetadata(); };
   window.sortFiles = sortFiles;
   window.toggleSort = toggleSort;
   window.goToPage = goToPage;
@@ -443,10 +444,50 @@ document.addEventListener("DOMContentLoaded", function () {
   setupCustom(scanSel, scanCust);
   setupCustom(processSel, processCust);
   setupCustom(filmSel, filmCust);
+  var _cameraLeading = null;
+  var _cameraLastValue = cameraSel.value;
   cameraSel.addEventListener("change", function () {
+    var newVal = cameraSel.value;
+    var names = countAssignedLensNames();
+    if (names.length > 1) {
+      _cameraLeading = { from: _cameraLastValue, to: newVal, count: names.length };
+      var hint = $("lens-change-msg");
+      if (hint) hint.textContent = t("lens_change_confirm", { n: names.length });
+      $("lens-change-overlay").classList.add("show");
+      // Revert select to the previous value while waiting for the decision.
+      cameraSel.value = _cameraLastValue;
+    } else {
+      applyCameraChange(newVal);
+    }
+  });
+  function applyCameraChange(value) {
+    if (value !== undefined) _cameraLastValue = value;
     updateLensUI();
     syncDefaultLensToCamera();
     S.renderFileList();
+  }
+  $("lens-change-ok").addEventListener("click", function () {
+    if (_cameraLeading === null) return;
+    var pending = _cameraLeading;
+    _cameraLeading = null;
+    $("lens-change-overlay").classList.remove("show");
+    _cameraLastValue = pending.to;
+    cameraSel.value = pending.to;
+    applyCameraChange();
+  });
+  $("lens-change-cancel").addEventListener("click", function () {
+    _cameraLeading = null;
+    $("lens-change-overlay").classList.remove("show");
+    _cameraLastValue = cameraSel.value;
+    cameraSel.value = _cameraLastValue;
+  });
+  $("lens-change-overlay").addEventListener("click", function (e) {
+    if (e.target === this) {
+      _cameraLeading = null;
+      this.classList.remove("show");
+      _cameraLastValue = cameraSel.value;
+      cameraSel.value = _cameraLastValue;
+    }
   });
   lensSel.addEventListener("change", function () {
     if (cameraSel.value === "__custom__") return;
@@ -461,6 +502,7 @@ document.addEventListener("DOMContentLoaded", function () {
   fileInp.addEventListener("change", function (e) {
     handleFiles(e.target.files);
     fileInp.value = "";
+    unlockMetadata();
   });
   uploadWrap.addEventListener("dragover", function (e) {
     e.preventDefault();
@@ -473,6 +515,7 @@ document.addEventListener("DOMContentLoaded", function () {
     e.preventDefault();
     uploadWrap.classList.remove("dragover");
     handleFiles(e.dataTransfer.files);
+    unlockMetadata();
   });
 
   S.addRangeBtn.addEventListener("click", function () {
@@ -632,6 +675,15 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.key === "Enter") mapSearchBtn.click();
   });
 
+  function unlockMetadata() {
+    var group = $("metadata-group");
+    if (!group) return;
+    var lock = $("metadata-lock");
+    var hasFiles = S.uploadedFiles.length > 0;
+    group.classList.toggle("locked", !hasFiles);
+    if (lock) lock.textContent = hasFiles ? "" : t("metadata_locked");
+  }
+
   $("reset-btn").addEventListener("click", function () {
     document.querySelectorAll("select").forEach(function (s, i, a) {
       s.selectedIndex = 0;
@@ -679,12 +731,14 @@ document.addEventListener("DOMContentLoaded", function () {
     updateLensUI();
     updateLensSummary();
     refreshSegments();
+    unlockMetadata();
   });
 
   updateLensUI();
   restoreLastSession();
   syncDefaultLensToCamera();
   updateLensSummary();
+  unlockMetadata();
   (function () {
     if (!localStorage.getItem("filmtag-tutorial-seen")) showTutorial();
   })();

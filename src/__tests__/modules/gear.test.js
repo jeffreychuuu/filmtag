@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { initGear, fillSelect, fillSelectWithCustom, collect, validate, applyLensToSelected, buildLensLegend, updateLensSummary } from '../../modules/gear.js';
+import { initGear, fillSelect, fillSelectWithCustom, collect, validate, applyLensToSelected, buildLensLegend, updateLensSummary, countAssignedLensNames } from '../../modules/gear.js';
 
 var S;
 var selectEl, customEl, customInput;
@@ -141,6 +141,36 @@ describe('lens apply functions', function() {
     applyLensToSelected({ name: '35mm', focal: '35', aperture: '2' });
     var byCam = JSON.parse(localStorage.getItem('filmtag-default-lens-by-camera') || '{}');
     expect(byCam.MP.name).toBe('35mm');
+  });
+});
+
+describe('countAssignedLensNames', function() {
+  it('counts multiple distinct per-file overrides', function() {
+    S.uploadedFiles = [{ file: {} }, { file: {} }, { file: {} }];
+    S.defaultLens = null;
+    S.lensByFile = { 0: { name: '28mm' }, 2: { name: '50mm' } };
+    expect(countAssignedLensNames()).toEqual(['28mm', '50mm']);
+  });
+
+  it('counts the roll default lens even when no file is overridden', function() {
+    S.uploadedFiles = [{ file: {} }, { file: {} }];
+    S.defaultLens = { name: '50mm' };
+    S.lensByFile = {};
+    expect(countAssignedLensNames()).toEqual(['50mm']);
+  });
+
+  it('counts roll default plus a different per-file override as two lenses', function() {
+    S.uploadedFiles = [{ file: {} }, { file: {} }, { file: {} }];
+    S.defaultLens = { name: '50mm' };
+    S.lensByFile = { 1: { name: '35mm' } };
+    expect(countAssignedLensNames()).toEqual(['50mm', '35mm']);
+  });
+
+  it('returns [] when no lens is assigned anywhere', function() {
+    S.uploadedFiles = [{ file: {} }, { file: {} }];
+    S.defaultLens = null;
+    S.lensByFile = {};
+    expect(countAssignedLensNames()).toEqual([]);
   });
 });
 
