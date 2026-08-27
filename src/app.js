@@ -677,10 +677,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function unlockMetadata() {
     var group = $("metadata-group");
-    if (!group) return;
+    var cameraGroup = $("camera-group");
     var lock = $("metadata-lock");
     var hasFiles = S.uploadedFiles.length > 0;
-    group.classList.toggle("locked", !hasFiles);
+    if (group) group.classList.toggle("locked", !hasFiles);
+    if (cameraGroup) cameraGroup.classList.toggle("locked", !hasFiles);
     if (lock) lock.textContent = hasFiles ? "" : t("metadata_locked");
   }
 

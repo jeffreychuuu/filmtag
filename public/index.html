@@ -59,6 +59,7 @@
       margin-top: 1rem; padding: 1rem; border: 1px dashed var(--border);
       border-radius: var(--radius); background: var(--surface2);
     }
+    .gear-group.locked { display: none; }
     .gear-group-header {
       display: flex; align-items: center; gap: 0.5rem;
       margin-bottom: 0.75rem; font-size: 0.9rem; font-weight: 600; color: var(--heading);
@@ -476,7 +477,7 @@
         <button class="btn btn-sm btn-secondary" id="select-all-btn" data-i18n="select_all">Select All</button>
       </div>
     </div>
-    <div class="gear-group">
+    <div class="gear-group" id="camera-group">
       <div class="gear-group-header"><span class="section-icon">📷</span> <span data-i18n="camera">Camera</span><span class="manage-field-btn" data-manage="cameraModel" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:auto;">⚙️</span></div>
       <div class="form-row">
         <div><select id="camera-select"></select></div>
