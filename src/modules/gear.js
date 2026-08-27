@@ -284,12 +284,13 @@ export function applyLensToSelected(lens) {
   updateLensSummary();
 }
 
-// Count distinct lens names currently assigned per-file (ignoring the roll default)
+// Count distinct lens names actually used in the roll (per-file override or roll default),
+// mirroring buildLensLegend so the "switch camera" confirm matches what the file list shows.
 export function countAssignedLensNames() {
   var files = S.uploadedFiles || [];
   var names = [];
   for (var i = 0; i < files.length; i++) {
-    var l = S.lensByFile[i];
+    var l = S.lensByFile[i] || S.defaultLens;
     if (l && l.name && names.indexOf(l.name) === -1) names.push(l.name);
   }
   return names;
