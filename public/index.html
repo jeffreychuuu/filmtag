@@ -459,18 +459,6 @@
 
   <div class="section">
     <div class="section-header"><span class="section-icon">⚙️</span> <span data-i18n="photo_gear">Photos &amp; Gear</span></div>
-    <div class="gear-group">
-      <div class="gear-group-header"><span class="section-icon">📷</span> <span data-i18n="camera">Camera</span><span class="manage-field-btn" data-manage="cameraModel" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:auto;">⚙️</span></div>
-      <div class="form-row">
-        <div><select id="camera-select"></select></div>
-        <div class="custom-input" id="camera-custom">
-          <div class="field-group">
-            <div><label data-i18n="make">Make</label><input type="text" id="camera-make-custom" placeholder="e.g. Fujifilm"></div>
-            <div><label data-i18n="model">Model</label><input type="text" id="camera-model-custom" placeholder="e.g. GA645"></div>
-          </div>
-        </div>
-      </div>
-    </div>
     <div class="upload-wrap" id="upload-wrap">
       <input type="file" id="file-input" multiple accept="image/jpeg,.jpg,.jpeg">
       <div class="upload-zone">
@@ -486,6 +474,18 @@
       <div class="range-actions">
         <button class="btn btn-sm btn-secondary" id="add-range-btn" data-i18n="add_range">+ Add Range</button>
         <button class="btn btn-sm btn-secondary" id="select-all-btn" data-i18n="select_all">Select All</button>
+      </div>
+    </div>
+    <div class="gear-group">
+      <div class="gear-group-header"><span class="section-icon">📷</span> <span data-i18n="camera">Camera</span><span class="manage-field-btn" data-manage="cameraModel" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:auto;">⚙️</span></div>
+      <div class="form-row">
+        <div><select id="camera-select"></select></div>
+        <div class="custom-input" id="camera-custom">
+          <div class="field-group">
+            <div><label data-i18n="make">Make</label><input type="text" id="camera-make-custom" placeholder="e.g. Fujifilm"></div>
+            <div><label data-i18n="model">Model</label><input type="text" id="camera-model-custom" placeholder="e.g. GA645"></div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="file-actions" id="file-actions" style="display:none;">
