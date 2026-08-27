@@ -804,6 +804,7 @@ document.addEventListener("DOMContentLoaded", function () {
     gpsOverlay.classList.remove("show");
     refreshSegments();
     S.renderFileList();
+    unlockMetadata();
   });
   $("progress-edit-btn").addEventListener("click", function () {
     progressSec.classList.remove("show");
