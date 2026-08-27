@@ -458,7 +458,19 @@
   </header>
 
   <div class="section">
-    <div class="section-header"><span class="section-icon">📷</span> <span data-i18n="photo_gear">Photos &amp; Gear</span></div>
+    <div class="section-header"><span class="section-icon">🎞️</span> <span data-i18n="photo_gear">Photos &amp; Gear</span></div>
+    <div class="gear-group">
+      <div class="gear-group-header"><span class="section-icon">📷</span> <span data-i18n="camera">Camera</span><span class="manage-field-btn" data-manage="cameraModel" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:auto;">⚙️</span></div>
+      <div class="form-row">
+        <div><select id="camera-select"></select></div>
+        <div class="custom-input" id="camera-custom">
+          <div class="field-group">
+            <div><label data-i18n="make">Make</label><input type="text" id="camera-make-custom" placeholder="e.g. Fujifilm"></div>
+            <div><label data-i18n="model">Model</label><input type="text" id="camera-model-custom" placeholder="e.g. GA645"></div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="upload-wrap" id="upload-wrap">
       <input type="file" id="file-input" multiple accept="image/jpeg,.jpg,.jpeg">
       <div class="upload-zone">
@@ -480,18 +492,6 @@
       <button class="btn btn-primary" id="edit-date-btn">📅 <span data-i18n="set_date_time">Set Date & Time</span></button>
       <button class="btn btn-primary" id="edit-gps-btn">📍 <span data-i18n="set_gps">Set GPS Location</span></button>
       <button class="btn btn-primary" id="edit-lens-btn">🔭 <span data-i18n="set_lens">Set Lens</span></button>
-    </div>
-    <div class="gear-group">
-      <div class="gear-group-header"><span class="section-icon">🎥</span> <span data-i18n="camera_lens">Camera &amp; Lens</span><span class="manage-field-btn" data-manage="cameraModel" style="cursor:pointer;font-size:0.8rem;opacity:0.5;margin-left:auto;">⚙️</span></div>
-      <div class="form-row">
-        <div><select id="camera-select"></select></div>
-        <div class="custom-input" id="camera-custom">
-          <div class="field-group">
-            <div><label data-i18n="make">Make</label><input type="text" id="camera-make-custom" placeholder="e.g. Fujifilm"></div>
-            <div><label data-i18n="model">Model</label><input type="text" id="camera-model-custom" placeholder="e.g. GA645"></div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -650,10 +650,6 @@
 <div class="overlay" id="lens-overlay">
   <div class="overlay-content">
     <h3 style="margin-bottom:1rem;">🔭 <span data-i18n="lens_overlay_title">Choose Lens</span></h3>
-    <div style="margin-bottom:0.75rem;">
-      <label><span data-i18n="camera">Camera</span></label>
-      <select id="lens-camera-select"></select>
-    </div>
     <div id="lens-dropdown-group">
       <label><span data-i18n="lens">Lens</span> <span class="manage-field-btn" data-manage="lensByCamera" style="cursor:pointer;font-size:0.8rem;opacity:0.5;">⚙️</span></label>
       <select id="lens-select"></select>

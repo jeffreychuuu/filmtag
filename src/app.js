@@ -444,10 +444,50 @@ document.addEventListener("DOMContentLoaded", function () {
   setupCustom(scanSel, scanCust);
   setupCustom(processSel, processCust);
   setupCustom(filmSel, filmCust);
+  var _cameraLeading = null;
+  var _cameraLastValue = cameraSel.value;
   cameraSel.addEventListener("change", function () {
+    var newVal = cameraSel.value;
+    var names = countAssignedLensNames();
+    if (names.length > 1) {
+      _cameraLeading = { from: _cameraLastValue, to: newVal, count: names.length };
+      var hint = $("lens-change-msg");
+      if (hint) hint.textContent = t("lens_change_confirm", { n: names.length });
+      $("lens-change-overlay").classList.add("show");
+      // Revert select to the previous value while waiting for the decision.
+      cameraSel.value = _cameraLastValue;
+    } else {
+      applyCameraChange(newVal);
+    }
+  });
+  function applyCameraChange(value) {
+    if (value !== undefined) _cameraLastValue = value;
     updateLensUI();
     syncDefaultLensToCamera();
     S.renderFileList();
+  }
+  $("lens-change-ok").addEventListener("click", function () {
+    if (_cameraLeading === null) return;
+    var pending = _cameraLeading;
+    _cameraLeading = null;
+    $("lens-change-overlay").classList.remove("show");
+    _cameraLastValue = pending.to;
+    cameraSel.value = pending.to;
+    applyCameraChange();
+  });
+  $("lens-change-cancel").addEventListener("click", function () {
+    _cameraLeading = null;
+    $("lens-change-overlay").classList.remove("show");
+    _cameraLastValue = cameraSel.value;
+    cameraSel.value = _cameraLastValue;
+  });
+  $("lens-change-overlay").addEventListener("click", function (e) {
+    if (e.target === this) {
+      _cameraLeading = null;
+      this.classList.remove("show");
+      _cameraLastValue = cameraSel.value;
+      cameraSel.value = _cameraLastValue;
+    }
   });
   lensSel.addEventListener("change", function () {
     if (cameraSel.value === "__custom__") return;
@@ -588,64 +628,15 @@ document.addEventListener("DOMContentLoaded", function () {
   gpsOverlay.addEventListener("click", function (e) {
     if (e.target === this) this.classList.remove("show");
   });
-  function fillLensCameraSelect() {
-    var lensCamSel = $("lens-camera-select");
-    if (!lensCamSel) return;
-    lensCamSel.innerHTML = "";
-    for (var i = 0; i < cameraSel.options.length; i++) {
-      var o = cameraSel.options[i];
-      var opt = document.createElement("option");
-      opt.textContent = o.textContent;
-      opt.value = o.value;
-      if (i === cameraSel.selectedIndex) opt.selected = true;
-      lensCamSel.appendChild(opt);
-    }
-  }
   editLensBtn.addEventListener("click", function () {
     $("manage-overlay").classList.remove("show");
     updateLensUI();
-    fillLensCameraSelect();
     var n = Object.keys(S.selectedSet).length;
     var hint = $("lens-overlay-hint");
     if (hint) hint.textContent = (n > 0 && n === S.uploadedFiles.length)
       ? t("lens_apply_all_photos", { n: n })
       : t("lens_apply_to", { n: n });
     $("lens-overlay").classList.add("show");
-  });
-  var _pendingLensCamera = null;
-  $("lens-camera-select").addEventListener("change", function () {
-    // If the selected camera is the same as the main page one, nothing to do.
-    var changed = this.value !== cameraSel.value;
-    if (!changed) { updateLensUI(); return; }
-    var names = countAssignedLensNames();
-    if (names.length > 1) {
-      _pendingLensCamera = this.value;
-      $("lens-change-msg").textContent = t("lens_change_confirm", { n: names.length });
-      $("lens-change-overlay").classList.add("show");
-    } else {
-      applyLensCameraSwitch(this.value);
-    }
-  });
-  function applyLensCameraSwitch(value) {
-    if (value === "__custom__") { cameraSel.value = "__custom__"; }
-    else { cameraSel.value = value; }
-    cameraSel.dispatchEvent(new Event("change"));
-    fillLensCameraSelect();
-    updateLensUI();
-  }
-  $("lens-change-cancel").addEventListener("click", function () {
-    _pendingLensCamera = null;
-    $("lens-change-overlay").classList.remove("show");
-    fillLensCameraSelect();
-  });
-  $("lens-change-ok").addEventListener("click", function () {
-    var v = _pendingLensCamera;
-    _pendingLensCamera = null;
-    $("lens-change-overlay").classList.remove("show");
-    if (v) applyLensCameraSwitch(v);
-  });
-  $("lens-change-overlay").addEventListener("click", function (e) {
-    if (e.target === this) { _pendingLensCamera = null; this.classList.remove("show"); fillLensCameraSelect(); }
   });
   $("lens-cancel-btn").addEventListener("click", function () {
     $("lens-overlay").classList.remove("show");
