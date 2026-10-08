@@ -185,6 +185,12 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 <details>
 <summary>Click to expand</summary>
 
+**1.13.2 (2026-10-09)** — Link previews & refined camera row
+
+- 🔗 Sharing the site now shows a proper preview card (Open Graph & Twitter Card) with cover image, title, and description
+- 📷 Camera row only appears once photos are uploaded; Set Lens appears after a photo is selected, with Set Date / Set GPS moved below
+- 🎨 Compact camera box aligned with the gear actions; Photos & Gear group now uses a magnifier icon
+
 **1.13.0 (2026-08-27)** — Streamlined roll workflow & redesigned gear/metadata layout
 
 - 🧭 Camera is now per-roll and placed **above the upload area** — pick your body first, then drop your scans

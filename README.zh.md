@@ -184,6 +184,12 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 <details>
 <summary>撳開嚟睇</summary>
 
+**1.13.2 (2026-10-09)** — 連結預覽 + 相機列優化
+
+- 🔗 分享網站而家有正式嘅連結預覽卡（Open Graph & Twitter Card），有封面圖、標題同描述
+- 📷 上傳相片後先出現相機列；揀咗相先出 Set Lens，Set Date / Set GPS 移咗落下面
+- 🎨 相機盒縮細，同 gear 操作同一行對齊；Photos & Gear 改用放大鏡 icon
+
 **1.13.0 (2026-08-27)** — 簡化成卷流程 + 重組器材/資料版面
 
 - 🧭 相機而家係成卷揀一次，擺喺 **上傳區上面** — 先揀好部機，先掉啲掃描檔入嚟
