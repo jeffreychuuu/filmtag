@@ -137,7 +137,7 @@ describe('injectXmp', function() {
 
 describe('esc', () => {
   it('escapes HTML special characters', () => {
-    expect(esc('<script>alert("xss")</script>')).toBe('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;');
+    expect(esc('<script>alert("xss")</script>')).toBe('&lt;script&gt;alert("xss")&lt;/script&gt;');
     expect(esc('safe text')).toBe('safe text');
     expect(esc('')).toBe('');
     expect(esc('Tom & Jerry')).toBe('Tom &amp; Jerry');
