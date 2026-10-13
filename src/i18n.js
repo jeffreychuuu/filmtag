@@ -192,7 +192,7 @@ tpl.en = {
   ok: "OK",
 
   // FAQ (SEO)
-  faq_title: "Frequently Asked Questions",
+  faq_title: "FAQ",
   faq_q1: "What is FilmTag?",
   faq_a1:
     "FilmTag is a free browser-based tool for writing EXIF metadata — camera, lens, date, GPS, film stock, and more — to your film-scanned JPEG photos, so apps like Google Photos display the correct details.",

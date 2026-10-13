@@ -297,14 +297,13 @@
     .overlay.fade-out { animation: overlayFadeOut 0.3s ease forwards; }
     @keyframes overlayFadeOut { to { opacity: 0; transform: scale(0.95); } }
 
-    .faq { margin-top: 2rem; }
-    .faq > details > summary { cursor: pointer; font-size: 0.75rem; color: var(--text-secondary); text-align: center; list-style: none; }
-    .faq > details > summary::before { content: "▸ "; }
-    .faq > details[open] > summary::before { content: "▾ "; }
-    .faq-items { margin-top: 0.75rem; text-align: left; }
+    .faq > summary { cursor: pointer; list-style: none; }
+    .faq > summary::after { content: " ▸"; }
+    .faq[open] > summary::after { content: " ▾"; }
+    .faq-items { max-width: 720px; margin: 0.75rem auto 0; text-align: left; }
     .faq-items details { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); margin-bottom: 0.4rem; }
-    .faq-items summary { cursor: pointer; padding: 0.55rem 0.85rem; font-size: 0.8rem; color: var(--text-secondary); list-style: none; }
-    .faq-items p { padding: 0 0.85rem 0.65rem; font-size: 0.78rem; color: var(--text-secondary); }
+    .faq-items summary { cursor: pointer; padding: 0.55rem 0.85rem; font-size: 0.78rem; color: var(--text-secondary); list-style: none; }
+    .faq-items p { padding: 0 0.85rem 0.65rem; font-size: 0.75rem; color: var(--text-secondary); }
 
     footer {
       text-align: center; padding: 2rem 0 1rem; margin-top: 2rem;
@@ -630,33 +629,6 @@
     </div>
   </div>
 
-  <section class="faq">
-    <details>
-      <summary data-i18n="faq_title">Frequently Asked Questions</summary>
-      <div class="faq-items">
-        <details>
-          <summary data-i18n="faq_q1">What is FilmTag?</summary>
-          <p data-i18n="faq_a1">FilmTag is a free browser-based tool for writing EXIF metadata — camera, lens, date, GPS, film stock, and more — to your film-scanned JPEG photos, so apps like Google Photos display the correct details.</p>
-        </details>
-        <details>
-          <summary data-i18n="faq_q2">How do I add EXIF data to my film scans?</summary>
-          <p data-i18n="faq_a2">Upload your scanned JPEGs, pick your camera and lens, set the date and GPS for the whole roll or for individual photos, then export. Everything runs directly in your browser.</p>
-        </details>
-        <details>
-          <summary data-i18n="faq_q3">Are my photos uploaded to a server?</summary>
-          <p data-i18n="faq_a3">No. All processing happens locally in your browser — your photos never leave your device.</p>
-        </details>
-        <details>
-          <summary data-i18n="faq_q4">Which file types are supported?</summary>
-          <p data-i18n="faq_a4">JPEG film scans (.jpg / .jpeg).</p>
-        </details>
-        <details>
-          <summary data-i18n="faq_q5">Is FilmTag free to use?</summary>
-          <p data-i18n="faq_a5">Yes. FilmTag is free to use for non-commercial purposes.</p>
-        </details>
-      </div>
-    </details>
-  </section>
 </div>
 
 <div class="overlay" id="manage-overlay">
@@ -669,7 +641,33 @@
   </div>
 </div>
 
-<footer><span id="version" style="user-select:none;-webkit-user-select:none;cursor:pointer;"></span> · Made by Jeffrey Chu (99% Agentic AI, 1% 🐈 Supervision &amp; 🥃)</footer>
+<footer>
+  <details class="faq">
+    <summary><span id="version" style="user-select:none;-webkit-user-select:none;cursor:pointer;"></span> · Made by Jeffrey Chu (99% Agentic AI, 1% 🐈 Supervision &amp; 🥃) · <span data-i18n="faq_title">FAQ</span></summary>
+    <div class="faq-items">
+      <details>
+        <summary data-i18n="faq_q1">What is FilmTag?</summary>
+        <p data-i18n="faq_a1">FilmTag is a free browser-based tool for writing EXIF metadata — camera, lens, date, GPS, film stock, and more — to your film-scanned JPEG photos, so apps like Google Photos display the correct details.</p>
+      </details>
+      <details>
+        <summary data-i18n="faq_q2">How do I add EXIF data to my film scans?</summary>
+        <p data-i18n="faq_a2">Upload your scanned JPEGs, pick your camera and lens, set the date and GPS for the whole roll or for individual photos, then export. Everything runs directly in your browser.</p>
+      </details>
+      <details>
+        <summary data-i18n="faq_q3">Are my photos uploaded to a server?</summary>
+        <p data-i18n="faq_a3">No. All processing happens locally in your browser — your photos never leave your device.</p>
+      </details>
+      <details>
+        <summary data-i18n="faq_q4">Which file types are supported?</summary>
+        <p data-i18n="faq_a4">JPEG film scans (.jpg / .jpeg).</p>
+      </details>
+      <details>
+        <summary data-i18n="faq_q5">Is FilmTag free to use?</summary>
+        <p data-i18n="faq_a5">Yes. FilmTag is free to use for non-commercial purposes.</p>
+      </details>
+    </div>
+  </details>
+</footer>
 
 <div class="lang-float-btn" id="lang-float-btn">🇭🇰</div>
 <div class="theme-float-btn" id="theme-float-btn">☀️</div>
