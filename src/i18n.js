@@ -190,6 +190,22 @@ tpl.en = {
   feedback_success_title: "Thank You!",
   feedback_success_msg: "Your feedback has been submitted successfully.",
   ok: "OK",
+
+  // FAQ (SEO)
+  faq_title: "Frequently Asked Questions",
+  faq_q1: "What is FilmTag?",
+  faq_a1:
+    "FilmTag is a free browser-based tool for writing EXIF metadata — camera, lens, date, GPS, film stock, and more — to your film-scanned JPEG photos, so apps like Google Photos display the correct details.",
+  faq_q2: "How do I add EXIF data to my film scans?",
+  faq_a2:
+    "Upload your scanned JPEGs, pick your camera and lens, set the date and GPS for the whole roll or for individual photos, then export. Everything runs directly in your browser.",
+  faq_q3: "Are my photos uploaded to a server?",
+  faq_a3:
+    "No. All processing happens locally in your browser — your photos never leave your device.",
+  faq_q4: "Which file types are supported?",
+  faq_a4: "JPEG film scans (.jpg / .jpeg).",
+  faq_q5: "Is FilmTag free to use?",
+  faq_a5: "Yes. FilmTag is free to use for non-commercial purposes.",
 };
 
 tpl.zh = {
@@ -347,6 +363,22 @@ tpl.zh = {
   feedback_success_title: "多謝你！",
   feedback_success_msg: "你嘅意見已成功提交。",
   ok: "好的",
+
+  // FAQ (SEO)
+  faq_title: "常見問題",
+  faq_q1: "FilmTag 係咩？",
+  faq_a1:
+    "FilmTag 係一個免費嘅瀏覽器工具，幫你喺菲林掃描嘅 JPEG 相片寫入 EXIF 資料 — 相機、鏡頭、日期、GPS、菲林型號等，等 Google Photos 等 app 顯示正確資訊。",
+  faq_q2: "點樣幫掃描檔加 EXIF 資料？",
+  faq_a2:
+    "上傳掃描嘅 JPEG，揀相機同鏡頭，為整卷菲林或個別相片設定日期同 GPS，然後匯出。所有處理都喺你嘅瀏覽器入面進行。",
+  faq_q3: "相片會上傳到伺服器嗎？",
+  faq_a3:
+    "唔會。所有處理都喺你嘅瀏覽器本地進行 — 相片永遠唔會離開你嘅裝置。",
+  faq_q4: "支援咩檔案格式？",
+  faq_a4: "JPEG 菲林掃描檔（.jpg / .jpeg）。",
+  faq_q5: "FilmTag 係咪免費？",
+  faq_a5: "係，FilmTag 免費使用（非商業用途）。",
 };
 
 export { t, setLang, toggleLang, applyTranslations, lang };

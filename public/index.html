@@ -7,12 +7,12 @@
   <meta name="google-site-verification" content="xgXIedckkwPTrToB6OLTzaTrWWt01ijbt9dmFSiuGOM">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
-  <title>FilmTag</title>
+  <title>FilmTag — Add EXIF Metadata to Film Scans</title>
   <meta name="description" content="Interactive web app for writing EXIF metadata to film-scanned photos. Batch-inject camera, lens, date, and GPS — all in your browser.">
   <link rel="canonical" href="https://filmtag.jeffreychuuu.com/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="FilmTag">
-  <meta property="og:title" content="FilmTag">
+  <meta property="og:title" content="FilmTag — Add EXIF Metadata to Film Scans">
   <meta property="og:description" content="Interactive web app for writing EXIF metadata to film-scanned photos. Batch-inject camera, lens, date, and GPS — all in your browser.">
   <meta property="og:url" content="https://filmtag.jeffreychuuu.com/">
   <meta property="og:image" content="https://filmtag.jeffreychuuu.com/img/og-cover.jpg">
@@ -20,7 +20,7 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="FilmTag app showing a film scan with its EXIF metadata panel in Google Photos">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="FilmTag">
+  <meta name="twitter:title" content="FilmTag — Add EXIF Metadata to Film Scans">
   <meta name="twitter:description" content="Interactive web app for writing EXIF metadata to film-scanned photos. Batch-inject camera, lens, date, and GPS — all in your browser.">
   <meta name="twitter:image" content="https://filmtag.jeffreychuuu.com/img/og-cover.jpg">
   <script type="application/ld+json">
@@ -296,6 +296,14 @@
     .gallery-item .g-save-btn:active { background: var(--accent); color: var(--heading); }
     .overlay.fade-out { animation: overlayFadeOut 0.3s ease forwards; }
     @keyframes overlayFadeOut { to { opacity: 0; transform: scale(0.95); } }
+
+    .faq { margin-top: 3rem; }
+    .faq h2 { font-size: 1rem; font-weight: 600; color: var(--heading); margin-bottom: 1rem; letter-spacing: -0.01em; }
+    .faq details { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); margin-bottom: 0.5rem; }
+    .faq summary { cursor: pointer; padding: 0.7rem 1rem; font-size: 0.9rem; color: var(--text); list-style: none; }
+    .faq summary::before { content: "▸ "; color: var(--accent); }
+    .faq details[open] summary::before { content: "▾ "; }
+    .faq details p { padding: 0 1rem 0.8rem; font-size: 0.85rem; color: var(--text-secondary); }
 
     footer {
       text-align: center; padding: 2rem 0 1rem; margin-top: 2rem;
@@ -632,6 +640,30 @@
   </div>
 </div>
 
+<section class="faq">
+  <h2 data-i18n="faq_title">Frequently Asked Questions</h2>
+  <details>
+    <summary data-i18n="faq_q1">What is FilmTag?</summary>
+    <p data-i18n="faq_a1">FilmTag is a free browser-based tool for writing EXIF metadata — camera, lens, date, GPS, film stock, and more — to your film-scanned JPEG photos, so apps like Google Photos display the correct details.</p>
+  </details>
+  <details>
+    <summary data-i18n="faq_q2">How do I add EXIF data to my film scans?</summary>
+    <p data-i18n="faq_a2">Upload your scanned JPEGs, pick your camera and lens, set the date and GPS for the whole roll or for individual photos, then export. Everything runs directly in your browser.</p>
+  </details>
+  <details>
+    <summary data-i18n="faq_q3">Are my photos uploaded to a server?</summary>
+    <p data-i18n="faq_a3">No. All processing happens locally in your browser — your photos never leave your device.</p>
+  </details>
+  <details>
+    <summary data-i18n="faq_q4">Which file types are supported?</summary>
+    <p data-i18n="faq_a4">JPEG film scans (.jpg / .jpeg).</p>
+  </details>
+  <details>
+    <summary data-i18n="faq_q5">Is FilmTag free to use?</summary>
+    <p data-i18n="faq_a5">Yes. FilmTag is free to use for non-commercial purposes.</p>
+  </details>
+</section>
+
 <footer><span id="version" style="user-select:none;-webkit-user-select:none;cursor:pointer;"></span> · Made by Jeffrey Chu (99% Agentic AI, 1% 🐈 Supervision &amp; 🥃)</footer>
 
 <div class="lang-float-btn" id="lang-float-btn">🇭🇰</div>
@@ -643,8 +675,8 @@
 <div class="egg-overlay" id="egg-overlay">
   <button class="egg-close" id="egg-close">✕</button>
   <div class="egg-images">
-    <img src="toro.jpg" alt="">
-    <img src="mallow.jpg" alt="">
+    <img src="toro.jpg" alt="" loading="lazy">
+    <img src="mallow.jpg" alt="" loading="lazy">
   </div>
 </div>
 
