@@ -185,6 +185,10 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 <details>
 <summary>Click to expand</summary>
 
+**1.13.3 (2026-10-13)** — Google Search Console verification
+
+- 🔍 Added the Google Search Console verification meta tag so the site can be verified for search indexing
+
 **1.13.2 (2026-10-09)** — Link previews & refined camera row
 
 - 🔗 Sharing the site now shows a proper preview card (Open Graph & Twitter Card) with cover image, title, and description
