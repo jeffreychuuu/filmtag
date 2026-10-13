@@ -185,6 +185,12 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 <details>
 <summary>Click to expand</summary>
 
+**1.14.0 (2026-10-14)** — Search engine visibility
+
+- 🔍 SEO basics: meta description, canonical URL, WebApplication structured data, `sitemap.xml`, and `robots.txt`
+- 📝 Keyword-rich page title and a FAQ section (hidden behind the footer's `FAQ ▸` toggle) so the page has crawlable content
+- ⚡ Easter egg cat photos no longer load on page load (~10MB saved)
+
 **1.13.3 (2026-10-13)** — Google Search Console verification
 
 - 🔍 Added the Google Search Console verification meta tag so the site can be verified for search indexing
