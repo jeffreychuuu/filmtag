@@ -95,7 +95,9 @@ export function fillSelectWithCustom(sel, items, key) {
   var filtered = items.filter(function(v) { return hidden.indexOf(v) === -1; });
   fillSelect(sel, filtered);
   if (key) {
-    var saved = loadSavedOpt(key);
+    var saved = loadSavedOpt(key).slice().sort(function(a, b) {
+      return String(a).localeCompare(String(b), 'en', { sensitivity: 'base' });
+    });
     for (var i = 0; i < saved.length; i++) {
       var o = document.createElement('option');
       o.textContent = saved[i]; sel.appendChild(o);
@@ -280,12 +282,18 @@ export function refreshCameraSelect() {
     if (!seen[fmt]) appendGroup(fmt);
   });
 
-  // Saved custom cameras have no format: always shown, after the groups
+  // Saved custom cameras have no format: grouped under Custom, A-Z
   var savedCameras = loadSavedOpt('cameraModel');
-  for (var si = 0; si < savedCameras.length; si++) {
-    var so = document.createElement('option');
-    so.textContent = savedCameras[si];
-    cameraSel.appendChild(so);
+  if (savedCameras.length) {
+    savedCameras.sort(function(a, b) { return a.localeCompare(b, 'en', { sensitivity: 'base' }); });
+    var cg = document.createElement('optgroup');
+    cg.label = t('custom');
+    for (var si = 0; si < savedCameras.length; si++) {
+      var so = document.createElement('option');
+      so.textContent = savedCameras[si];
+      cg.appendChild(so);
+    }
+    cameraSel.appendChild(cg);
   }
   var oo = document.createElement('option');
   oo.value = '__custom__';
@@ -306,6 +314,22 @@ export function refreshCameraSelect() {
   if (!restored) cameraSel.selectedIndex = 0;
 }
 
+// Limit the custom-film format choices to the current camera's format (or both)
+function refreshFilmFormatOptions(cameraFormat) {
+  var fmtSel = $('film-format-custom');
+  if (!fmtSel) return;
+  var allowed = cameraFormat ? [cameraFormat, 'both'] : ['135', '120', 'both'];
+  var prev = fmtSel.value;
+  fmtSel.innerHTML = '';
+  for (var i = 0; i < allowed.length; i++) {
+    var o = document.createElement('option');
+    o.value = allowed[i];
+    o.textContent = allowed[i] === 'both' ? '135 / 120' : allowed[i];
+    fmtSel.appendChild(o);
+  }
+  fmtSel.value = allowed.indexOf(prev) !== -1 ? prev : 'both';
+}
+
 // Rebuild the film dropdown: format-filtered, grouped by category, A-Z within each group
 export function refreshFilmSelect() {
   if (!filmSel) return;
@@ -314,6 +338,7 @@ export function refreshFilmSelect() {
     prev = filmSel.value === '__custom__' ? '__custom__' : selText(filmSel);
   }
   var cameraFormat = currentCameraFormat();
+  refreshFilmFormatOptions(cameraFormat);
   var hidden = loadHidden().filmName || [];
   var films = (S.films || []).filter(function(f) {
     return hidden.indexOf(f.name) === -1 && filmMatchesFormat(f.format, cameraFormat);

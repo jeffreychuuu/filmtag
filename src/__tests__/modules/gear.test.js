@@ -264,6 +264,35 @@ describe('film format filtering', function() {
     expect(texts135).toEqual(['Portra 400', 'Ilford Pan 400', 'Other (free text)']);
   });
 
+  it('limits the custom film format choices to the camera format or both', function() {
+    S.CAMERAS = [
+      { make: 'Leica', model: 'MP', format: '135', lenses: [] },
+      { make: 'Hasselblad', model: '500CM', format: '120', lenses: [] }
+    ];
+    S.films = [];
+    var fmtSel = document.createElement('select');
+    fmtSel.id = 'film-format-custom';
+    fmtSel.innerHTML = '<option value="135">135</option><option value="120">120</option><option value="both">both</option>';
+    document.body.appendChild(fmtSel);
+    initGear(S);
+    var mpOpt = document.createElement('option');
+    mpOpt.value = 'MP'; mpOpt.textContent = 'MP';
+    S.cameraSel.appendChild(mpOpt);
+    var hbOpt = document.createElement('option');
+    hbOpt.value = '500CM'; hbOpt.textContent = '500CM';
+    S.cameraSel.appendChild(hbOpt);
+
+    S.cameraSel.value = 'MP';
+    refreshFilmSelect();
+    var values135 = Array.prototype.map.call(fmtSel.options, function(o) { return o.value; });
+    expect(values135).toEqual(['135', 'both']);
+
+    S.cameraSel.value = '500CM';
+    refreshFilmSelect();
+    var values120 = Array.prototype.map.call(fmtSel.options, function(o) { return o.value; });
+    expect(values120).toEqual(['120', 'both']);
+  });
+
   it('groups saved custom films under Custom and filters them by their format', function() {
     localStorage.setItem('filmtag-custom-opts', JSON.stringify({
       filmName: [
@@ -313,6 +342,20 @@ describe('camera format grouping', function() {
     expect(texts).toEqual(['Leica MP', 'Nikon FM2', 'Hasselblad 500CM', 'Other (free text)']);
     var labels = Array.prototype.map.call(S.cameraSel.querySelectorAll('optgroup'), function(g) { return g.label; });
     expect(labels).toEqual(['135 Format', '120 Format']);
+  });
+
+  it('sorts saved custom cameras A-Z under the Custom group', function() {
+    localStorage.setItem('filmtag-custom-opts', JSON.stringify({
+      cameraModel: ['Zenit 12', 'Agfa Isolette']
+    }));
+    S.CAMERAS = [{ make: 'Leica', model: 'Leica MP', format: '135', lenses: [] }];
+    initGear(S);
+    refreshCameraSelect();
+
+    var texts = Array.prototype.map.call(S.cameraSel.options, function(o) { return o.textContent; });
+    expect(texts).toEqual(['Leica MP', 'Agfa Isolette', 'Zenit 12', 'Other (free text)']);
+    var labels = Array.prototype.map.call(S.cameraSel.querySelectorAll('optgroup'), function(g) { return g.label; });
+    expect(labels).toEqual(['135 Format', 'Custom']);
   });
 
   it('keeps the current camera selected after a rebuild', function() {
