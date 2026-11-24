@@ -37,8 +37,8 @@ One thing worth knowing: local storage is tied to your browser. Clear your data,
 
 | Feature                         | Description                                                                                                                                                                                  |
 | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Camera & Lens                   | Camera is per-roll (set once, above upload) — built-in presets (Leica MP, Olympus OM-2Sp, etc.) plus full custom model, focal length, and max aperture. Lens is per-photo: the lens modal only lists the chosen camera's lenses, so a roll can mix different lenses on the same camera |
-| Film Stock & ISO                | 23 built-in film stocks (Kodak, Fujifilm, CineStill, Ilford, etc.) — selecting a film auto-fills ISO                                                                                         |
+| Camera & Lens                   | Camera is per-roll (set once, above upload) — presets grouped by film format (135 / 120), plus full custom model, format, focal length, and max aperture. Lens is per-photo: the lens modal only lists the chosen camera's lenses, so a roll can mix different lenses on the same camera |
+| Film Stock & ISO                | 41 built-in film stocks (Kodak, Fujifilm, CineStill, Ilford, Harman, etc.), grouped by category (Negative / Cine / Slide / B&W) and filtered to the selected camera's format (135 / 120 / both) — selecting a film auto-fills ISO |
 | Lab Records                     | Hong Kong lab presets: DOT-WELL, Megatoni, TrueFace Pro Lab, Photo Garden, HK Camera, Showa, Colorluxe — with Push/Pull and scanner model tracking                                           |
 | Time Sequencing (the best part) | Auto-increments +1 minute per photo, timezone forced to +08:00. Shot a roll across multiple days? Set up date segments with individual start times — Google Photos will order them perfectly |
 | 🌐 i18n                         | English & Traditional Chinese (Hong Kong) — toggle via floating button, translations for all UI text                                                                                         |
@@ -65,12 +65,13 @@ The final result 👇
 - Review summary with file rename preview before processing
 - Writes EXIF tags: Make, Model, Artist, ISO, LensModel, DateTime, FocalLength, FNumber, Aperture, Shutter, UserComment, ImageDescription, Copyright, Instructions
 - Writes XMP: Label, Creator, Credit, DateCreated, dc:description
-- Batch download as ZIP with standardized filenames (`FilmName_YYYYMMDDHHMM_XX.jpg`)
+- Batch download as ZIP with standardized filenames (`FilmName_YYYYMMDDHHMM_XX.jpg`); the ZIP itself is named `filmtag_<from>_<to>_<film-stock>.zip` from the roll's shooting dates
 - iOS: Save to Album via share sheet
 - File thumbnails with click-to-full-image preview
 - Multi-select files + map-click to batch-assign GPS
 - Location search via OpenStreetMap Nominatim geocoding
 - Collapsible Origin & Disclaimer sections
+- Film stocks and cameras grouped by category/format and sorted A–Z (numbers ordered naturally, so 50D comes before 400D); custom entries can pick 135 / 120 / both and a film category
 - Contact Sheet: auto-generated JPEG with thumbnail grid, footer (film, camera, lens, lab, date range) — toggle on/off, standalone download, or auto-added during Save/ZIP
 
 ## Tech
@@ -99,7 +100,7 @@ src/
     process.js      ← ZIP/Save processing with EXIF injection
     ui.js           ← File list, summary, thumbnails, selection, ranges
     upload.js       ← File upload & EXIF extraction
-  __tests__/        ← Vitest test suites (57 tests)
+  __tests__/        ← Vitest test suites (107 tests)
     lib/utils.test.js
     modules/{date,gear,ui}.test.js
 public/
@@ -184,6 +185,14 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 
 <details>
 <summary>Click to expand</summary>
+
+**1.15.0 (2026-11-24)** — Film formats & categories
+
+- 🎞️ Film stocks are now grouped by category (Negative / Cine / Slide / B&W), A–Z within each group with natural number ordering
+- 📷 Cameras are grouped by film format (135 / 120); picking a camera filters the film list to matching stocks (or "both")
+- 🧩 Custom cameras and films can pick their format and category — saved entries land in the same groups, sorted A–Z
+- 🏷️ ZIP downloads are named `filmtag_<from>_<to>_<film-stock>.zip` using the roll's earliest and latest shooting dates
+- 📈 Film library expanded to 41 stocks (Harman Phoenix 200 / II 200 / 120, Kodak Ektachrome E100, Kentmere Pan 400, Reflx Lab 5219 500T, Alien 5203 / 5207)
 
 **1.14.0 (2026-10-14)** — Search engine visibility
 
