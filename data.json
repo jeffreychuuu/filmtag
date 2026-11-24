@@ -7,6 +7,7 @@
       "make": "Leica Camera AG",
       "model": "Leica MP",
       "shutter": null,
+      "format": "135",
       "lenses": [
         { "name": "Leica Summarit-M 35mm F/2.5", "focal": "35", "aperture": "2.5" },
         { "name": "Leica Elmarit-M 28mm F/2.8", "focal": "28", "aperture": "2.8" }
@@ -16,6 +17,7 @@
       "make": "Minolta",
       "model": "Minolta Prod 20'S",
       "shutter": null,
+      "format": "135",
       "lenses": [
         { "name": "Minolta Lens 35mm F/4.5", "focal": "35", "aperture": "4.5" }
       ]
@@ -24,6 +26,7 @@
       "make": "Olympus",
       "model": "Olympus OM-2Sp",
       "shutter": null,
+      "format": "135",
       "lenses": [
         { "name": "OM-System Zuiko 50mm F/1.4", "focal": "50", "aperture": "1.4" }
       ]
@@ -32,6 +35,7 @@
       "make": "Lomography",
       "model": "Lomography Simple Use",
       "shutter": "1/120",
+      "format": "135",
       "lenses": [
         { "name": "Plastic Lens 35mm F/9", "focal": "35", "aperture": "9" }
       ]
@@ -40,6 +44,7 @@
       "make": "Fuji",
       "model": "Fuji Cardia Travel mini op",
       "shutter": null,
+      "format": "135",
       "lenses": [
         { "name": "Fujinon 28mm F/3.5", "focal": "28", "aperture": "3.5" },
         { "name": "Fujinon 45mm F/5.6", "focal": "45", "aperture": "5.6" }
@@ -49,45 +54,63 @@
       "make": "Yashica",
       "model": "Yashica T3 Super",
       "shutter": null,
+      "format": "135",
       "lenses": [
         { "name": "Carl Zeiss Tessar T* 35mm F/2.8", "focal": "35", "aperture": "2.8" }
+      ]
+    },
+    {
+      "make": "Hasselblad",
+      "model": "Hasselblad 500CM",
+      "shutter": null,
+      "format": "120",
+      "lenses": [
+        { "name": "Carl Zeiss Planar 80mm F/2.8", "focal": "80", "aperture": "2.8" }
       ]
     }
   ],
   "films": [
-    { "name": "Kodacolor 100", "iso": "100" },
-    { "name": "Kodak Pro Image 100", "iso": "100" },
-    { "name": "Kodak Ektar 100", "iso": "100" },
-    { "name": "Kodacolor 200", "iso": "200" },
-    { "name": "Kodak ColorPlus 200", "iso": "200" },
-    { "name": "Kodak Gold 200", "iso": "200" },
-    { "name": "Kodak Ultramax 400", "iso": "400" },
-    { "name": "Kodak Portra 160", "iso": "160" },
-    { "name": "Kodak Portra 400", "iso": "400" },
-    { "name": "Kodak Portra 800", "iso": "800" },
-    { "name": "Kodak Ektacolor Pro 160", "iso": "160" },
-    { "name": "Kodak Ektacolor Pro 400", "iso": "400" },
-    { "name": "Kodak Ektacolor Pro 800", "iso": "800" },
-    { "name": "Fujifilm 200", "iso": "200" },
-    { "name": "Fujifilm 400", "iso": "400" },
-    { "name": "Fujifilm Superia Premium 400", "iso": "400" },
-    { "name": "Lucky C200", "iso": "200" },
-    { "name": "Lucky C400", "iso": "400" },
-    { "name": "Lucky SHD 400", "iso": "400" },
-    { "name": "OneSec 100D", "iso": "100" },
-    { "name": "OneSec 400D", "iso": "400" },
-    { "name": "OneSec 800T", "iso": "800" },
-    { "name": "OneSec 640T", "iso": "640" },
-    { "name": "Crystal 250D AHU - 5207", "iso": "250" },
-    { "name": "Crystal 250D AHU - 5219", "iso": "500" },
-    { "name": "CineStill 50D", "iso": "50" },
-    { "name": "CineStill 400D", "iso": "400" },
-    { "name": "CineStill 800T", "iso": "800" },
-    { "name": "Ilford Pan 100", "iso": "100" },
-    { "name": "Ilford Pan 400", "iso": "400" },
-    { "name": "FilmNeverDie IRO 400", "iso": "400" },
-    { "name": "Retocolor Maple 100", "iso": "100" },
-    { "name": "CAMDI Lost in Tokyo 500", "iso": "500" }
+    { "name": "CAMDI Lost in Tokyo 500", "iso": "500", "format": "135", "category": "negative" },
+    { "name": "CineStill 400D", "iso": "400", "format": "both", "category": "negative" },
+    { "name": "CineStill 50D", "iso": "50", "format": "both", "category": "negative" },
+    { "name": "CineStill 800T", "iso": "800", "format": "both", "category": "negative" },
+    { "name": "FilmNeverDie IRO 400", "iso": "400", "format": "135", "category": "negative" },
+    { "name": "Fujifilm 200", "iso": "200", "format": "135", "category": "negative" },
+    { "name": "Fujifilm 400", "iso": "400", "format": "135", "category": "negative" },
+    { "name": "Fujifilm Superia Premium 400", "iso": "400", "format": "135", "category": "negative" },
+    { "name": "Harman Phoenix 120", "iso": "200", "format": "both", "category": "negative" },
+    { "name": "Harman Phoenix 200", "iso": "200", "format": "both", "category": "negative" },
+    { "name": "Harman Phoenix II 200", "iso": "200", "format": "both", "category": "negative" },
+    { "name": "Kodacolor 100", "iso": "100", "format": "135", "category": "negative" },
+    { "name": "Kodacolor 200", "iso": "200", "format": "135", "category": "negative" },
+    { "name": "Kodak ColorPlus 200", "iso": "200", "format": "135", "category": "negative" },
+    { "name": "Kodak Ektacolor Pro 160", "iso": "160", "format": "135", "category": "negative" },
+    { "name": "Kodak Ektacolor Pro 400", "iso": "400", "format": "135", "category": "negative" },
+    { "name": "Kodak Ektacolor Pro 800", "iso": "800", "format": "135", "category": "negative" },
+    { "name": "Kodak Ektar 100", "iso": "100", "format": "both", "category": "negative" },
+    { "name": "Kodak Gold 200", "iso": "200", "format": "both", "category": "negative" },
+    { "name": "Kodak Portra 160", "iso": "160", "format": "both", "category": "negative" },
+    { "name": "Kodak Portra 400", "iso": "400", "format": "both", "category": "negative" },
+    { "name": "Kodak Portra 800", "iso": "800", "format": "both", "category": "negative" },
+    { "name": "Kodak Pro Image 100", "iso": "100", "format": "135", "category": "negative" },
+    { "name": "Kodak Ultramax 400", "iso": "400", "format": "135", "category": "negative" },
+    { "name": "Lucky C200", "iso": "200", "format": "135", "category": "negative" },
+    { "name": "Lucky C400", "iso": "400", "format": "135", "category": "negative" },
+    { "name": "Retocolor Maple 100", "iso": "100", "format": "135", "category": "negative" },
+    { "name": "Alien 5203 50D", "iso": "50", "format": "120", "category": "cine" },
+    { "name": "Alien 5207 250D", "iso": "250", "format": "120", "category": "cine" },
+    { "name": "Crystal 250D AHU - 5207", "iso": "250", "format": "135", "category": "cine" },
+    { "name": "Crystal 250D AHU - 5219", "iso": "500", "format": "135", "category": "cine" },
+    { "name": "OneSec 100D", "iso": "100", "format": "135", "category": "cine" },
+    { "name": "OneSec 400D", "iso": "400", "format": "135", "category": "cine" },
+    { "name": "OneSec 640T", "iso": "640", "format": "135", "category": "cine" },
+    { "name": "OneSec 800T", "iso": "800", "format": "135", "category": "cine" },
+    { "name": "Reflx Lab 5219 500T", "iso": "500", "format": "120", "category": "cine" },
+    { "name": "Kodak Ektachrome E100", "iso": "100", "format": "both", "category": "slide" },
+    { "name": "Ilford Pan 100", "iso": "100", "format": "135", "category": "bw" },
+    { "name": "Ilford Pan 400", "iso": "400", "format": "135", "category": "bw" },
+    { "name": "Kentmere Pan 400", "iso": "400", "format": "both", "category": "bw" },
+    { "name": "Lucky SHD 400", "iso": "400", "format": "135", "category": "bw" }
   ],
   "labs": [
     "Fiona",

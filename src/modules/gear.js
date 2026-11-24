@@ -3,6 +3,9 @@ import { esc } from '../lib/utils.js';
 
 var CAMERAS, $, artistSel, artistCust, cameraSel, cameraCust, lensDrop, lensSel, lensCust;
 var filmSel, filmCust, labSel, labCust, ppSel, ppCust, scanSel, scanCust, processSel, processCust;
+
+// Film rendering order: negative → cine → slide → b&w
+var FILM_CATEGORY_ORDER = ['negative', 'cine', 'slide', 'bw'];
 var DEFAULT_ITEMS = {};
 var HIDDEN_KEY = 'filmtag-hidden-defaults';
 var LENS_HIDDEN_KEY = 'filmtag-hidden-lenses';
@@ -203,6 +206,108 @@ function findCameraByModel(modelName) {
     if (CAMERAS[i].model === modelName) return i;
   }
   return -1;
+}
+
+// A film is shown when it has no format info, is "both", or matches the camera format
+export function filmMatchesFormat(filmFormat, cameraFormat) {
+  if (!filmFormat || !cameraFormat) return true;
+  if (filmFormat === 'both') return true;
+  return filmFormat === cameraFormat;
+}
+
+function currentCameraFormat() {
+  if (!cameraSel || cameraSel.value === '__custom__') return null;
+  var idx = findCameraByModel(cameraSel.value);
+  if (idx === -1) return null;
+  return CAMERAS[idx].format || null;
+}
+
+function compareFilmNames(a, b) {
+  return a.name.localeCompare(b.name, 'en', { sensitivity: 'base' });
+}
+
+// Rebuild the film dropdown: format-filtered, grouped by category, A-Z within each group
+export function refreshFilmSelect() {
+  if (!filmSel) return;
+  var prev = '';
+  if (filmSel.options.length && filmSel.selectedIndex >= 0) {
+    prev = filmSel.value === '__custom__' ? '__custom__' : selText(filmSel);
+  }
+  var cameraFormat = currentCameraFormat();
+  var hidden = loadHidden().filmName || [];
+  var films = (S.films || []).filter(function(f) {
+    return hidden.indexOf(f.name) === -1 && filmMatchesFormat(f.format, cameraFormat);
+  });
+  var groups = {};
+  films.forEach(function(f) {
+    var cat = f.category || 'negative';
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(f);
+  });
+
+  filmSel.innerHTML = '';
+  var seen = {};
+  FILM_CATEGORY_ORDER.forEach(function(cat) {
+    var list = groups[cat];
+    if (!list || !list.length) return;
+    seen[cat] = true;
+    list.sort(compareFilmNames);
+    var og = document.createElement('optgroup');
+    og.label = t('film_cat_' + cat);
+    for (var i = 0; i < list.length; i++) {
+      var o = document.createElement('option');
+      o.textContent = list[i].name;
+      if (list[i].iso) o.setAttribute('data-iso', list[i].iso);
+      og.appendChild(o);
+    }
+    filmSel.appendChild(og);
+  });
+  // Any unexpected category still gets shown, after the known groups
+  Object.keys(groups).forEach(function(cat) {
+    if (seen[cat]) return;
+    groups[cat].sort(compareFilmNames);
+    var og = document.createElement('optgroup');
+    og.label = t('film_cat_' + cat);
+    for (var i = 0; i < groups[cat].length; i++) {
+      var o = document.createElement('option');
+      o.textContent = groups[cat][i].name;
+      if (groups[cat][i].iso) o.setAttribute('data-iso', groups[cat][i].iso);
+      og.appendChild(o);
+    }
+    filmSel.appendChild(og);
+  });
+
+  // Saved custom films have no format/category: always shown, after the groups
+  var savedFilms = loadSavedOpt('filmName');
+  for (var si = 0; si < savedFilms.length; si++) {
+    var so = document.createElement('option');
+    so.textContent = savedFilms[si];
+    filmSel.appendChild(so);
+  }
+  var oo = document.createElement('option');
+  oo.value = '__custom__';
+  oo.textContent = t('other_free_text');
+  filmSel.appendChild(oo);
+
+  var restored = false;
+  if (prev) {
+    for (var j = 0; j < filmSel.options.length; j++) {
+      var opt = filmSel.options[j];
+      if ((prev === '__custom__' && opt.value === '__custom__') || opt.textContent === prev) {
+        filmSel.selectedIndex = j;
+        restored = true;
+        break;
+      }
+    }
+  }
+  if (!restored) {
+    filmSel.selectedIndex = 0;
+    var nameInp = $('film-name-custom');
+    var isoInp = $('film-iso-custom');
+    if (nameInp) nameInp.value = '';
+    if (isoInp) isoInp.value = '';
+  }
+  filmSel.dispatchEvent(new Event('change'));
 }
 
 function isCustomCamera() {
@@ -423,19 +528,7 @@ function refreshGearDropdowns() {
   fillSelectWithCustom(ppSel, DEFAULT_ITEMS.pushPull || [], 'pushPull');
   fillSelectWithCustom(scanSel, DEFAULT_ITEMS.scanner || [], 'scanner');
   updateLensUI();
-  filmSel.innerHTML = '';
-  var hiddenFilms = (loadHidden().filmName || []);
-  var filmDefaults = DEFAULT_ITEMS.filmName || [];
-  for (var fi = 0; fi < filmDefaults.length; fi++) {
-    if (hiddenFilms.indexOf(filmDefaults[fi]) === -1) {
-      var fo = document.createElement('option'); fo.textContent = filmDefaults[fi]; filmSel.appendChild(fo);
-    }
-  }
-  var savedFilms = loadSavedOpt('filmName');
-  for (var si = 0; si < savedFilms.length; si++) {
-    var o = document.createElement('option'); o.textContent = savedFilms[si]; filmSel.appendChild(o);
-  }
-  var oo = document.createElement('option'); oo.value = '__custom__'; oo.textContent = t('other_free_text'); filmSel.appendChild(oo);
+  refreshFilmSelect();
   [artistSel, cameraSel, labSel, processSel, ppSel, scanSel, filmSel].forEach(function(sel) {
     sel.dispatchEvent(new Event('change'));
   });

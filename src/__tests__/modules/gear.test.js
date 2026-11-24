@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { initGear, fillSelect, fillSelectWithCustom, collect, validate, applyLensToSelected, buildLensLegend, updateLensSummary, countAssignedLensNames } from '../../modules/gear.js';
+import { initGear, fillSelect, fillSelectWithCustom, collect, validate, applyLensToSelected, buildLensLegend, updateLensSummary, countAssignedLensNames, filmMatchesFormat, refreshFilmSelect } from '../../modules/gear.js';
 
 var S;
 var selectEl, customEl, customInput;
@@ -171,6 +171,70 @@ describe('countAssignedLensNames', function() {
     S.defaultLens = null;
     S.lensByFile = {};
     expect(countAssignedLensNames()).toEqual([]);
+  });
+});
+
+describe('film format filtering', function() {
+  it('matches both and treats missing format as universal', function() {
+    expect(filmMatchesFormat('both', '135')).toBe(true);
+    expect(filmMatchesFormat('both', '120')).toBe(true);
+    expect(filmMatchesFormat('135', '135')).toBe(true);
+    expect(filmMatchesFormat('135', '120')).toBe(false);
+    expect(filmMatchesFormat('120', '135')).toBe(false);
+    expect(filmMatchesFormat(undefined, '120')).toBe(true);
+    expect(filmMatchesFormat('120', null)).toBe(true);
+  });
+
+  it('filters by camera format, groups by category and sorts A-Z', function() {
+    S.CAMERAS = [
+      { make: 'Leica', model: 'MP', format: '135', lenses: [] },
+      { make: 'Hasselblad', model: '500CM', format: '120', lenses: [] }
+    ];
+    S.films = [
+      { name: 'Kodak Portra 400', iso: '400', format: 'both', category: 'negative' },
+      { name: 'Ilford Pan 400', iso: '400', format: '135', category: 'bw' },
+      { name: 'Reflx Lab 5219 500T', iso: '500', format: '120', category: 'cine' },
+      { name: 'Alien 5207 250D', iso: '250', format: '120', category: 'cine' }
+    ];
+    initGear(S);
+
+    var mpOpt = document.createElement('option');
+    mpOpt.value = 'MP'; mpOpt.textContent = 'MP';
+    S.cameraSel.appendChild(mpOpt);
+    var hbOpt = document.createElement('option');
+    hbOpt.value = '500CM'; hbOpt.textContent = '500CM';
+    S.cameraSel.appendChild(hbOpt);
+
+    S.cameraSel.value = 'MP';
+    refreshFilmSelect();
+    var texts135 = Array.prototype.map.call(S.filmSel.options, function(o) { return o.textContent; });
+    expect(texts135).toEqual(['Kodak Portra 400', 'Ilford Pan 400', 'Other (free text)']);
+    var labels135 = Array.prototype.map.call(S.filmSel.querySelectorAll('optgroup'), function(g) { return g.label; });
+    expect(labels135).toEqual(['Negative Film', 'Black & White']);
+
+    S.cameraSel.value = '500CM';
+    refreshFilmSelect();
+    var texts120 = Array.prototype.map.call(S.filmSel.options, function(o) { return o.textContent; });
+    expect(texts120).toEqual(['Kodak Portra 400', 'Alien 5207 250D', 'Reflx Lab 5219 500T', 'Other (free text)']);
+    var labels120 = Array.prototype.map.call(S.filmSel.querySelectorAll('optgroup'), function(g) { return g.label; });
+    expect(labels120).toEqual(['Negative Film', 'Cine Film']);
+  });
+
+  it('shows all films for a custom camera', function() {
+    S.CAMERAS = [{ make: 'Leica', model: 'MP', format: '135', lenses: [] }];
+    S.films = [
+      { name: 'Portra 400', iso: '400', format: 'both', category: 'negative' },
+      { name: 'Ilford Pan 400', iso: '400', format: '135', category: 'bw' },
+      { name: 'Reflx Lab 5219 500T', iso: '500', format: '120', category: 'cine' }
+    ];
+    initGear(S);
+    var customOpt = document.createElement('option');
+    customOpt.value = '__custom__'; customOpt.textContent = 'Other';
+    S.cameraSel.appendChild(customOpt);
+    S.cameraSel.value = '__custom__';
+    refreshFilmSelect();
+    var texts = Array.prototype.map.call(S.filmSel.options, function(o) { return o.textContent; });
+    expect(texts).toEqual(['Portra 400', 'Reflx Lab 5219 500T', 'Ilford Pan 400', 'Other (free text)']);
   });
 });
 

@@ -20,6 +20,7 @@ import {
   restoreLastSession,
   renderManageOverlay,
   setDefaultItems,
+  refreshFilmSelect,
 } from "./modules/gear.js";
 import {
   initGps,
@@ -318,6 +319,7 @@ document.addEventListener("DOMContentLoaded", function () {
   S.lensCust = lensCust;
   S.filmSel = filmSel;
   S.filmCust = filmCust;
+  S.films = DATA.films;
   S.labSel = labSel;
   S.labCust = labCust;
   S.ppSel = ppSel;
@@ -410,35 +412,12 @@ document.addEventListener("DOMContentLoaded", function () {
   fillSelectWithCustom(scanSel, DATA.scanners, "scanner");
   fillSelectWithCustom(ppSel, DATA.pushpulls, "pushPull");
   fillSelectWithCustom(processSel, DATA.processes, "process");
+  // Film stock list: names only, for the manage overlay
   var filmNames = DATA.films.map(function (f) {
     return f.name;
   });
   setDefaultItems("filmName", filmNames);
-  (function () {
-    filmSel.innerHTML = "";
-    var hiddenFilms =
-      JSON.parse(localStorage.getItem("filmtag-hidden-defaults") || "{}")
-        .filmName || [];
-    for (var i = 0; i < DATA.films.length; i++) {
-      if (hiddenFilms.indexOf(DATA.films[i].name) !== -1) continue;
-      var o = document.createElement("option");
-      o.textContent = DATA.films[i].name;
-      o.setAttribute("data-iso", DATA.films[i].iso);
-      filmSel.appendChild(o);
-    }
-    var savedFilms =
-      JSON.parse(localStorage.getItem("filmtag-custom-opts") || "{}")
-        .filmName || [];
-    for (var si = 0; si < savedFilms.length; si++) {
-      var o2 = document.createElement("option");
-      o2.textContent = savedFilms[si];
-      filmSel.appendChild(o2);
-    }
-    var oo = document.createElement("option");
-    oo.value = "__custom__";
-    oo.textContent = t("other_free_text");
-    filmSel.appendChild(oo);
-  })();
+  refreshFilmSelect();
   setupCustom(artistSel, artistCust);
   setupCustom(cameraSel, cameraCust);
   setupCustom(labSel, labCust);
@@ -466,6 +445,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (value !== undefined) _cameraLastValue = value;
     updateLensUI();
     syncDefaultLensToCamera();
+    refreshFilmSelect();
     S.renderFileList();
   }
   $("lens-change-ok").addEventListener("click", function () {
