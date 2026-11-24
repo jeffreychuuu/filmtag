@@ -38,7 +38,7 @@ Upload 你嘅 scans，揀你嘅 gear 同菲林，set 拍攝日期——佢會喺
 | 功能                        | 說明                                                                                                                                                        |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 📷 相機 & 鏡頭              | 相機係成卷揀一次（設喺上傳區上面）— 預設按格式分組（135 / 120），亦支援完全自訂相機型號、格式、鏡頭焦距同最大光圈。鏡頭係逐張相揀：揀鏡頭 modal 只顯示嗰部機啱用嘅鏡頭，所以同卷同機都可以用唔同鏡頭                                                              |
-| 🎞️ 底片 & ISO               | 內建 41 款菲林（Kodak、Fujifilm、CineStill、Ilford、Harman 等），按類別分組（負片 / 電影片 / 正片 / 黑白），並按相機格式（135 / 120 / 兩者）過濾，揀菲林會自動帶入 ISO |
+| 🎞️ 底片 & ISO               | 內建 43 款菲林（Kodak、Fujifilm、CineStill、Ilford、Harman 等），按類別分組（負片 / 電影片 / 正片 / 黑白），並按相機格式（135 / 120 / 兩者）過濾，揀菲林會自動帶入 ISO |
 | 🧪 沖掃紀錄                 | 內建香港主流沖掃工作室：DOT-WELL、Megatoni、TrueFace Pro Lab 金鈿、Photo Garden 金藝、HK Camera、Showa、Colorluxe 彩圖麗——仲支援記錄 Push/Pull 同掃描器型號 |
 | 🕐 時間排序（最正嗰個功能） | 每張相片自動遞增 1 分鐘，時區強制寫入 +08:00。一卷菲林跨唔同日子拍？可以分段設定日期同起始時間，Google Photos 就會完美排好順序                              |
 | 🌐 多語言                   | 英文 & 繁體中文，透過浮動按鈕一鍵切換。所有介面文字均已翻譯                                                                                                 |
@@ -191,7 +191,7 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 - 📷 相機按格式分組（135 / 120）；揀咗相機就只顯示對應格式（或兩者）嘅菲林
 - 🧩 自訂相機同菲林可以揀格式同類別 — 儲存後歸入同一組並 A–Z 排序
 - 🏷️ ZIP 按整卷最早／最遲拍攝日期命名 `filmtag_<from>_<to>_<film-stock>.zip`
-- 📈 菲林庫擴充至 41 款（Harman Phoenix 125 / 200 / II 200、Kodak Ektachrome E100、Kentmere Pan 400、Reflx Lab 5219 500T、Alien 5203 / 5207）
+- 📈 菲林庫擴充至 43 款（Lomography LomoChrome Classicolor 200 / Color ’92 Sun-kissed、Harman Phoenix 125 / 200 / II 200、Kodak Ektachrome E100、Kentmere Pan 400、Reflx Lab 5219 500T、Alien 5203 / 5207）
 
 **1.13.2 (2026-10-09)** — 連結預覽 + 相機列優化
 
