@@ -236,6 +236,23 @@ describe('film format filtering', function() {
     var texts = Array.prototype.map.call(S.filmSel.options, function(o) { return o.textContent; });
     expect(texts).toEqual(['Portra 400', 'Reflx Lab 5219 500T', 'Ilford Pan 400', 'Other (free text)']);
   });
+  it('sorts embedded numbers numerically (50D before 400D)', function() {
+    S.CAMERAS = [{ make: 'Leica', model: 'Leica MP', format: '135', lenses: [] }];
+    S.films = [
+      { name: 'CineStill 400D', iso: '400', format: 'both', category: 'cine' },
+      { name: 'CineStill 50D', iso: '50', format: 'both', category: 'cine' },
+      { name: 'CineStill 800T', iso: '800', format: 'both', category: 'cine' }
+    ];
+    initGear(S);
+    var mpOpt = document.createElement('option');
+    mpOpt.value = 'Leica MP'; mpOpt.textContent = 'Leica MP';
+    S.cameraSel.appendChild(mpOpt);
+    S.cameraSel.value = 'Leica MP';
+    refreshFilmSelect();
+    var texts = Array.prototype.map.call(S.filmSel.options, function(o) { return o.textContent; });
+    expect(texts).toEqual(['CineStill 50D', 'CineStill 400D', 'CineStill 800T', 'Other (free text)']);
+  });
+
   it('uses the chosen format for a custom camera', function() {
     S.CAMERAS = [{ make: 'Leica', model: 'Leica MP', format: '135', lenses: [] }];
     S.films = [

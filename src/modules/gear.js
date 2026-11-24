@@ -96,7 +96,7 @@ export function fillSelectWithCustom(sel, items, key) {
   fillSelect(sel, filtered);
   if (key) {
     var saved = loadSavedOpt(key).slice().sort(function(a, b) {
-      return String(a).localeCompare(String(b), 'en', { sensitivity: 'base' });
+      return String(a).localeCompare(String(b), 'en', { sensitivity: 'base', numeric: true });
     });
     for (var i = 0; i < saved.length; i++) {
       var o = document.createElement('option');
@@ -240,11 +240,11 @@ function currentCameraFormat() {
 }
 
 function compareFilmNames(a, b) {
-  return a.name.localeCompare(b.name, 'en', { sensitivity: 'base' });
+  return a.name.localeCompare(b.name, 'en', { sensitivity: 'base', numeric: true });
 }
 
 function compareCameraModels(a, b) {
-  return a.model.localeCompare(b.model, 'en', { sensitivity: 'base' });
+  return a.model.localeCompare(b.model, 'en', { sensitivity: 'base', numeric: true });
 }
 
 // Rebuild the camera dropdown: grouped by film format, A-Z within each group
@@ -287,7 +287,7 @@ export function refreshCameraSelect() {
   // Saved custom cameras have no format: grouped under Custom, A-Z
   var savedCameras = loadSavedOpt('cameraModel');
   if (savedCameras.length) {
-    savedCameras.sort(function(a, b) { return a.localeCompare(b, 'en', { sensitivity: 'base' }); });
+    savedCameras.sort(function(a, b) { return a.localeCompare(b, 'en', { sensitivity: 'base', numeric: true }); });
     var cg = document.createElement('optgroup');
     cg.label = t('custom');
     for (var si = 0; si < savedCameras.length; si++) {
