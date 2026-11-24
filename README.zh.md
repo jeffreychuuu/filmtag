@@ -185,6 +185,14 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 <details>
 <summary>撳開嚟睇</summary>
 
+**1.15.2 (2026-11-24)** — 設定分組 & 修正
+
+- ⚙️ 自訂選項（設定）而家菲林按類別、相機按格式分組，可以撳標題摺埋
+- 🔤 設定入面所有項目按 A–Z 排序，數字按自然順序
+- 🈶 切換中英文時，dropdown 分組標題即時轉語言
+- 🐛 自訂菲林同名 preset（唔分大小寫）會自動隱藏，唔會再重複
+- 🎞️ 新增 Lomography LomoChrome Classicolor 200、Color ’92 Sun-kissed；新增 Harman Phoenix 125、刪除錯誤嘅 Phoenix 120
+
 **1.15.0 (2026-11-24)** — 菲林格式 & 分類
 
 - 🎞️ 菲林按類別分組（負片 / 電影片 / 正片 / 黑白），組內 A–Z 排序，數字按自然順序

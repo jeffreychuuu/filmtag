@@ -186,6 +186,14 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 <details>
 <summary>Click to expand</summary>
 
+**1.15.2 (2026-11-24)** — Settings grouping & fixes
+
+- ⚙️ Custom Options (settings) now groups film stocks by category and cameras by format, with collapsible sections
+- 🔤 Every settings entry is sorted A–Z with natural numeric ordering
+- 🈶 Dropdown group labels switch language immediately when toggling EN / 中文
+- 🐛 Saved custom films that duplicate a preset (case-insensitive) are hidden, so no more duplicate entries
+- 🎞️ Added Lomography LomoChrome Classicolor 200 and Color '92 Sun-kissed; added Harman Phoenix 125 and removed the bogus Phoenix 120 entry
+
 **1.15.0 (2026-11-24)** — Film formats & categories
 
 - 🎞️ Film stocks are now grouped by category (Negative / Cine / Slide / B&W), A–Z within each group with natural number ordering
