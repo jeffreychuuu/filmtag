@@ -253,6 +253,24 @@ describe('film format filtering', function() {
     expect(texts).toEqual(['CineStill 50D', 'CineStill 400D', 'CineStill 800T', 'Other (free text)']);
   });
 
+  it('drops a saved custom film that duplicates a preset name', function() {
+    localStorage.setItem('filmtag-custom-opts', JSON.stringify({
+      filmName: [{ name: 'HARMAN PHOENIX II 200', iso: '200', format: 'both', category: 'negative' }]
+    }));
+    S.CAMERAS = [{ make: 'Leica', model: 'Leica MP', format: '135', lenses: [] }];
+    S.films = [
+      { name: 'Harman Phoenix II 200', iso: '200', format: 'both', category: 'negative' }
+    ];
+    initGear(S);
+    var mpOpt = document.createElement('option');
+    mpOpt.value = 'Leica MP'; mpOpt.textContent = 'Leica MP';
+    S.cameraSel.appendChild(mpOpt);
+    S.cameraSel.value = 'Leica MP';
+    refreshFilmSelect();
+    var texts = Array.prototype.map.call(S.filmSel.options, function(o) { return o.textContent; });
+    expect(texts).toEqual(['Harman Phoenix II 200', 'Other (free text)']);
+  });
+
   it('uses the chosen format for a custom camera', function() {
     S.CAMERAS = [{ make: 'Leica', model: 'Leica MP', format: '135', lenses: [] }];
     S.films = [

@@ -75,7 +75,7 @@
     { "name": "Fujifilm 200", "iso": "200", "format": "135", "category": "negative" },
     { "name": "Fujifilm 400", "iso": "400", "format": "135", "category": "negative" },
     { "name": "Fujifilm Superia Premium 400", "iso": "400", "format": "135", "category": "negative" },
-    { "name": "Harman Phoenix 120", "iso": "200", "format": "both", "category": "negative" },
+    { "name": "Harman Phoenix 125", "iso": "125", "format": "both", "category": "negative" },
     { "name": "Harman Phoenix 200", "iso": "200", "format": "both", "category": "negative" },
     { "name": "Harman Phoenix II 200", "iso": "200", "format": "both", "category": "negative" },
     { "name": "Kodacolor 100", "iso": "100", "format": "135", "category": "negative" },

@@ -191,7 +191,7 @@ Push 上 GitHub → 喺 Vercel import → Root Directory = `.`（repo 根目錄�
 - 📷 相機按格式分組（135 / 120）；揀咗相機就只顯示對應格式（或兩者）嘅菲林
 - 🧩 自訂相機同菲林可以揀格式同類別 — 儲存後歸入同一組並 A–Z 排序
 - 🏷️ ZIP 按整卷最早／最遲拍攝日期命名 `filmtag_<from>_<to>_<film-stock>.zip`
-- 📈 菲林庫擴充至 41 款（Harman Phoenix 200 / II 200 / 120、Kodak Ektachrome E100、Kentmere Pan 400、Reflx Lab 5219 500T、Alien 5203 / 5207）
+- 📈 菲林庫擴充至 41 款（Harman Phoenix 125 / 200 / II 200、Kodak Ektachrome E100、Kentmere Pan 400、Reflx Lab 5219 500T、Alien 5203 / 5207）
 
 **1.13.2 (2026-10-09)** — 連結預覽 + 相機列優化
 

@@ -345,11 +345,17 @@ export function refreshFilmSelect() {
   var films = (S.films || []).filter(function(f) {
     return hidden.indexOf(f.name) === -1 && filmMatchesFormat(f.format, cameraFormat);
   });
-  // Saved custom films join their chosen category group
+  // Saved custom films join their chosen category group, unless they duplicate a preset
+  var seenNames = {};
+  films.forEach(function(f) { seenNames[f.name.toLowerCase()] = true; });
   var savedFilms = loadSavedOpt('filmName').map(function(f) {
     return typeof f === 'object' && f ? f : { name: f, iso: '', format: '', category: 'negative' };
   }).filter(function(f) {
-    return f.name && filmMatchesFormat(f.format, cameraFormat);
+    if (!f.name || !filmMatchesFormat(f.format, cameraFormat)) return false;
+    var key = f.name.toLowerCase();
+    if (seenNames[key]) return false;
+    seenNames[key] = true;
+    return true;
   });
   films = films.concat(savedFilms);
   var groups = {};
