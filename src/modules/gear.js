@@ -161,8 +161,9 @@ export function saveCustomOpts() {
       } else if (fields[i].key === 'filmName') {
         var isoVal = $('film-iso-custom') ? $('film-iso-custom').value.trim() : '';
         var fmtVal = $('film-format-custom') ? $('film-format-custom').value : '';
+        var catVal = $('film-category-custom') ? $('film-category-custom').value : 'negative';
         data.filmName = data.filmName.filter(function(x) { return (typeof x === 'object' ? x.name : x) !== v; });
-        data.filmName.unshift({ name: v, iso: isoVal, format: fmtVal });
+        data.filmName.unshift({ name: v, iso: isoVal, format: fmtVal, category: catVal });
         data.filmName = data.filmName.slice(0, 5);
       } else {
         data[fields[i].key] = data[fields[i].key].filter(function(x) { return x !== v; });
@@ -182,6 +183,7 @@ export function saveLastSession() {
     cameraFormat: $('camera-format-custom') ? $('camera-format-custom').value : '',
     film: fv(filmSel, $('film-name-custom')), filmIso: $('film-iso-custom').value.trim(),
     filmFormat: $('film-format-custom') ? $('film-format-custom').value : '',
+    filmCategory: $('film-category-custom') ? $('film-category-custom').value : '',
     lab: fv(labSel, $('lab-custom-input')), process: fv(processSel, $('process-custom-input')),
     pushpull: fv(ppSel, $('pushpull-custom-input')), scanner: fv(scanSel, $('scanner-custom-input')),
     publicDesc: $('public-checkbox').checked
@@ -201,7 +203,7 @@ export function restoreLastSession() {
   if (!data) return;
   if (data.camera && !selByText(cameraSel, data.camera)) { setCust(cameraSel, $('camera-model-custom'), data.camera); if (data.cameraMake) $('camera-make-custom').value = data.cameraMake; if (data.cameraFormat && $('camera-format-custom')) $('camera-format-custom').value = data.cameraFormat; }
   [{sel:artistSel,inp:$('artist-custom-input'),val:data.artist},{sel:labSel,inp:$('lab-custom-input'),val:data.lab},{sel:processSel,inp:$('process-custom-input'),val:data.process},{sel:ppSel,inp:$('pushpull-custom-input'),val:data.pushpull},{sel:scanSel,inp:$('scanner-custom-input'),val:data.scanner}].forEach(function(f) { if (f.val && !selByText(f.sel, f.val)) setCust(f.sel, f.inp, f.val); });
-  if (data.film && !selByText(filmSel, data.film)) { setCust(filmSel, $('film-name-custom'), data.film); if (data.filmIso) $('film-iso-custom').value = data.filmIso; if (data.filmFormat && $('film-format-custom')) $('film-format-custom').value = data.filmFormat; }
+  if (data.film && !selByText(filmSel, data.film)) { setCust(filmSel, $('film-name-custom'), data.film); if (data.filmIso) $('film-iso-custom').value = data.filmIso; if (data.filmFormat && $('film-format-custom')) $('film-format-custom').value = data.filmFormat; if (data.filmCategory && $('film-category-custom')) $('film-category-custom').value = data.filmCategory; }
   if (data.publicDesc !== undefined) $('public-checkbox').checked = data.publicDesc;
 }
 
@@ -343,6 +345,13 @@ export function refreshFilmSelect() {
   var films = (S.films || []).filter(function(f) {
     return hidden.indexOf(f.name) === -1 && filmMatchesFormat(f.format, cameraFormat);
   });
+  // Saved custom films join their chosen category group
+  var savedFilms = loadSavedOpt('filmName').map(function(f) {
+    return typeof f === 'object' && f ? f : { name: f, iso: '', format: '', category: 'negative' };
+  }).filter(function(f) {
+    return f.name && filmMatchesFormat(f.format, cameraFormat);
+  });
+  films = films.concat(savedFilms);
   var groups = {};
   films.forEach(function(f) {
     var cat = f.category || 'negative';
@@ -382,24 +391,6 @@ export function refreshFilmSelect() {
     filmSel.appendChild(og);
   });
 
-  // Saved custom films: shown in their own group, filtered by their saved format
-  var savedFilms = loadSavedOpt('filmName').map(function(f) {
-    return typeof f === 'object' && f ? f : { name: f, iso: '', format: '' };
-  }).filter(function(f) {
-    return f.name && filmMatchesFormat(f.format, cameraFormat);
-  });
-  if (savedFilms.length) {
-    savedFilms.sort(compareFilmNames);
-    var cg = document.createElement('optgroup');
-    cg.label = t('custom');
-    for (var ci = 0; ci < savedFilms.length; ci++) {
-      var co = document.createElement('option');
-      co.textContent = savedFilms[ci].name;
-      if (savedFilms[ci].iso) co.setAttribute('data-iso', savedFilms[ci].iso);
-      cg.appendChild(co);
-    }
-    filmSel.appendChild(cg);
-  }
   var oo = document.createElement('option');
   oo.value = '__custom__';
   oo.textContent = t('other_free_text');

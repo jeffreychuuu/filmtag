@@ -293,11 +293,11 @@ describe('film format filtering', function() {
     expect(values120).toEqual(['120', 'both']);
   });
 
-  it('groups saved custom films under Custom and filters them by their format', function() {
+  it('places saved custom films in their chosen category and filters by format', function() {
     localStorage.setItem('filmtag-custom-opts', JSON.stringify({
       filmName: [
-        { name: 'My 120 Stock', iso: '400', format: '120' },
-        { name: 'My Both Stock', iso: '200', format: 'both' },
+        { name: 'My 120 Stock', iso: '400', format: '120', category: 'bw' },
+        { name: 'My Both Stock', iso: '200', format: 'both', category: 'negative' },
         'Legacy Stock'
       ]
     }));
@@ -319,12 +319,14 @@ describe('film format filtering', function() {
     var texts135 = Array.prototype.map.call(S.filmSel.options, function(o) { return o.textContent; });
     expect(texts135).toEqual(['Legacy Stock', 'My Both Stock', 'Other (free text)']);
     var labels135 = Array.prototype.map.call(S.filmSel.querySelectorAll('optgroup'), function(g) { return g.label; });
-    expect(labels135).toEqual(['Custom']);
+    expect(labels135).toEqual(['Negative Film']);
 
     S.cameraSel.value = '500CM';
     refreshFilmSelect();
     var texts120 = Array.prototype.map.call(S.filmSel.options, function(o) { return o.textContent; });
-    expect(texts120).toEqual(['Legacy Stock', 'My 120 Stock', 'My Both Stock', 'Other (free text)']);
+    expect(texts120).toEqual(['Legacy Stock', 'My Both Stock', 'My 120 Stock', 'Other (free text)']);
+    var labels120 = Array.prototype.map.call(S.filmSel.querySelectorAll('optgroup'), function(g) { return g.label; });
+    expect(labels120).toEqual(['Negative Film', 'Black & White']);
   });
 });
 
