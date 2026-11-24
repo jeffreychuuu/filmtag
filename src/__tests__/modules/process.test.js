@@ -1,5 +1,31 @@
 import { describe, it, expect } from 'vitest';
-import { resolveLensForFile } from '../../modules/process.js';
+import { resolveLensForFile, zipFileName, init } from '../../modules/process.js';
+
+describe('zipFileName', function() {
+  function setDates(dates) {
+    init({
+      uploadedFiles: dates.map(function() { return {}; }),
+      getFileDate: function(i) { return { fileDate: dates[i] }; }
+    });
+  }
+
+  it('uses the roll date range and a hyphenated film name', function() {
+    setDates(['20260105', '20260101', '20260103']);
+    expect(zipFileName({ film: { name: 'Kodak Portra 400' } }))
+      .toBe('filmtag_20260101_20260105_Kodak-Portra-400.zip');
+  });
+
+  it('uses a single date when the whole roll was shot on one day', function() {
+    setDates(['20260201', '20260201']);
+    expect(zipFileName({ film: { name: 'CineStill 800T' } }))
+      .toBe('filmtag_20260201_CineStill-800T.zip');
+  });
+
+  it('omits the film name when it is missing', function() {
+    setDates(['20260301']);
+    expect(zipFileName({ film: { name: '' } })).toBe('filmtag_20260301.zip');
+  });
+});
 
 describe('resolveLensForFile', function() {
   var defaultLens = { name: '50mm', focal: '50', aperture: '1.4' };

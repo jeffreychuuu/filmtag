@@ -204,6 +204,26 @@ function runProcessPipeline(onFileDone, onAllDone) {
   startNext();
 }
 
+// ZIP download name: filmtag_<from>_<to>_<film-stock-name>.zip (roll shoot dates)
+export function zipFileName(p) {
+  var files = (S && S.uploadedFiles) || [];
+  var from = null, to = null;
+  for (var i = 0; i < files.length; i++) {
+    var fd = S.getFileDate ? S.getFileDate(i) : null;
+    if (!fd || !fd.fileDate) continue;
+    if (from === null || fd.fileDate < from) from = fd.fileDate;
+    if (to === null || fd.fileDate > to) to = fd.fileDate;
+  }
+  if (!from) from = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  if (!to) to = from;
+  var film = (p && p.film && p.film.name) ? p.film.name : "";
+  var slug = film.replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  var parts = ["filmtag", from];
+  if (to !== from) parts.push(to);
+  if (slug) parts.push(slug);
+  return parts.join("_") + ".zip";
+}
+
 export function startZipProcess() {
   runProcessPipeline(
     function (bytes, nn) {},
@@ -214,10 +234,7 @@ export function startZipProcess() {
           var url = URL.createObjectURL(blob),
             a = document.createElement("a");
           a.href = url;
-          a.download =
-            "filmtag_" +
-            new Date().toISOString().slice(0, 10).replace(/-/g, "") +
-            ".zip";
+          a.download = zipFileName(p);
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
@@ -341,10 +358,7 @@ export function showGallery(files, params, zip) {
       var url = URL.createObjectURL(blob);
       var a = document.createElement("a");
       a.href = url;
-      a.download =
-        "filmtag_" +
-        new Date().toISOString().slice(0, 10).replace(/-/g, "") +
-        ".zip";
+      a.download = zipFileName(params);
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
