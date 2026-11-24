@@ -192,7 +192,7 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 - 📷 Cameras are grouped by film format (135 / 120); picking a camera filters the film list to matching stocks (or "both")
 - 🧩 Custom cameras and films can pick their format and category — saved entries land in the same groups, sorted A–Z
 - 🏷️ ZIP downloads are named `filmtag_<from>_<to>_<film-stock>.zip` using the roll's earliest and latest shooting dates
-- 📈 Film library expanded to 41 stocks (Harman Phoenix 200 / II 200 / 120, Kodak Ektachrome E100, Kentmere Pan 400, Reflx Lab 5219 500T, Alien 5203 / 5207)
+- 📈 Film library expanded to 41 stocks (Harman Phoenix 125 / 200 / II 200, Kodak Ektachrome E100, Kentmere Pan 400, Reflx Lab 5219 500T, Alien 5203 / 5207)
 
 **1.14.0 (2026-10-14)** — Search engine visibility
 
