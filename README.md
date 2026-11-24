@@ -38,7 +38,7 @@ One thing worth knowing: local storage is tied to your browser. Clear your data,
 | Feature                         | Description                                                                                                                                                                                  |
 | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Camera & Lens                   | Camera is per-roll (set once, above upload) — presets grouped by film format (135 / 120), plus full custom model, format, focal length, and max aperture. Lens is per-photo: the lens modal only lists the chosen camera's lenses, so a roll can mix different lenses on the same camera |
-| Film Stock & ISO                | 41 built-in film stocks (Kodak, Fujifilm, CineStill, Ilford, Harman, etc.), grouped by category (Negative / Cine / Slide / B&W) and filtered to the selected camera's format (135 / 120 / both) — selecting a film auto-fills ISO |
+| Film Stock & ISO                | 43 built-in film stocks (Kodak, Fujifilm, CineStill, Ilford, Harman, etc.), grouped by category (Negative / Cine / Slide / B&W) and filtered to the selected camera's format (135 / 120 / both) — selecting a film auto-fills ISO |
 | Lab Records                     | Hong Kong lab presets: DOT-WELL, Megatoni, TrueFace Pro Lab, Photo Garden, HK Camera, Showa, Colorluxe — with Push/Pull and scanner model tracking                                           |
 | Time Sequencing (the best part) | Auto-increments +1 minute per photo, timezone forced to +08:00. Shot a roll across multiple days? Set up date segments with individual start times — Google Photos will order them perfectly |
 | 🌐 i18n                         | English & Traditional Chinese (Hong Kong) — toggle via floating button, translations for all UI text                                                                                         |
@@ -186,13 +186,21 @@ This project is licensed under the **PolyForm Noncommercial License 1.0.0**. You
 <details>
 <summary>Click to expand</summary>
 
+**1.15.2 (2026-11-24)** — Settings grouping & fixes
+
+- ⚙️ Custom Options (settings) now groups film stocks by category and cameras by format, with collapsible sections
+- 🔤 Every settings entry is sorted A–Z with natural numeric ordering
+- 🈶 Dropdown group labels switch language immediately when toggling EN / 中文
+- 🐛 Saved custom films that duplicate a preset (case-insensitive) are hidden, so no more duplicate entries
+- 🎞️ Added Lomography LomoChrome Classicolor 200 and Color '92 Sun-kissed; added Harman Phoenix 125 and removed the bogus Phoenix 120 entry
+
 **1.15.0 (2026-11-24)** — Film formats & categories
 
 - 🎞️ Film stocks are now grouped by category (Negative / Cine / Slide / B&W), A–Z within each group with natural number ordering
 - 📷 Cameras are grouped by film format (135 / 120); picking a camera filters the film list to matching stocks (or "both")
 - 🧩 Custom cameras and films can pick their format and category — saved entries land in the same groups, sorted A–Z
 - 🏷️ ZIP downloads are named `filmtag_<from>_<to>_<film-stock>.zip` using the roll's earliest and latest shooting dates
-- 📈 Film library expanded to 41 stocks (Harman Phoenix 125 / 200 / II 200, Kodak Ektachrome E100, Kentmere Pan 400, Reflx Lab 5219 500T, Alien 5203 / 5207)
+- 📈 Film library expanded to 43 stocks (Lomography LomoChrome Classicolor 200 / Color '92 Sun-kissed, Harman Phoenix 125 / 200 / II 200, Kodak Ektachrome E100, Kentmere Pan 400, Reflx Lab 5219 500T, Alien 5203 / 5207)
 
 **1.14.0 (2026-10-14)** — Search engine visibility
 

@@ -91,6 +91,8 @@
     { "name": "Kodak Portra 800", "iso": "800", "format": "both", "category": "negative" },
     { "name": "Kodak Pro Image 100", "iso": "100", "format": "135", "category": "negative" },
     { "name": "Kodak Ultramax 400", "iso": "400", "format": "135", "category": "negative" },
+    { "name": "Lomography LomoChrome Classicolor 200", "iso": "200", "format": "135", "category": "negative" },
+    { "name": "Lomography LomoChrome Color ’92 Sun-kissed", "iso": "400", "format": "135", "category": "negative" },
     { "name": "Lucky C200", "iso": "200", "format": "135", "category": "negative" },
     { "name": "Lucky C400", "iso": "400", "format": "135", "category": "negative" },
     { "name": "Retocolor Maple 100", "iso": "100", "format": "135", "category": "negative" },

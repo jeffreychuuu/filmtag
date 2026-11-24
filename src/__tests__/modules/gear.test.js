@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { initGear, fillSelect, fillSelectWithCustom, collect, validate, applyLensToSelected, buildLensLegend, updateLensSummary, countAssignedLensNames, filmMatchesFormat, refreshFilmSelect, refreshCameraSelect } from '../../modules/gear.js';
+import { initGear, fillSelect, fillSelectWithCustom, collect, validate, applyLensToSelected, buildLensLegend, updateLensSummary, countAssignedLensNames, filmMatchesFormat, refreshFilmSelect, refreshCameraSelect, renderManageOverlay, setDefaultItems } from '../../modules/gear.js';
 
 var S;
 var selectEl, customEl, customInput;
@@ -405,6 +405,71 @@ describe('camera format grouping', function() {
     S.cameraSel.value = 'Hasselblad 500CM';
     refreshCameraSelect();
     expect(S.cameraSel.value).toBe('Hasselblad 500CM');
+  });
+});
+
+describe('manage overlay grouping', function() {
+  it('groups film stocks by category in the settings overlay', function() {
+    var body = document.createElement('div');
+    body.id = 'manage-body';
+    document.body.appendChild(body);
+    S.films = [
+      { name: 'Kodak Portra 400', category: 'negative' },
+      { name: 'CineStill 800T', category: 'cine' },
+      { name: 'Kodak Ektachrome E100', category: 'slide' },
+      { name: 'Ilford Pan 400', category: 'bw' }
+    ];
+    setDefaultItems('filmName', ['Kodak Portra 400', 'CineStill 800T', 'Kodak Ektachrome E100', 'Ilford Pan 400']);
+    initGear(S);
+    renderManageOverlay('filmName');
+
+    var text = body.textContent;
+    var positions = ['Negative Film', 'Cine Film', 'Slide Film', 'Black & White'].map(function(label) {
+      return text.indexOf(label);
+    });
+    expect(positions[0]).toBeGreaterThan(-1);
+    expect(positions[0]).toBeLessThan(positions[1]);
+    expect(positions[1]).toBeLessThan(positions[2]);
+    expect(positions[2]).toBeLessThan(positions[3]);
+  });
+
+  it('collapses a category group when its header is clicked', function() {
+    var body = document.createElement('div');
+    body.id = 'manage-body';
+    document.body.appendChild(body);
+    S.films = [
+      { name: 'Kodak Portra 400', category: 'negative' },
+      { name: 'CineStill 800T', category: 'cine' }
+    ];
+    setDefaultItems('filmName', ['Kodak Portra 400', 'CineStill 800T']);
+    initGear(S);
+    renderManageOverlay('filmName');
+
+    var header = document.querySelector('.manage-group-header[data-group="filmName:cine"]');
+    header.dispatchEvent(new Event('click'));
+
+    var groupBody = document.querySelector('.manage-group-body[data-group="filmName:cine"]');
+    expect(groupBody.style.display).toBe('none');
+
+    // restore state for other tests
+    document.querySelector('.manage-group-header[data-group="filmName:cine"]').dispatchEvent(new Event('click'));
+  });
+
+  it('groups cameras by format in the settings overlay', function() {
+    var body = document.createElement('div');
+    body.id = 'manage-body';
+    document.body.appendChild(body);
+    S.CAMERAS = [
+      { make: 'Leica', model: 'Leica MP', format: '135', lenses: [] },
+      { make: 'Hasselblad', model: 'Hasselblad 500CM', format: '120', lenses: [] }
+    ];
+    setDefaultItems('cameraModel', ['Leica MP', 'Hasselblad 500CM']);
+    initGear(S);
+    renderManageOverlay('cameraModel');
+
+    var text = body.textContent;
+    expect(text.indexOf('135 Format')).toBeLessThan(text.indexOf('120 Format'));
+    expect(text.indexOf('135 Format')).toBeGreaterThan(-1);
   });
 });
 

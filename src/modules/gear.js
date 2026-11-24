@@ -722,10 +722,54 @@ export function deleteCustomOpt(key, value) {
 }
 
 var _manageKey = null;
+var _manageCollapsed = {};
 
 function getLabelForManageKey(key) {
   var map = {artist:'artist', cameraModel:'camera', filmName:'film_stock', lab:'lab', process:'process', pushPull:'push_pull', scanner:'scanner', lensByCamera:'lens', filmStock:'film_stock'};
   return map[key] || 'manage_opts_title';
+}
+
+function compareNatural(a, b) {
+  return String(a).localeCompare(String(b), 'en', { sensitivity: 'base', numeric: true });
+}
+
+function filmCategoryForName(name) {
+  var films = (S && S.films) || [];
+  for (var i = 0; i < films.length; i++) {
+    if (films[i].name === name) return films[i].category || 'negative';
+  }
+  var customs = loadSavedOpt('filmName');
+  for (var j = 0; j < customs.length; j++) {
+    var c = customs[j];
+    if (c && typeof c === 'object' && c.name === name) return c.category || 'negative';
+  }
+  return 'negative';
+}
+
+function cameraFormatForName(name) {
+  var idx = findCameraByModel(name);
+  return idx !== -1 ? (CAMERAS[idx].format || 'other') : 'other';
+}
+
+function manageGroupLabel(key, group) {
+  if (key === 'filmName') return t('film_cat_' + group);
+  if (group === 'other') return t('custom');
+  return t('format_' + group);
+}
+
+function manageDefaultRow(key, name, hiddenForField) {
+  var isHidden = hiddenForField.indexOf(name) !== -1;
+  return '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">' +
+    '<span style="flex:1;' + (isHidden ? 'color:var(--text-secondary);text-decoration:line-through;' : '') + '">' + esc(name) + '</span>' +
+    '<button class="manage-toggle-btn" data-key="' + key + '" data-value="' + esc(name) + '" style="background:none;border:1px solid ' + (isHidden ? 'var(--accent)' : 'var(--border)') + ';border-radius:4px;color:' + (isHidden ? 'var(--accent)' : 'var(--text)') + ';cursor:pointer;font-size:0.65rem;padding:0.1rem 0.35rem;">' + (isHidden ? t('show') : t('hide')) + '</button>' +
+    '</div>';
+}
+
+function manageCustomRow(key, label) {
+  return '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">' +
+    '<span style="flex:1;">' + esc(label) + '</span>' +
+    '<button class="manage-del-btn" data-key="' + key + '" data-value="' + esc(label) + '" style="background:#c0392b;color:#fff;border:1px solid #c0392b;border-radius:4px;cursor:pointer;font-size:0.7rem;padding:0.1rem 0.4rem;">' + t('remove') + '</button>' +
+    '</div>';
 }
 
 export function renderManageOverlay(key) {
@@ -769,25 +813,60 @@ export function renderManageOverlay(key) {
     h += '<div style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);padding:0.3rem 0;">▼ ' + esc(keys[ki].label) + '</div>';
     h += '<div style="margin-left:1.2rem;border-left:1px solid var(--border);padding-left:0.75rem;">';
 
-    if (hasDefaults) {
-      h += '<div style="font-size:0.65rem;color:var(--text-secondary);margin-bottom:0.2rem;">' + t('default') + '</div>';
-      for (var di = 0; di < defaults.length; di++) {
-        var isHidden = hiddenForField.indexOf(defaults[di]) !== -1;
-        h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">';
-        h += '<span style="flex:1;' + (isHidden ? 'color:var(--text-secondary);text-decoration:line-through;' : '') + '">' + esc(defaults[di]) + '</span>';
-        h += '<button class="manage-toggle-btn" data-key="' + keys[ki].key + '" data-value="' + esc(defaults[di]) + '" style="background:none;border:1px solid ' + (isHidden ? 'var(--accent)' : 'var(--border)') + ';border-radius:4px;color:' + (isHidden ? 'var(--accent)' : 'var(--text)') + ';cursor:pointer;font-size:0.65rem;padding:0.1rem 0.35rem;">' + (isHidden ? t('show') : t('hide')) + '</button>';
+    if (keys[ki].key === 'filmName' || keys[ki].key === 'cameraModel') {
+      var isFilm = keys[ki].key === 'filmName';
+      var groups = {};
+      var bucket = function(g) {
+        if (!groups[g]) groups[g] = { defs: [], cust: [] };
+        return groups[g];
+      };
+      var di;
+      for (di = 0; di < (defaults || []).length; di++) {
+        var dname = defaults[di];
+        bucket(isFilm ? filmCategoryForName(dname) : cameraFormatForName(dname)).defs.push(dname);
+      }
+      for (var ci = 0; ci < (customItems || []).length; ci++) {
+        var item = customItems[ci];
+        var cname = (item && typeof item === 'object') ? item.name : item;
+        var cgroup;
+        if (isFilm) cgroup = (item && typeof item === 'object' && item.category) ? item.category : 'negative';
+        else cgroup = 'other';
+        bucket(cgroup).cust.push(cname);
+      }
+      var order = isFilm ? FILM_CATEGORY_ORDER.slice() : CAMERA_FORMAT_ORDER.slice();
+      order.push('other');
+      Object.keys(groups).forEach(function(g) { if (order.indexOf(g) === -1) order.push(g); });
+      for (var gi = 0; gi < order.length; gi++) {
+        var grp = groups[order[gi]];
+        if (!grp || (!grp.defs.length && !grp.cust.length)) continue;
+        var gkey = keys[ki].key + ':' + order[gi];
+        var collapsed = !!_manageCollapsed[gkey];
+        h += '<div class="manage-group-header" data-group="' + esc(gkey) + '" style="font-size:0.7rem;font-weight:600;color:var(--text);padding:0.4rem 0 0.15rem;cursor:pointer;user-select:none;">' + (collapsed ? '▶' : '▼') + ' ' + esc(manageGroupLabel(keys[ki].key, order[gi])) + '</div>';
+        h += '<div class="manage-group-body" data-group="' + esc(gkey) + '" style="margin-left:1.2rem;border-left:1px solid var(--border);padding-left:0.75rem;' + (collapsed ? 'display:none;' : '') + '">';
+        grp.defs.sort(compareNatural);
+        for (var gi2 = 0; gi2 < grp.defs.length; gi2++) h += manageDefaultRow(keys[ki].key, grp.defs[gi2], hiddenForField);
+        grp.cust.sort(compareNatural);
+        for (var gi3 = 0; gi3 < grp.cust.length; gi3++) h += manageCustomRow(keys[ki].key, grp.cust[gi3]);
         h += '</div>';
       }
-    }
+    } else {
+      var sortedDefs = (defaults || []).slice().sort(compareNatural);
+      var flatCustoms = (customItems || []).map(function(item) {
+        return (item && typeof item === 'object') ? item.name : item;
+      }).sort(compareNatural);
 
-    if (hasCustom) {
-      h += '<div style="font-size:0.65rem;color:var(--text-secondary);margin-top:0.3rem;margin-bottom:0.2rem;">' + t('custom') + '</div>';
-      for (var ii = 0; ii < customItems.length; ii++) {
-        var customLabel = (customItems[ii] && typeof customItems[ii] === 'object') ? customItems[ii].name : customItems[ii];
-        h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">';
-        h += '<span style="flex:1;">' + esc(customLabel) + '</span>';
-        h += '<button class="manage-del-btn" data-key="' + keys[ki].key + '" data-value="' + esc(customLabel) + '" style="background:#c0392b;color:#fff;border:1px solid #c0392b;border-radius:4px;cursor:pointer;font-size:0.7rem;padding:0.1rem 0.4rem;">' + t('remove') + '</button>';
-        h += '</div>';
+      if (hasDefaults) {
+        h += '<div style="font-size:0.65rem;color:var(--text-secondary);margin-bottom:0.2rem;">' + t('default') + '</div>';
+        for (var di2 = 0; di2 < sortedDefs.length; di2++) {
+          h += manageDefaultRow(keys[ki].key, sortedDefs[di2], hiddenForField);
+        }
+      }
+
+      if (hasCustom) {
+        h += '<div style="font-size:0.65rem;color:var(--text-secondary);margin-top:0.3rem;margin-bottom:0.2rem;">' + t('custom') + '</div>';
+        for (var ii = 0; ii < flatCustoms.length; ii++) {
+          h += manageCustomRow(keys[ki].key, flatCustoms[ii]);
+        }
       }
     }
 
@@ -865,6 +944,13 @@ export function renderManageOverlay(key) {
   body.querySelectorAll('.manage-toggle-lens-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       toggleHiddenLens(this.getAttribute('data-camera'), this.getAttribute('data-value'));
+    });
+  });
+  body.querySelectorAll('.manage-group-header').forEach(function(hd) {
+    hd.addEventListener('click', function() {
+      var g = this.getAttribute('data-group');
+      _manageCollapsed[g] = !_manageCollapsed[g];
+      renderManageOverlay();
     });
   });
   var resetBtn = document.getElementById('reset-defaults-btn');

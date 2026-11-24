@@ -775,6 +775,8 @@ document.addEventListener("DOMContentLoaded", function () {
       .forEach(function (o) {
         o.textContent = t("other_free_text");
       });
+    refreshCameraSelect();
+    refreshFilmSelect();
     summaryPanel.classList.remove("show");
     summaryBody.innerHTML = "";
     summaryFooter.innerHTML = "";
