@@ -722,6 +722,7 @@ export function deleteCustomOpt(key, value) {
 }
 
 var _manageKey = null;
+var _manageCollapsed = {};
 
 function getLabelForManageKey(key) {
   var map = {artist:'artist', cameraModel:'camera', filmName:'film_stock', lab:'lab', process:'process', pushPull:'push_pull', scanner:'scanner', lensByCamera:'lens', filmStock:'film_stock'};
@@ -838,8 +839,10 @@ export function renderManageOverlay(key) {
       for (var gi = 0; gi < order.length; gi++) {
         var grp = groups[order[gi]];
         if (!grp || (!grp.defs.length && !grp.cust.length)) continue;
-        h += '<div style="font-size:0.7rem;font-weight:600;color:var(--text);padding:0.4rem 0 0.15rem;">▼ ' + esc(manageGroupLabel(keys[ki].key, order[gi])) + '</div>';
-        h += '<div style="margin-left:1.2rem;border-left:1px solid var(--border);padding-left:0.75rem;">';
+        var gkey = keys[ki].key + ':' + order[gi];
+        var collapsed = !!_manageCollapsed[gkey];
+        h += '<div class="manage-group-header" data-group="' + esc(gkey) + '" style="font-size:0.7rem;font-weight:600;color:var(--text);padding:0.4rem 0 0.15rem;cursor:pointer;user-select:none;">' + (collapsed ? '▶' : '▼') + ' ' + esc(manageGroupLabel(keys[ki].key, order[gi])) + '</div>';
+        h += '<div class="manage-group-body" data-group="' + esc(gkey) + '" style="margin-left:1.2rem;border-left:1px solid var(--border);padding-left:0.75rem;' + (collapsed ? 'display:none;' : '') + '">';
         grp.defs.sort(compareNatural);
         for (var gi2 = 0; gi2 < grp.defs.length; gi2++) h += manageDefaultRow(keys[ki].key, grp.defs[gi2], hiddenForField);
         grp.cust.sort(compareNatural);
@@ -941,6 +944,13 @@ export function renderManageOverlay(key) {
   body.querySelectorAll('.manage-toggle-lens-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       toggleHiddenLens(this.getAttribute('data-camera'), this.getAttribute('data-value'));
+    });
+  });
+  body.querySelectorAll('.manage-group-header').forEach(function(hd) {
+    hd.addEventListener('click', function() {
+      var g = this.getAttribute('data-group');
+      _manageCollapsed[g] = !_manageCollapsed[g];
+      renderManageOverlay();
     });
   });
   var resetBtn = document.getElementById('reset-defaults-btn');
