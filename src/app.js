@@ -21,6 +21,7 @@ import {
   renderManageOverlay,
   setDefaultItems,
   refreshFilmSelect,
+  refreshCameraSelect,
 } from "./modules/gear.js";
 import {
   initGps,
@@ -401,13 +402,8 @@ document.addEventListener("DOMContentLoaded", function () {
   window.changeSummaryPageSize = changeSummaryPageSize;
 
   fillSelectWithCustom(artistSel, DATA.artists, "artist");
-  fillSelectWithCustom(
-    cameraSel,
-    DATA.cameras.map(function (c) {
-      return c.model;
-    }),
-    "cameraModel",
-  );
+  setDefaultItems("cameraModel", DATA.cameras.map(function (c) { return c.model; }));
+  refreshCameraSelect();
   fillSelectWithCustom(labSel, DATA.labs, "lab");
   fillSelectWithCustom(scanSel, DATA.scanners, "scanner");
   fillSelectWithCustom(ppSel, DATA.pushpulls, "pushPull");
@@ -448,6 +444,8 @@ document.addEventListener("DOMContentLoaded", function () {
     refreshFilmSelect();
     S.renderFileList();
   }
+  var cameraFormatSel = $("camera-format-custom");
+  if (cameraFormatSel) cameraFormatSel.addEventListener("change", function () { refreshFilmSelect(); });
   $("lens-change-ok").addEventListener("click", function () {
     if (_cameraLeading === null) return;
     var pending = _cameraLeading;

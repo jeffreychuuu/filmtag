@@ -6,6 +6,8 @@ var filmSel, filmCust, labSel, labCust, ppSel, ppCust, scanSel, scanCust, proces
 
 // Film rendering order: negative → cine → slide → b&w
 var FILM_CATEGORY_ORDER = ['negative', 'cine', 'slide', 'bw'];
+// Camera rendering order by film format
+var CAMERA_FORMAT_ORDER = ['135', '120'];
 var DEFAULT_ITEMS = {};
 var HIDDEN_KEY = 'filmtag-hidden-defaults';
 var LENS_HIDDEN_KEY = 'filmtag-hidden-lenses';
@@ -154,8 +156,13 @@ export function saveCustomOpts() {
         data.lensByCamera[cameraModel] = data.lensByCamera[cameraModel].filter(function(x) { return x.name !== v; });
         data.lensByCamera[cameraModel].unshift({ name: v, focal: $('lens-focal').value.trim(), aperture: $('lens-aperture').value.trim() });
         data.lensByCamera[cameraModel] = data.lensByCamera[cameraModel].slice(0, 5);
+      } else if (fields[i].key === 'filmName') {
+        var isoVal = $('film-iso-custom') ? $('film-iso-custom').value.trim() : '';
+        var fmtVal = $('film-format-custom') ? $('film-format-custom').value : '';
+        data.filmName = data.filmName.filter(function(x) { return (typeof x === 'object' ? x.name : x) !== v; });
+        data.filmName.unshift({ name: v, iso: isoVal, format: fmtVal });
+        data.filmName = data.filmName.slice(0, 5);
       } else {
-        if (!data[fields[i].key]) data[fields[i].key] = [];
         data[fields[i].key] = data[fields[i].key].filter(function(x) { return x !== v; });
         data[fields[i].key].unshift(v);
         data[fields[i].key] = data[fields[i].key].slice(0, 5);
@@ -170,7 +177,9 @@ export function saveLastSession() {
   var session = {
     artist: fv(artistSel, $('artist-custom-input')),
     camera: fv(cameraSel, $('camera-model-custom')), cameraMake: $('camera-make-custom').value.trim(),
+    cameraFormat: $('camera-format-custom') ? $('camera-format-custom').value : '',
     film: fv(filmSel, $('film-name-custom')), filmIso: $('film-iso-custom').value.trim(),
+    filmFormat: $('film-format-custom') ? $('film-format-custom').value : '',
     lab: fv(labSel, $('lab-custom-input')), process: fv(processSel, $('process-custom-input')),
     pushpull: fv(ppSel, $('pushpull-custom-input')), scanner: fv(scanSel, $('scanner-custom-input')),
     publicDesc: $('public-checkbox').checked
@@ -188,9 +197,9 @@ export function restoreLastSession() {
   var data;
   try { data = JSON.parse(localStorage.getItem('filmtag-last-session')); } catch(_) {}
   if (!data) return;
-  if (data.camera && !selByText(cameraSel, data.camera)) { setCust(cameraSel, $('camera-model-custom'), data.camera); if (data.cameraMake) $('camera-make-custom').value = data.cameraMake; }
+  if (data.camera && !selByText(cameraSel, data.camera)) { setCust(cameraSel, $('camera-model-custom'), data.camera); if (data.cameraMake) $('camera-make-custom').value = data.cameraMake; if (data.cameraFormat && $('camera-format-custom')) $('camera-format-custom').value = data.cameraFormat; }
   [{sel:artistSel,inp:$('artist-custom-input'),val:data.artist},{sel:labSel,inp:$('lab-custom-input'),val:data.lab},{sel:processSel,inp:$('process-custom-input'),val:data.process},{sel:ppSel,inp:$('pushpull-custom-input'),val:data.pushpull},{sel:scanSel,inp:$('scanner-custom-input'),val:data.scanner}].forEach(function(f) { if (f.val && !selByText(f.sel, f.val)) setCust(f.sel, f.inp, f.val); });
-  if (data.film && !selByText(filmSel, data.film)) { setCust(filmSel, $('film-name-custom'), data.film); if (data.filmIso) $('film-iso-custom').value = data.filmIso; }
+  if (data.film && !selByText(filmSel, data.film)) { setCust(filmSel, $('film-name-custom'), data.film); if (data.filmIso) $('film-iso-custom').value = data.filmIso; if (data.filmFormat && $('film-format-custom')) $('film-format-custom').value = data.filmFormat; }
   if (data.publicDesc !== undefined) $('public-checkbox').checked = data.publicDesc;
 }
 
@@ -216,7 +225,11 @@ export function filmMatchesFormat(filmFormat, cameraFormat) {
 }
 
 function currentCameraFormat() {
-  if (!cameraSel || cameraSel.value === '__custom__') return null;
+  if (!cameraSel) return null;
+  if (cameraSel.value === '__custom__') {
+    var fmtSel = $('camera-format-custom');
+    return fmtSel ? fmtSel.value : null;
+  }
   var idx = findCameraByModel(cameraSel.value);
   if (idx === -1) return null;
   return CAMERAS[idx].format || null;
@@ -224,6 +237,73 @@ function currentCameraFormat() {
 
 function compareFilmNames(a, b) {
   return a.name.localeCompare(b.name, 'en', { sensitivity: 'base' });
+}
+
+function compareCameraModels(a, b) {
+  return a.model.localeCompare(b.model, 'en', { sensitivity: 'base' });
+}
+
+// Rebuild the camera dropdown: grouped by film format, A-Z within each group
+export function refreshCameraSelect() {
+  if (!cameraSel) return;
+  var prev = '';
+  if (cameraSel.options.length && cameraSel.selectedIndex >= 0) {
+    prev = cameraSel.value === '__custom__' ? '__custom__' : selText(cameraSel);
+  }
+  var hidden = loadHidden().cameraModel || [];
+  var groups = {};
+  CAMERAS.forEach(function(c) {
+    if (hidden.indexOf(c.model) !== -1) return;
+    var fmt = c.format || 'other';
+    if (!groups[fmt]) groups[fmt] = [];
+    groups[fmt].push(c);
+  });
+
+  cameraSel.innerHTML = '';
+  var seen = {};
+  function appendGroup(fmt) {
+    var list = groups[fmt];
+    if (!list || !list.length) return;
+    seen[fmt] = true;
+    list.sort(compareCameraModels);
+    var og = document.createElement('optgroup');
+    og.label = t('format_' + fmt);
+    for (var i = 0; i < list.length; i++) {
+      var o = document.createElement('option');
+      o.textContent = list[i].model;
+      og.appendChild(o);
+    }
+    cameraSel.appendChild(og);
+  }
+  CAMERA_FORMAT_ORDER.forEach(appendGroup);
+  Object.keys(groups).forEach(function(fmt) {
+    if (!seen[fmt]) appendGroup(fmt);
+  });
+
+  // Saved custom cameras have no format: always shown, after the groups
+  var savedCameras = loadSavedOpt('cameraModel');
+  for (var si = 0; si < savedCameras.length; si++) {
+    var so = document.createElement('option');
+    so.textContent = savedCameras[si];
+    cameraSel.appendChild(so);
+  }
+  var oo = document.createElement('option');
+  oo.value = '__custom__';
+  oo.textContent = t('other_free_text');
+  cameraSel.appendChild(oo);
+
+  var restored = false;
+  if (prev) {
+    for (var j = 0; j < cameraSel.options.length; j++) {
+      var opt = cameraSel.options[j];
+      if ((prev === '__custom__' && opt.value === '__custom__') || opt.textContent === prev) {
+        cameraSel.selectedIndex = j;
+        restored = true;
+        break;
+      }
+    }
+  }
+  if (!restored) cameraSel.selectedIndex = 0;
 }
 
 // Rebuild the film dropdown: format-filtered, grouped by category, A-Z within each group
@@ -277,12 +357,23 @@ export function refreshFilmSelect() {
     filmSel.appendChild(og);
   });
 
-  // Saved custom films have no format/category: always shown, after the groups
-  var savedFilms = loadSavedOpt('filmName');
-  for (var si = 0; si < savedFilms.length; si++) {
-    var so = document.createElement('option');
-    so.textContent = savedFilms[si];
-    filmSel.appendChild(so);
+  // Saved custom films: shown in their own group, filtered by their saved format
+  var savedFilms = loadSavedOpt('filmName').map(function(f) {
+    return typeof f === 'object' && f ? f : { name: f, iso: '', format: '' };
+  }).filter(function(f) {
+    return f.name && filmMatchesFormat(f.format, cameraFormat);
+  });
+  if (savedFilms.length) {
+    savedFilms.sort(compareFilmNames);
+    var cg = document.createElement('optgroup');
+    cg.label = t('custom');
+    for (var ci = 0; ci < savedFilms.length; ci++) {
+      var co = document.createElement('option');
+      co.textContent = savedFilms[ci].name;
+      if (savedFilms[ci].iso) co.setAttribute('data-iso', savedFilms[ci].iso);
+      cg.appendChild(co);
+    }
+    filmSel.appendChild(cg);
   }
   var oo = document.createElement('option');
   oo.value = '__custom__';
@@ -522,7 +613,7 @@ function refreshGearDropdowns() {
     sel.innerHTML = '';
   });
   fillSelectWithCustom(artistSel, DEFAULT_ITEMS.artist || [], 'artist');
-  fillSelectWithCustom(cameraSel, DEFAULT_ITEMS.cameraModel || [], 'cameraModel');
+  refreshCameraSelect();
   fillSelectWithCustom(labSel, DEFAULT_ITEMS.lab || [], 'lab');
   fillSelectWithCustom(processSel, DEFAULT_ITEMS.process || [], 'process');
   fillSelectWithCustom(ppSel, DEFAULT_ITEMS.pushPull || [], 'pushPull');
@@ -599,7 +690,7 @@ export function deleteCustomOpt(key, value) {
     }
   } else {
     if (data[key]) {
-      data[key] = data[key].filter(function(v) { return v !== value; });
+      data[key] = data[key].filter(function(v) { return (v && typeof v === 'object' ? v.name : v) !== value; });
       if (data[key].length === 0) delete data[key];
     }
   }
@@ -670,9 +761,10 @@ export function renderManageOverlay(key) {
     if (hasCustom) {
       h += '<div style="font-size:0.65rem;color:var(--text-secondary);margin-top:0.3rem;margin-bottom:0.2rem;">' + t('custom') + '</div>';
       for (var ii = 0; ii < customItems.length; ii++) {
+        var customLabel = (customItems[ii] && typeof customItems[ii] === 'object') ? customItems[ii].name : customItems[ii];
         h += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.2rem 0;font-size:0.8rem;">';
-        h += '<span style="flex:1;">' + esc(customItems[ii]) + '</span>';
-        h += '<button class="manage-del-btn" data-key="' + keys[ki].key + '" data-value="' + esc(customItems[ii]) + '" style="background:#c0392b;color:#fff;border:1px solid #c0392b;border-radius:4px;cursor:pointer;font-size:0.7rem;padding:0.1rem 0.4rem;">' + t('remove') + '</button>';
+        h += '<span style="flex:1;">' + esc(customLabel) + '</span>';
+        h += '<button class="manage-del-btn" data-key="' + keys[ki].key + '" data-value="' + esc(customLabel) + '" style="background:#c0392b;color:#fff;border:1px solid #c0392b;border-radius:4px;cursor:pointer;font-size:0.7rem;padding:0.1rem 0.4rem;">' + t('remove') + '</button>';
         h += '</div>';
       }
     }

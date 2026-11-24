@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { initGear, fillSelect, fillSelectWithCustom, collect, validate, applyLensToSelected, buildLensLegend, updateLensSummary, countAssignedLensNames, filmMatchesFormat, refreshFilmSelect } from '../../modules/gear.js';
+import { initGear, fillSelect, fillSelectWithCustom, collect, validate, applyLensToSelected, buildLensLegend, updateLensSummary, countAssignedLensNames, filmMatchesFormat, refreshFilmSelect, refreshCameraSelect } from '../../modules/gear.js';
 
 var S;
 var selectEl, customEl, customInput;
@@ -235,6 +235,96 @@ describe('film format filtering', function() {
     refreshFilmSelect();
     var texts = Array.prototype.map.call(S.filmSel.options, function(o) { return o.textContent; });
     expect(texts).toEqual(['Portra 400', 'Reflx Lab 5219 500T', 'Ilford Pan 400', 'Other (free text)']);
+  });
+  it('uses the chosen format for a custom camera', function() {
+    S.CAMERAS = [{ make: 'Leica', model: 'Leica MP', format: '135', lenses: [] }];
+    S.films = [
+      { name: 'Portra 400', iso: '400', format: 'both', category: 'negative' },
+      { name: 'Ilford Pan 400', iso: '400', format: '135', category: 'bw' },
+      { name: 'Reflx Lab 5219 500T', iso: '500', format: '120', category: 'cine' }
+    ];
+    var fmt = document.createElement('select');
+    fmt.id = 'camera-format-custom';
+    fmt.innerHTML = '<option value="135">135</option><option value="120">120</option>';
+    document.body.appendChild(fmt);
+    initGear(S);
+    var customOpt = document.createElement('option');
+    customOpt.value = '__custom__'; customOpt.textContent = 'Other';
+    S.cameraSel.appendChild(customOpt);
+    S.cameraSel.value = '__custom__';
+
+    fmt.value = '120';
+    refreshFilmSelect();
+    var texts120 = Array.prototype.map.call(S.filmSel.options, function(o) { return o.textContent; });
+    expect(texts120).toEqual(['Portra 400', 'Reflx Lab 5219 500T', 'Other (free text)']);
+
+    fmt.value = '135';
+    refreshFilmSelect();
+    var texts135 = Array.prototype.map.call(S.filmSel.options, function(o) { return o.textContent; });
+    expect(texts135).toEqual(['Portra 400', 'Ilford Pan 400', 'Other (free text)']);
+  });
+
+  it('groups saved custom films under Custom and filters them by their format', function() {
+    localStorage.setItem('filmtag-custom-opts', JSON.stringify({
+      filmName: [
+        { name: 'My 120 Stock', iso: '400', format: '120' },
+        { name: 'My Both Stock', iso: '200', format: 'both' },
+        'Legacy Stock'
+      ]
+    }));
+    S.CAMERAS = [
+      { make: 'Leica', model: 'MP', format: '135', lenses: [] },
+      { make: 'Hasselblad', model: '500CM', format: '120', lenses: [] }
+    ];
+    S.films = [];
+    initGear(S);
+    var mpOpt = document.createElement('option');
+    mpOpt.value = 'MP'; mpOpt.textContent = 'MP';
+    S.cameraSel.appendChild(mpOpt);
+    var hbOpt = document.createElement('option');
+    hbOpt.value = '500CM'; hbOpt.textContent = '500CM';
+    S.cameraSel.appendChild(hbOpt);
+
+    S.cameraSel.value = 'MP';
+    refreshFilmSelect();
+    var texts135 = Array.prototype.map.call(S.filmSel.options, function(o) { return o.textContent; });
+    expect(texts135).toEqual(['Legacy Stock', 'My Both Stock', 'Other (free text)']);
+    var labels135 = Array.prototype.map.call(S.filmSel.querySelectorAll('optgroup'), function(g) { return g.label; });
+    expect(labels135).toEqual(['Custom']);
+
+    S.cameraSel.value = '500CM';
+    refreshFilmSelect();
+    var texts120 = Array.prototype.map.call(S.filmSel.options, function(o) { return o.textContent; });
+    expect(texts120).toEqual(['Legacy Stock', 'My 120 Stock', 'My Both Stock', 'Other (free text)']);
+  });
+});
+
+describe('camera format grouping', function() {
+  it('groups cameras by format (135 then 120), A-Z inside each group', function() {
+    S.CAMERAS = [
+      { make: 'Hasselblad', model: 'Hasselblad 500CM', format: '120', lenses: [] },
+      { make: 'Nikon', model: 'Nikon FM2', format: '135', lenses: [] },
+      { make: 'Leica', model: 'Leica MP', format: '135', lenses: [] }
+    ];
+    initGear(S);
+    refreshCameraSelect();
+
+    var texts = Array.prototype.map.call(S.cameraSel.options, function(o) { return o.textContent; });
+    expect(texts).toEqual(['Leica MP', 'Nikon FM2', 'Hasselblad 500CM', 'Other (free text)']);
+    var labels = Array.prototype.map.call(S.cameraSel.querySelectorAll('optgroup'), function(g) { return g.label; });
+    expect(labels).toEqual(['135 Format', '120 Format']);
+  });
+
+  it('keeps the current camera selected after a rebuild', function() {
+    S.CAMERAS = [
+      { make: 'Leica', model: 'Leica MP', format: '135', lenses: [] },
+      { make: 'Hasselblad', model: 'Hasselblad 500CM', format: '120', lenses: [] }
+    ];
+    initGear(S);
+    refreshCameraSelect();
+    S.cameraSel.value = 'Hasselblad 500CM';
+    refreshCameraSelect();
+    expect(S.cameraSel.value).toBe('Hasselblad 500CM');
   });
 });
 
